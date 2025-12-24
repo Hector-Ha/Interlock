@@ -25,6 +25,7 @@ interface User {
   userID: string;
   dwollaCustomerID: string;
   dwollaCustomerURL: string;
+
   phoneNumber: string;
 
   firstName: string;
@@ -35,4 +36,14 @@ interface User {
   postalCode: string;
   dateOfBirth: string;
   ssn: string;
+}
+
+interface MobileNavProps {
+  user: User;
+}
+
+interface RightSideBarProps {
+  user: User;
+  transactions: [];
+  banks: [];
 }
