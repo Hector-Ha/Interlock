@@ -1,0 +1,107 @@
+services:
+  # PostgreSQL
+  postgres:
+    image: postgres:18-alpine
+    container_name: interlock_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-interlock}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    networks:
+      - interlock_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis
+  redis:
+    image: redis:8-alpine
+    container_name: interlock_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - interlock_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Semgrep
+  semgrep:
+    image: semgrep/semgrep:latest
+    container_name: interlock_semgrep
+    volumes:
+      - ./server:/src
+    # Default command runs a scan and exits.
+    # Use 'docker compose run semgrep' to scan manually.
+    command: semgrep scan --config=auto --error
+    networks:
+      - interlock_net
+    profiles:
+      - tools
+
+  # Express
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: interlock_server
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://${DB_USER:-postgres}:${DB_PASSWORD:-password}@postgres:5432/${DB_NAME:-interlock}
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "${PORT:-8080}:${PORT:-8080}"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    networks:
+      - interlock_net
+    restart: unless-stopped
+
+  # Prisma Studio
+  # Accessible at http://localhost:5555
+  studio:
+    image: node:22-alpine
+    container_name: interlock_studio
+    working_dir: /app
+    volumes:
+      - ./server:/app
+    environment:
+      DATABASE_URL: postgres://${DB_USER:-postgres}:${DB_PASSWORD:-password}@postgres:5432/${DB_NAME:-interlock}
+    command: sh -c "if [ -d 'node_modules' ]; then npx prisma studio --port 5555 --browser none; else npm install && npx prisma studio --port 5555 --browser none; fi"
+    ports:
+      - "5555:5555"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - interlock_net
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
+    name: interlock_db_data
+  redis_data:
+    name: interlock_redis_data
+
+networks:
+  interlock_net:
