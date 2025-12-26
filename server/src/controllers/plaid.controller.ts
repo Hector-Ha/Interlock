@@ -29,13 +29,20 @@ export const exchangePublicToken = async (req: Request, res: Response) => {
   try {
     const { publicToken, institutionId, institutionName, user } = req.body;
 
+    console.log("Starting token exchange for user:", user.id);
+    console.log("Request body:", req.body);
+
     // Exchange public token for access token
     const response = await plaidClient.itemPublicTokenExchange({
       public_token: publicToken,
     });
 
+    console.log("Plaid Exchange Response:", response.data);
+
     const accessToken = response.data.access_token;
     const itemId = response.data.item_id;
+
+    console.log("Saving to DB...", { accessToken, itemId });
 
     // Save to DB (Security Risk: Storing raw access token)
     await prisma.bank.create({
