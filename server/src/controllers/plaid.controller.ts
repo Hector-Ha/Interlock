@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { CountryCode, Products } from "plaid";
 import { plaidClient } from "../services/plaid.service";
 import { prisma } from "../db";
+import { encrypt } from "../utils/encryption";
 
 export const createLinkToken = async (req: Request, res: Response) => {
   try {
@@ -42,18 +43,28 @@ export const exchangePublicToken = async (req: Request, res: Response) => {
     const accessToken = response.data.access_token;
     const itemId = response.data.item_id;
 
-    console.log("Saving to DB...", { accessToken, itemId });
+    const encryptedAccessToken = encrypt(accessToken);
 
-    // Save to DB (Security Risk: Storing raw access token)
-    await prisma.bank.create({
-      data: {
-        userId: user.id, // Assuming passed from frontend or auth
+    // Persist to DB securely
+    await prisma.bank.upsert({
+      where: {
+        userId_institutionId: {
+          userId: user.userId,
+          institutionId: institutionId || "ins_unknown",
+        },
+      },
+      update: {
+        accessToken: encryptedAccessToken,
+        itemId: itemId,
+      },
+      create: {
+        userId: user.userId,
         institutionId: institutionId || "ins_unknown",
         institutionName: institutionName || "Unknown Bank",
-        accessToken: accessToken, // Not encrypted! based on plan
+        accessToken: encryptedAccessToken,
         itemId: itemId,
-        type: "checking", // Defaulting for now
-        mask: "0000", // Placeholder
+        type: "checking",
+        mask: "0000",
       },
     });
 
