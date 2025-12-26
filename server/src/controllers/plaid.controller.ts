@@ -18,7 +18,20 @@ export const createLinkToken = async (req: Request, res: Response) => {
       language: "en",
     });
 
-    console.log("Link Token Response:", response.data); // Debugging response
+export const createLinkToken = async (req: Request, res: Response) => {
+  try {
+    const user = req.user; // From auth middleware
+
+    const response = await plaidClient.linkTokenCreate({
+      user: {
+        client_user_id: user.userId.toString(),
+      },
+      client_name: "Interlock",
+      products: [Products.Auth, Products.Transactions],
+      country_codes: [CountryCode.Us],
+      language: "en",
+    });
+
     res.json(response.data);
   } catch (error) {
     console.error("Link Token Error:", error);
@@ -30,15 +43,10 @@ export const exchangePublicToken = async (req: Request, res: Response) => {
   try {
     const { publicToken, institutionId, institutionName, user } = req.body;
 
-    console.log("Starting token exchange for user:", user.id);
-    console.log("Request body:", req.body);
-
     // Exchange public token for access token
     const response = await plaidClient.itemPublicTokenExchange({
       public_token: publicToken,
     });
-
-    console.log("Plaid Exchange Response:", response.data);
 
     const accessToken = response.data.access_token;
     const itemId = response.data.item_id;
