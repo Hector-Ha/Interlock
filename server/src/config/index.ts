@@ -11,4 +11,7 @@ export const config = {
   plaidEnv: process.env.PLAID_ENV || "sandbox",
   encryptionKey:
     process.env.ENCRYPTION_KEY || "interlock_secret_key_32_bytes_long",
+  dwollaKey: process.env.DWOLLA_KEY || "",
+  dwollaSecret: process.env.DWOLLA_SECRET || "",
+  dwollaEnv: process.env.DWOLLA_ENV || "sandbox",
 };
