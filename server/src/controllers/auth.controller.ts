@@ -5,12 +5,19 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { config } from "../config";
 
+import { validateEmail } from "../utils/validation";
+
 export const signUp = async (req: Request, res: Response) => {
   try {
     const { email, password, firstName, lastName } = req.body;
 
     if (!email || !password || !firstName || !lastName) {
       res.status(400).json({ message: "Missing required fields" });
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      res.status(400).json({ message: "Invalid email format" });
       return;
     }
 
