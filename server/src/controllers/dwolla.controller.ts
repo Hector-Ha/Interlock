@@ -16,6 +16,6 @@ export const createCustomer = async (req: Request, res: Response) => {
     res.status(201).json({ customerUrl: response.headers.get("location") });
   } catch (error) {
     console.error("Failed to create Dwolla customer", error);
-    res.status(200).json({ message: "Request received" });
+    res.status(500).json({ error: "Failed to create customer" });
   }
 };
