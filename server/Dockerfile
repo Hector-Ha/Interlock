@@ -15,5 +15,8 @@ COPY . .
 # Expose the port the app runs on
 EXPOSE 8080
 
+# Run as non-root user
+USER bun
+
 # Command to run the application
 CMD ["bun", "run", "index.ts"]

@@ -11,4 +11,11 @@ export default defineConfig({
       };
     },
   },
+  studio: {
+    async resolveDataSource() {
+      return {
+        databaseUrl: process.env.DATABASE_URL as string,
+      };
+    },
+  },
 });

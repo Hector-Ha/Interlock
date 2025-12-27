@@ -18,7 +18,8 @@ export const decrypt = (text: string): string => {
   const decipher = crypto.createDecipheriv(
     ALGORITHM,
     Buffer.from(KEY),
-    Buffer.from(ivHex, "hex")
+    Buffer.from(ivHex, "hex"),
+    { authTagLength: 16 }
   );
   decipher.setAuthTag(Buffer.from(authTagHex, "hex"));
   let decrypted = decipher.update(encryptedText, "hex", "utf8");

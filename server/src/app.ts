@@ -1,4 +1,5 @@
 import express from "express";
+import * as Sentry from "@sentry/node";
 import cors from "cors";
 import helmet from "helmet";
 
@@ -23,5 +24,7 @@ app.use("/api/transactions", transactionRoutes);
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
+
+Sentry.setupExpressErrorHandler(app);
 
 export default app;
