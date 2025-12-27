@@ -18,20 +18,6 @@ export const createLinkToken = async (req: Request, res: Response) => {
       language: "en",
     });
 
-export const createLinkToken = async (req: Request, res: Response) => {
-  try {
-    const user = req.user; // From auth middleware
-
-    const response = await plaidClient.linkTokenCreate({
-      user: {
-        client_user_id: user.userId.toString(),
-      },
-      client_name: "Interlock",
-      products: [Products.Auth, Products.Transactions],
-      country_codes: [CountryCode.Us],
-      language: "en",
-    });
-
     res.json(response.data);
   } catch (error) {
     console.error("Link Token Error:", error);

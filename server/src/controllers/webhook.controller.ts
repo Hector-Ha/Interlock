@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import crypto from "crypto";
 import { config } from "../config";
+import { verifyWebhookSignature } from "../utils/webhook-signature";
 
 export const handleWebhook = async (req: Request, res: Response) => {
   const signature = req.headers["x-request-signature-sha-256"];
@@ -10,11 +11,9 @@ export const handleWebhook = async (req: Request, res: Response) => {
     return;
   }
 
-  const hmac = crypto.createHmac("sha256", config.dwollaSecret);
-  hmac.update(JSON.stringify(req.body));
-  const expectedSignature = hmac.digest("hex");
-
-  if (signature !== expectedSignature) {
+  if (
+    !verifyWebhookSignature(signature as string, req.body, config.dwollaSecret)
+  ) {
     console.warn("Invalid webhook signature attempted");
     res.status(403).send("Invalid signature");
     return;
