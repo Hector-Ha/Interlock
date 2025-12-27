@@ -1,8 +1,12 @@
 import { Request, Response } from "express";
 import { dwollaClient } from "../services/dwolla.service";
 import { prisma } from "../db";
+import { CreateTransferRequest } from "../types/transfer";
 
-export const createTransfer = async (req: Request, res: Response) => {
+export const createTransfer = async (
+  req: Request<{}, {}, CreateTransferRequest>,
+  res: Response
+) => {
   try {
     const { sourceFundingSourceUrl, destinationFundingSourceUrl, amount } =
       req.body;
@@ -29,7 +33,6 @@ export const createTransfer = async (req: Request, res: Response) => {
         dwollaTransferId: transferUrl?.split("/").pop() || "",
         amount: parseFloat(amount),
         status: "pending",
-        type: "p2p", // Default for now
         sourceId: sourceFundingSourceUrl,
         destinationId: destinationFundingSourceUrl,
       },

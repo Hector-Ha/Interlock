@@ -3,10 +3,11 @@ import { CountryCode, Products } from "plaid";
 import { plaidClient } from "../services/plaid.service";
 import { prisma } from "../db";
 import { encrypt } from "../utils/encryption";
+import { CreateLinkTokenRequest, ExchangeTokenRequest } from "../types/plaid";
 
 export const createLinkToken = async (req: Request, res: Response) => {
   try {
-    const user = req.user; // From auth middleware
+    const user = req.user; // From auth middleware, assume valid
 
     const response = await plaidClient.linkTokenCreate({
       user: {
@@ -25,9 +26,13 @@ export const createLinkToken = async (req: Request, res: Response) => {
   }
 };
 
-export const exchangePublicToken = async (req: Request, res: Response) => {
+export const exchangePublicToken = async (
+  req: Request<{}, {}, ExchangeTokenRequest>,
+  res: Response
+) => {
   try {
-    const { publicToken, institutionId, institutionName, user } = req.body;
+    const { publicToken, institutionId, institutionName } = req.body;
+    const user = req.user; // Middleware populated
 
     // Exchange public token for access token
     const response = await plaidClient.itemPublicTokenExchange({
@@ -40,6 +45,7 @@ export const exchangePublicToken = async (req: Request, res: Response) => {
     const encryptedAccessToken = encrypt(accessToken);
 
     // Persist to DB securely
+    // Note: ensure generated client supports userId_institutionId compound unique
     await prisma.bank.upsert({
       where: {
         userId_institutionId: {
@@ -50,6 +56,7 @@ export const exchangePublicToken = async (req: Request, res: Response) => {
       update: {
         accessToken: encryptedAccessToken,
         itemId: itemId,
+        institutionName: institutionName || "Unknown Bank", // Update name if provided
       },
       create: {
         userId: user.userId,
@@ -57,8 +64,8 @@ export const exchangePublicToken = async (req: Request, res: Response) => {
         institutionName: institutionName || "Unknown Bank",
         accessToken: encryptedAccessToken,
         itemId: itemId,
-        type: "checking",
-        mask: "0000",
+        type: "checking", // Default, could be derived from accounts
+        mask: "0000", // Default, should fetch accounts meta
       },
     });
 

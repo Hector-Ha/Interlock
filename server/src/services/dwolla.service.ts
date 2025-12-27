@@ -1,5 +1,10 @@
 import { Client } from "dwolla-v2";
 import { config } from "../config";
+import {
+  CreateCustomerRequest,
+  CreateFundingSourceRequest,
+  CreateTransferRequest,
+} from "../types/dwolla";
 
 export const dwollaClient = new Client({
   key: config.dwolla.key!,
@@ -7,29 +12,14 @@ export const dwollaClient = new Client({
   environment: config.dwolla.env as "sandbox" | "production",
 });
 
-export const createCustomer = async (customerData: {
-  firstName: string;
-  lastName: string;
-  email: string;
-  type: string;
-  address1: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  dateOfBirth: string;
-  ssn: string;
-}) => {
+export const createCustomer = async (customerData: CreateCustomerRequest) => {
   const response = await dwollaClient.post("customers", customerData);
   return response.headers.get("location");
 };
 
 export const addFundingSource = async (
   customerId: string,
-  fundingSourceData: {
-    plaidToken: string;
-    name: string;
-    type: "checking" | "savings";
-  }
+  fundingSourceData: CreateFundingSourceRequest
 ) => {
   const response = await dwollaClient.post(
     `customers/${customerId}/funding-sources`,
@@ -38,11 +28,7 @@ export const addFundingSource = async (
   return response.headers.get("location");
 };
 
-export const createTransfer = async (transferData: {
-  source: { href: string };
-  destination: { href: string };
-  amount: { currency: "USD"; value: string };
-}) => {
+export const createTransfer = async (transferData: CreateTransferRequest) => {
   const response = await dwollaClient.post("transfers", {
     _links: {
       source: transferData.source,

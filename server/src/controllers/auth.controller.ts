@@ -6,8 +6,12 @@ import jwt from "jsonwebtoken";
 import { config } from "../config";
 
 import { validateEmail } from "../utils/validation";
+import { SignInRequest, SignUpRequest } from "../types/auth";
 
-export const signUp = async (req: Request, res: Response) => {
+export const signUp = async (
+  req: Request<{}, {}, SignUpRequest>,
+  res: Response
+) => {
   try {
     const { email, password, firstName, lastName } = req.body;
 
@@ -54,7 +58,10 @@ export const signUp = async (req: Request, res: Response) => {
   }
 };
 
-export const signIn = async (req: Request, res: Response) => {
+export const signIn = async (
+  req: Request<{}, {}, SignInRequest>,
+  res: Response
+) => {
   try {
     const { email, password } = req.body;
 

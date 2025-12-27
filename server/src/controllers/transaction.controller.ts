@@ -2,8 +2,12 @@ import { Request, Response } from "express";
 import { plaidClient } from "../services/plaid.service";
 import { prisma } from "../db";
 import { decrypt } from "../utils/encryption";
+import { SyncTransactionsRequest } from "../types/transaction";
 
-export const syncTransactions = async (req: Request, res: Response) => {
+export const syncTransactions = async (
+  req: Request<{}, {}, SyncTransactionsRequest>,
+  res: Response
+) => {
   try {
     const user = req.user;
     const { itemId } = req.body;
@@ -26,21 +30,24 @@ export const syncTransactions = async (req: Request, res: Response) => {
 
     const added = response.data.added;
 
-    for (const transaction of added) {
-      await prisma.transaction.create({
-        data: {
-          id: transaction.transaction_id,
-          name: transaction.name,
-          amount: transaction.amount,
-          date: transaction.date,
-          paymentChannel: transaction.payment_channel,
-          type: transaction.transaction_type,
-          accountId: transaction.account_id,
-          bankId: bank.id,
-          userId: user.userId,
-        },
-      });
-    }
+    // Use transaction for batch insert
+    await prisma.$transaction(
+      added.map((transaction) =>
+        prisma.transaction.create({
+          data: {
+            id: transaction.transaction_id,
+            name: transaction.name,
+            amount: transaction.amount,
+            date: transaction.date,
+            paymentChannel: transaction.payment_channel,
+            type: transaction.transaction_type,
+            accountId: transaction.account_id,
+            bankId: bank.id,
+            userId: user.userId,
+          },
+        })
+      )
+    );
 
     res.json({ status: "synced", count: added.length });
   } catch (error) {
