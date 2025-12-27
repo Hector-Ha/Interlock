@@ -1,10 +1,27 @@
 import { Request, Response } from "express";
+import crypto from "crypto";
+import { config } from "../config";
 
 export const handleWebhook = async (req: Request, res: Response) => {
-  // Anyone can send a POST request here and spoof events possible for a SECURITY VULNERABILITY.
+  const signature = req.headers["x-request-signature-sha-256"];
+
+  if (!signature) {
+    res.status(400).send("Missing signature");
+    return;
+  }
+
+  const hmac = crypto.createHmac("sha256", config.dwollaSecret);
+  hmac.update(JSON.stringify(req.body));
+  const expectedSignature = hmac.digest("hex");
+
+  if (signature !== expectedSignature) {
+    console.warn("Invalid webhook signature attempted");
+    res.status(403).send("Invalid signature");
+    return;
+  }
 
   const event = req.body;
-  console.log("Received Webhook:", event.topic, event.resourceId);
+  console.log("Verified Webhook:", event.topic, event.resourceId);
 
   // Process event (mock processing)
   if (event.topic === "customer_transfer_completed") {
