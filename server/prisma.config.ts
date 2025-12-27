@@ -1,5 +1,14 @@
-import { PrismaClient } from "@prisma/client";
+import path from "path";
+import { defineConfig } from "prisma/config";
 
-const prisma = new PrismaClient();
-
-export default prisma;
+export default defineConfig({
+  earlyAccess: true,
+  schema: path.join(__dirname, "prisma/schema.prisma"),
+  migrate: {
+    async resolveDataSource() {
+      return {
+        databaseUrl: process.env.DATABASE_URL as string,
+      };
+    },
+  },
+});
