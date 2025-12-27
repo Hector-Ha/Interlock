@@ -12,7 +12,11 @@ export const handleWebhook = async (req: Request, res: Response) => {
   }
 
   if (
-    !verifyWebhookSignature(signature as string, req.body, config.dwollaSecret)
+    !verifyWebhookSignature(
+      signature as string,
+      req.body,
+      config.dwolla.webhookSecret!
+    )
   ) {
     console.warn("Invalid webhook signature attempted");
     res.status(403).send("Invalid signature");

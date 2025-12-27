@@ -3,12 +3,12 @@ import { config } from "../config";
 
 const configuration = new Configuration({
   basePath:
-    PlaidEnvironments[config.plaidEnv as keyof typeof PlaidEnvironments] ||
+    PlaidEnvironments[config.plaid.env as keyof typeof PlaidEnvironments] ||
     PlaidEnvironments.sandbox,
   baseOptions: {
     headers: {
-      "PLAID-CLIENT-ID": config.plaidClientId,
-      "PLAID-SECRET": config.plaidSecret,
+      "PLAID-CLIENT-ID": config.plaid.clientId,
+      "PLAID-SECRET": config.plaid.secret,
     },
   },
 });
