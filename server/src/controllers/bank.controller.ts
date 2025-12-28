@@ -162,4 +162,3 @@ export const initiateTransfer = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ message: "Failed to initiate transfer" });
   }
 };
-

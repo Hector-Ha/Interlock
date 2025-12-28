@@ -83,4 +83,3 @@ const updateTransactionStatus = async (
     console.warn(`Transaction not found for Dwolla ID: ${transferId}`);
   }
 };
-

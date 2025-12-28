@@ -13,4 +13,3 @@ router.post("/link-dwolla", authenticate, linkBankWithDwolla);
 router.post("/transfer", authenticate, initiateTransfer);
 
 export default router;
-
