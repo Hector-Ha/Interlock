@@ -1,13 +1,13 @@
 import { Router } from "express";
 import {
-  createLinkToken,
-  exchangePublicToken,
-} from "../controllers/plaid.controller";
-import { authenticate } from "../middleware/auth";
+  createLinkTokenHandler,
+  exchangeTokenHandler,
+} from "@/controllers/plaid.controller";
+import { authenticate } from "@/middleware/auth";
 
-const router = Router();
+const router: Router = Router();
 
-router.post("/create_link_token", authenticate, createLinkToken);
-router.post("/exchange_public_token", authenticate, exchangePublicToken);
+router.post("/link-token", authenticate, createLinkTokenHandler);
+router.post("/exchange-token", authenticate, exchangeTokenHandler);
 
 export default router;
