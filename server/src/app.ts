@@ -8,6 +8,7 @@ import { config } from "@/config";
 import authRoutes from "./routes/auth.routes";
 import plaidRoutes from "./routes/plaid.routes";
 import bankRoutes from "./routes/bank.routes";
+import webhooksRoutes from "./routes/webhooks.routes";
 import dwollaRoutes from "./routes/dwolla.routes";
 import transferRoutes from "./routes/transfer.routes";
 import transactionRoutes from "./routes/transaction.routes";
@@ -37,6 +38,7 @@ app.get("/health", (req, res) => {
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/plaid", plaidRoutes);
 app.use("/api/v1/bank", bankRoutes);
+app.use("/api/v1/webhooks", webhooksRoutes);
 app.use("/api/v1/dwolla", dwollaRoutes);
 app.use("/api/v1/transfer", transferRoutes);
 app.use("/api/v1/transactions", transactionRoutes);
