@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -36,6 +37,8 @@ model Bank {
   dwollaFundingUrl  String?
   institutionId     String
   institutionName   String
+
+  @@unique([userId, institutionId])
 
   status            BankStatus @default(ACTIVE)
   transactions      Transaction[]
