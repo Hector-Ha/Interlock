@@ -7,68 +7,70 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  passwordHash String
-  firstName String
-  lastName  String
-  address   String   // JSON string
-  identityDocumentId String?
-  dateOfBirth String?
-  country    String  @default("US")
+  id                String   @id @default(uuid())
+  email             String   @unique
+  passwordHash      String
+  firstName         String
+  lastName          String
+  address           String
+  identityDocumentId String
+  dateOfBirth       String
   
-  banks        Bank[]
-  transfers    Transfer[]
-  transactions Transaction[]
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  country           String
+  dwollaCustomerId  String?
+  dwollaCustomerUrl String?
+
+  banks             Bank[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model Bank {
-  id              Int      @id @default(autoincrement())
-  userId          Int
-  user            User     @relation(fields: [userId], references: [id])
-  institutionId   String
-  institutionName String
-  accessToken     String   // Encrypted later
-  itemId          String
-  type            String   // checking, savings
-  mask            String   // last 4 digits
-  transactions    Transaction[]
+  id                String   @id @default(uuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  plaidItemId       String
+  plaidAccessToken  String
+
+  dwollaFundingUrl  String?
+  institutionId     String
+  institutionName   String
+
+  status            BankStatus @default(ACTIVE)
+  transactions      Transaction[]
   
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@unique([userId, institutionId])
-}
-
-model Transfer {
-  id              Int      @id @default(autoincrement())
-  userId          Int
-  user            User     @relation(fields: [userId], references: [id])
-  amount          Decimal
-  sourceId        String   // Plaid Account ID
-  destinationId   String   // Dwolla destination
-  status          String   // PENDING, COMPLETED, FAILED
-  dwollaTransferId String?
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model Transaction {
-  id              String   @id // Plaid transaction_id
-  bankId          Int
-  bank            Bank     @relation(fields: [bankId], references: [id])
-  userId          Int
-  user            User     @relation(fields: [userId], references: [id])
-  name            String
-  amount          Decimal
-  date            String   // YYYY-MM-DD from Plaid
-  paymentChannel  String   // online, in_store, etc.
-  type            String   // transaction_type from Plaid
-  accountId       String   // Plaid account_id
+  id                String   @id @default(uuid())
+  bankId            String
+  bank              Bank     @relation(fields: [bankId], references: [id], onDelete: Cascade)
 
-  createdAt       DateTime @default(now())
+  amount            Decimal
+  name              String
+  date              DateTime
+  
+  status            TxStatus @default(PENDING)
+  channel           String   
+  category          String?
+
+  dwollaTransferId  String?  @unique
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+enum BankStatus {
+  ACTIVE
+  LOGIN_REQUIRED
+}
+
+enum TxStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  RETURNED
 }

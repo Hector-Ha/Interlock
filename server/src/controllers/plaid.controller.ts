@@ -1,77 +1,61 @@
-import { Request, Response } from "express";
-import { CountryCode, Products } from "plaid";
-import { plaidClient } from "../services/plaid.service";
-import { prisma } from "../db";
-import { encrypt } from "../utils/encryption";
-import { CreateLinkTokenRequest, ExchangeTokenRequest } from "../types/plaid";
+import { Response } from "express";
+import { AuthRequest } from "@/middleware/auth";
+import { z } from "zod";
+import { createLinkToken, exchangePublicToken } from "@/services/plaid.service";
 
-export const createLinkToken = async (req: Request, res: Response) => {
-  try {
-    const user = req.user; // From auth middleware, assume valid
+const exchangeTokenSchema = z.object({
+  publicToken: z.string().min(1),
+  metadata: z.object({
+    institution: z.object({
+      institution_id: z.string(),
+      name: z.string(),
+    }),
+    accounts: z.array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        mask: z.string(),
+        type: z.string(),
+        subtype: z.string(),
+      })
+    ),
+  }),
+});
 
-    const response = await plaidClient.linkTokenCreate({
-      user: {
-        client_user_id: user.userId.toString(),
-      },
-      client_name: "Interlock",
-      products: [Products.Auth, Products.Transactions],
-      country_codes: [CountryCode.Us],
-      language: "en",
-    });
-
-    res.json(response.data);
-  } catch (error) {
-    console.error("Link Token Error:", error);
-    res.status(500).json({ error: "Failed to create link token" });
-  }
-};
-
-export const exchangePublicToken = async (
-  req: Request<{}, {}, ExchangeTokenRequest>,
+export const createLinkTokenHandler = async (
+  req: AuthRequest,
   res: Response
 ) => {
   try {
-    const { publicToken, institutionId, institutionName } = req.body;
-    const user = req.user; // Middleware populated
+    const userId = req.user!.userId;
+    const linkToken = await createLinkToken(userId);
 
-    // Exchange public token for access token
-    const response = await plaidClient.itemPublicTokenExchange({
-      public_token: publicToken,
-    });
-
-    const accessToken = response.data.access_token;
-    const itemId = response.data.item_id;
-
-    const encryptedAccessToken = encrypt(accessToken);
-
-    // Persist to DB securely
-    // Note: ensure generated client supports userId_institutionId compound unique
-    await prisma.bank.upsert({
-      where: {
-        userId_institutionId: {
-          userId: user.userId,
-          institutionId: institutionId || "ins_unknown",
-        },
-      },
-      update: {
-        accessToken: encryptedAccessToken,
-        itemId: itemId,
-        institutionName: institutionName || "Unknown Bank", // Update name if provided
-      },
-      create: {
-        userId: user.userId,
-        institutionId: institutionId || "ins_unknown",
-        institutionName: institutionName || "Unknown Bank",
-        accessToken: encryptedAccessToken,
-        itemId: itemId,
-        type: "checking", // Default, could be derived from accounts
-        mask: "0000", // Default, should fetch accounts meta
-      },
-    });
-
-    res.json({ status: "success", itemId });
+    res.json({ link_token: linkToken });
   } catch (error) {
-    console.error("Exchange Token Error:", error);
-    res.status(500).json({ error: "Failed to exchange token" });
+    console.error("Plaid Link Token Error:", error);
+    res.status(500).json({ message: "Failed to create link token" });
+  }
+};
+
+export const exchangeTokenHandler = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user!.userId;
+
+    const { publicToken, metadata } = exchangeTokenSchema.parse(req.body);
+
+    const bank = await exchangePublicToken(userId, publicToken, metadata);
+
+    res.status(201).json({ bank });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({
+        message: "Validation error",
+        errors: error.format(),
+      });
+      return;
+    }
+
+    console.error("Plaid Exchange Token Error:", error);
+    res.status(500).json({ message: "Failed to exchange token" });
   }
 };

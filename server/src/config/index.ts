@@ -8,8 +8,7 @@ export const config = {
   clientUrl: process.env.CLIENT_URL || "http://localhost:3000",
   databaseUrl: process.env.DATABASE_URL,
   jwtSecret: process.env.JWT_SECRET || "supersecret",
-  encryptionKey:
-    process.env.ENCRYPTION_KEY || "32_byte_encryption_key_here!!!!",
+  encryptionKey: process.env.ENCRYPTION_KEY,
   plaid: {
     clientId: process.env.PLAID_CLIENT_ID,
     secret: process.env.PLAID_SECRET,
@@ -22,6 +21,7 @@ export const config = {
   dwolla: {
     key: process.env.DWOLLA_KEY,
     secret: process.env.DWOLLA_SECRET,
+    baseUrl: process.env.DWOLLA_BASE_URL || "https://api-sandbox.dwolla.com",
     env: process.env.DWOLLA_ENV || "sandbox",
     webhookSecret: process.env.DWOLLA_WEBHOOK_SECRET,
   },
