@@ -36,9 +36,11 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok", env: config.env });
 });
 
-app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/plaid", plaidRoutes);
-app.use("/api/v1/bank", bankRoutes);
+import { authLimiter, apiLimiter } from "@/middleware/rateLimit";
+
+app.use("/api/v1/auth", authLimiter, authRoutes);
+app.use("/api/v1/plaid", apiLimiter, plaidRoutes);
+app.use("/api/v1/bank", apiLimiter, bankRoutes);
 app.use("/api/v1/webhooks", webhooksRoutes);
 
 Sentry.setupExpressErrorHandler(app);
