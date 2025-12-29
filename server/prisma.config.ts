@@ -10,20 +10,5 @@ export default defineConfig({
   datasource: {
     url: process.env.DATABASE_URL as string,
   },
-  earlyAccess: true,
   schema: path.join(__dirname, "prisma/schema.prisma"),
-  migrate: {
-    async resolveDataSource() {
-      return {
-        databaseUrl: process.env.DATABASE_URL as string,
-      };
-    },
-  },
-  studio: {
-    async resolveDataSource() {
-      return {
-        databaseUrl: process.env.DATABASE_URL as string,
-      };
-    },
-  },
 });

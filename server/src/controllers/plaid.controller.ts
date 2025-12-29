@@ -2,25 +2,7 @@ import { Response } from "express";
 import { AuthRequest } from "@/middleware/auth";
 import { z } from "zod";
 import { createLinkToken, exchangePublicToken } from "@/services/plaid.service";
-
-const exchangeTokenSchema = z.object({
-  publicToken: z.string().min(1),
-  metadata: z.object({
-    institution: z.object({
-      institution_id: z.string(),
-      name: z.string(),
-    }),
-    accounts: z.array(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-        mask: z.string(),
-        type: z.string(),
-        subtype: z.string(),
-      })
-    ),
-  }),
-});
+import { exchangeTokenSchema } from "@/validators/plaid.schema";
 
 export const createLinkTokenHandler = async (
   req: AuthRequest,
