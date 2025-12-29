@@ -69,17 +69,26 @@ export const handleDwollaWebhook = async (req: Request, res: Response) => {
 const updateTransactionStatus = async (
   transferId: string,
   status: "SUCCESS" | "FAILED" | "RETURNED"
-) => {
-  const transaction = await prisma.transaction.update({
-    where: { dwollaTransferId: transferId },
-    data: { status },
-  });
+): Promise<void> => {
+  try {
+    const transaction = await prisma.transaction.findFirst({
+      where: { dwollaTransferId: transferId },
+    });
 
-  if (transaction) {
+    if (!transaction) {
+      console.warn(`Transaction not found for Dwolla ID: ${transferId}`);
+      return;
+    }
+
+    await prisma.transaction.update({
+      where: { id: transaction.id },
+      data: { status },
+    });
+
     console.info(
       `Updated transaction ${transaction.id} (Dwolla ID: ${transferId}) to ${status}`
     );
-  } else {
-    console.warn(`Transaction not found for Dwolla ID: ${transferId}`);
+  } catch (error) {
+    console.error(`Failed to update transaction ${transferId}:`, error);
   }
 };
