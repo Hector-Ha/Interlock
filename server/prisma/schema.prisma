@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -20,6 +19,9 @@ model User {
   country           String
   dwollaCustomerId  String?
   dwollaCustomerUrl String?
+
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
 
   banks             Bank[]
   createdAt         DateTime @default(now())

@@ -5,6 +5,7 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import { config } from "@/config";
 import { httpLogger, logger } from "@/middleware/logger";
+import { authLimiter, apiLimiter } from "@/middleware/rateLimit";
 
 import authRoutes from "./routes/auth.routes";
 import plaidRoutes from "./routes/plaid.routes";
@@ -17,8 +18,7 @@ interface RequestWithRawBody extends express.Request {
 
 const app: express.Application = express();
 
-app.use(httpLogger); // Request logging
-
+// Security middleware
 app.use(
   cors({
     origin: config.clientUrl,
@@ -26,37 +26,47 @@ app.use(
   })
 );
 app.use(helmet());
+
+// Request logging
+app.use(httpLogger);
+
+// Body parsing
 app.use(
   express.json({
-    verify: (req: RequestWithRawBody, res, buf) => {
+    verify: (req: RequestWithRawBody, _res, buf) => {
       req.rawBody = buf;
     },
   })
 );
 app.use(cookieParser());
 
-app.get("/health", (req, res) => {
-  res.json({ status: "ok", env: config.env });
+// Health check (exclude from logging if desired)
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok" });
 });
 
-import { authLimiter, apiLimiter } from "@/middleware/rateLimit";
-
+// API routes with rate limiting
 app.use("/api/v1/auth", authLimiter, authRoutes);
 app.use("/api/v1/plaid", apiLimiter, plaidRoutes);
 app.use("/api/v1/bank", apiLimiter, bankRoutes);
 app.use("/api/v1/webhooks", webhooksRoutes);
 
+// Sentry error handling
 Sentry.setupExpressErrorHandler(app);
 
+// Global error handler
 app.use(
   (
-    err: any,
+    err: Error,
     req: express.Request,
     res: express.Response,
-    next: express.NextFunction
+    _next: express.NextFunction
   ) => {
-    logger.error(err);
-    res.status(500).json({ message: "Internal Server Error" });
+    logger.error({ err, url: req.url, method: req.method }, "Unhandled error");
+    res.status(500).json({
+      message: "Internal Server Error",
+      code: "INTERNAL_ERROR",
+    });
   }
 );
 

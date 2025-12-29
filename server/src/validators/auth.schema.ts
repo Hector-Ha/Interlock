@@ -1,16 +1,30 @@
 import { z } from "zod";
 
+// Password validation regex patterns.
+const passwordPatterns = {
+  uppercase: /[A-Z]/,
+  lowercase: /[a-z]/,
+  number: /[0-9]/,
+  special: /[!@#$%^&*(),.?":{}|<>]/,
+};
+
+// Sign-up validation schema.
 export const authSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z
     .string()
-    .min(12, "Password must be at least 12 characters")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number")
+    .min(8, "Password must be at least 8 characters")
     .regex(
-      /[!@#$%^&*(),.?":{}|<>]/,
-      "Password must contain at least one special character"
+      passwordPatterns.uppercase,
+      "Password must contain at least one uppercase letter"
+    )
+    .regex(
+      passwordPatterns.lowercase,
+      "Password must contain at least one lowercase letter"
+    )
+    .regex(
+      passwordPatterns.number,
+      "Password must contain at least one number"
     ),
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
@@ -21,4 +35,10 @@ export const authSchema = z.object({
   dateOfBirth: z.string(),
   ssn: z.string().length(4, "SSN must be exactly 4 digits"),
   country: z.string().optional(),
+});
+
+// Sign-in validation schema.
+export const signInSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
 });
