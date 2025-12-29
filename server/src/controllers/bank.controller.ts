@@ -1,5 +1,5 @@
-import { Response } from "express";
-import { AuthRequest } from "@/middleware/auth";
+import { Response, NextFunction } from "express";
+import { AuthRequest } from "@/types/auth.types";
 import { z } from "zod";
 import { bankService } from "@/services/bank.service";
 import { linkBankSchema, transferSchema } from "@/validators/bank.schema";

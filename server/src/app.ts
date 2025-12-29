@@ -4,6 +4,7 @@ import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import { config } from "@/config";
+import { httpLogger, logger } from "@/middleware/logger";
 
 import authRoutes from "./routes/auth.routes";
 import plaidRoutes from "./routes/plaid.routes";
@@ -15,6 +16,8 @@ interface RequestWithRawBody extends express.Request {
 }
 
 const app: express.Application = express();
+
+app.use(httpLogger); // Request logging
 
 app.use(
   cors({
@@ -52,7 +55,7 @@ app.use(
     res: express.Response,
     next: express.NextFunction
   ) => {
-    console.error(err);
+    logger.error(err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 );

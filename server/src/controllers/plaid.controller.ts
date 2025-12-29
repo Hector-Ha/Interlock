@@ -1,6 +1,7 @@
-import { Response } from "express";
-import { AuthRequest } from "@/middleware/auth";
+import { Response, NextFunction } from "express";
+import { AuthRequest } from "@/types/auth.types";
 import { z } from "zod";
+
 import { createLinkToken, exchangePublicToken } from "@/services/plaid.service";
 import { exchangeTokenSchema } from "@/validators/plaid.schema";
 

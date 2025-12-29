@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import { AuthRequest } from "@/middleware/auth";
+import { NextFunction, Request, Response } from "express";
+import { AuthRequest } from "@/types/auth.types";
 import { z } from "zod";
 import { config } from "@/config";
 import { authService } from "@/services/auth.service";
