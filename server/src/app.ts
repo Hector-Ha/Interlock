@@ -11,6 +11,7 @@ import authRoutes from "./routes/auth.routes";
 import plaidRoutes from "./routes/plaid.routes";
 import bankRoutes from "./routes/bank.routes";
 import webhooksRoutes from "./routes/webhooks.routes";
+import transactionRoutes from "./routes/transaction.routes";
 
 interface RequestWithRawBody extends express.Request {
   rawBody?: Buffer;
@@ -49,6 +50,7 @@ app.get("/health", (_req, res) => {
 app.use("/api/v1/auth", authLimiter, authRoutes);
 app.use("/api/v1/plaid", apiLimiter, plaidRoutes);
 app.use("/api/v1/bank", apiLimiter, bankRoutes);
+app.use("/api/v1/transaction", apiLimiter, transactionRoutes);
 app.use("/api/v1/webhooks", webhooksRoutes);
 
 // Sentry error handling

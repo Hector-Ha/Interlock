@@ -8,7 +8,12 @@ import {
   getAccounts,
   getAccountBalance,
 } from "@/controllers/account.controller";
+import {
+  getTransactions,
+  syncTransactions,
+} from "@/controllers/transaction.controller";
 import { authenticate } from "@/middleware/auth";
+import { apiLimiter } from "@/middleware/rateLimit";
 
 const router: Router = Router();
 
@@ -22,6 +27,19 @@ router.get(
   "/:bankId/accounts/:accountId/balance",
   authenticate,
   getAccountBalance as RequestHandler
+);
+
+// Transaction Endpoints
+router.get(
+  "/:bankId/transactions",
+  authenticate,
+  getTransactions as RequestHandler
+);
+router.post(
+  "/:bankId/sync",
+  authenticate,
+  apiLimiter,
+  syncTransactions as RequestHandler
 );
 
 export default router;
