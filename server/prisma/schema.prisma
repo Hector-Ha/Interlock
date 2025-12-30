@@ -45,6 +45,8 @@ model Bank {
   @@unique([userId, institutionId])
   @@index([userId, status])
 
+  transactionsCursor String?  // For Plaid sync pagination
+
   status            BankStatus @default(ACTIVE)
   transactions      Transaction[]
   
@@ -57,11 +59,14 @@ model Transaction {
   bankId            String
   bank              Bank     @relation(fields: [bankId], references: [id], onDelete: Cascade)
 
+  plaidTransactionId String? @unique  // Link to Plaid transaction
   amount            Decimal
   name              String
+  merchantName      String?           // Merchant name from Plaid
   date              DateTime
   
   status            TxStatus @default(PENDING)
+  pending           Boolean @default(false)
   channel           String   
   category          String?
 
