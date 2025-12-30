@@ -1,12 +1,15 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { z } from "zod";
 import { prisma } from "@/db";
 import { config } from "@/config";
 import { encrypt } from "@/utils/encryption";
-import { z } from "zod";
 import { authSchema } from "@/validators/auth.schema";
 
 type SignUpInput = z.infer<typeof authSchema>;
+
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MINUTES = 30;
 
 export const authService = {
   async signUp(data: SignUpInput) {
@@ -53,13 +56,57 @@ export const authService = {
 
   async signIn(email: string, password: string) {
     const user = await prisma.user.findUnique({ where: { email } });
+
+    // Use generic error to prevent email enumeration
     if (!user) {
       throw new Error("Invalid credentials");
     }
 
+    // Check if account is locked
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
+      const minutesRemaining = Math.ceil(
+        (user.lockedUntil.getTime() - Date.now()) / (1000 * 60)
+      );
+      throw new Error(
+        `Account is locked. Please try again in ${minutesRemaining} minutes.`
+      );
+    }
+
     const isMatch = await bcrypt.compare(password, user.passwordHash);
+
     if (!isMatch) {
+      // Increment failed attempts
+      const failedAttempts = user.failedLoginAttempts + 1;
+      const shouldLock = failedAttempts >= MAX_FAILED_ATTEMPTS;
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          failedLoginAttempts: failedAttempts,
+          lockedUntil: shouldLock
+            ? new Date(Date.now() + LOCKOUT_DURATION_MINUTES * 60 * 1000)
+            : null,
+        },
+      });
+
+      if (shouldLock) {
+        throw new Error(
+          `Too many failed attempts. Account locked for ${LOCKOUT_DURATION_MINUTES} minutes.`
+        );
+      }
+
       throw new Error("Invalid credentials");
+    }
+
+    // Reset failed attempts on successful login
+    if (user.failedLoginAttempts > 0 || user.lockedUntil) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          failedLoginAttempts: 0,
+          lockedUntil: null,
+        },
+      });
     }
 
     const token = jwt.sign({ userId: user.id }, config.jwtSecret, {

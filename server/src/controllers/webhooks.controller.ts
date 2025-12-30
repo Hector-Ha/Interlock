@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import crypto from "crypto";
 import { config } from "@/config";
 import { prisma } from "@/db";
+import { logger } from "@/middleware/logger";
 
 interface WebhookRequest extends Request {
   rawBody?: Buffer;
@@ -12,9 +13,7 @@ const verifySignature = (req: WebhookRequest): boolean => {
   const secret = config.dwolla.webhookSecret;
 
   if (!signature || !secret || !req.rawBody) {
-    console.warn(
-      "Webhook verification failed: Missing signature, secret, or body"
-    );
+    logger.warn("Webhook verification failed: Missing signature, secret, or body");
     return false;
   }
 
@@ -39,7 +38,7 @@ export const handleDwollaWebhook = async (req: Request, res: Response) => {
     const resourceUrl = event._links.resource.href;
     const resourceId = resourceUrl.split("/").pop();
 
-    console.info(`Received Dwolla Webhook: ${topic} for ${resourceId}`);
+    logger.info({ topic, resourceId }, "Received Dwolla Webhook");
 
     switch (topic) {
       case "customer_transfer_completed":
@@ -56,12 +55,12 @@ export const handleDwollaWebhook = async (req: Request, res: Response) => {
         break;
 
       default:
-        console.info(`Unhandled topic: ${topic}`);
+        logger.info({ topic }, "Unhandled webhook topic");
     }
 
     res.status(200).send();
   } catch (error) {
-    console.error("Webhook Error:", error);
+    logger.error({ err: error }, "Webhook Error");
     res.status(200).send();
   }
 };
@@ -76,7 +75,7 @@ const updateTransactionStatus = async (
     });
 
     if (!transaction) {
-      console.warn(`Transaction not found for Dwolla ID: ${transferId}`);
+      logger.warn({ transferId }, "Transaction not found for Dwolla transfer");
       return;
     }
 
@@ -85,10 +84,11 @@ const updateTransactionStatus = async (
       data: { status },
     });
 
-    console.info(
-      `Updated transaction ${transaction.id} (Dwolla ID: ${transferId}) to ${status}`
+    logger.info(
+      { transactionId: transaction.id, transferId, status },
+      "Updated transaction status"
     );
   } catch (error) {
-    console.error(`Failed to update transaction ${transferId}:`, error);
+    logger.error({ err: error, transferId }, "Failed to update transaction");
   }
 };

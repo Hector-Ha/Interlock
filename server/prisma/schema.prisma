@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -21,7 +20,12 @@ model User {
   dwollaCustomerId  String?
   dwollaCustomerUrl String?
 
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+
   banks             Bank[]
+  sessions          Session[]
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
@@ -31,7 +35,7 @@ model Bank {
   userId            String
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  plaidItemId       String
+  plaidItemId       String   @unique
   plaidAccessToken  String
 
   dwollaFundingUrl  String?
@@ -39,6 +43,7 @@ model Bank {
   institutionName   String
 
   @@unique([userId, institutionId])
+  @@index([userId, status])
 
   status            BankStatus @default(ACTIVE)
   transactions      Transaction[]
@@ -62,6 +67,9 @@ model Transaction {
 
   dwollaTransferId  String?  @unique
 
+  @@index([bankId, date])
+  @@index([status])
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
@@ -76,4 +84,32 @@ enum TxStatus {
   SUCCESS
   FAILED
   RETURNED
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  refreshToken String   @unique
+  userAgent    String?
+  ipAddress    String?
+  expiresAt    DateTime
+  
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+
+  @@index([expiresAt])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  resource  String
+  details   Json?
+  ipAddress String?
+  
+  createdAt DateTime @default(now())
 }

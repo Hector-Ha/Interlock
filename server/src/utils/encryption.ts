@@ -8,13 +8,8 @@ const TAG_LENGTH = 16;
 const KEY_LENGTH = 32;
 const ITERATIONS = 100000;
 
-if (!config.encryptionKey) {
-  console.warn(
-    "WARNING: ENCRYPTION_KEY not found in env. Using random key for this session."
-  );
-}
-const MASTER_KEY =
-  config.encryptionKey || crypto.randomBytes(32).toString("hex");
+// ENCRYPTION_KEY is required and validated at startup via Zod schema
+const MASTER_KEY = config.encryptionKey;
 
 function getKey(salt: Buffer): Buffer {
   return crypto.pbkdf2Sync(MASTER_KEY, salt, ITERATIONS, KEY_LENGTH, "sha512");

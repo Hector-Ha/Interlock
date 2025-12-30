@@ -1,28 +1,61 @@
 import dotenv from "dotenv";
+import { z } from "zod";
 
 dotenv.config();
 
+const envSchema = z.object({
+  PORT: z.string().default("8080"),
+  NODE_ENV: z
+    .enum(["development", "production", "test"])
+    .default("development"),
+  CLIENT_URL: z.string().default("http://localhost:3000"),
+  DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+  JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters"),
+  ENCRYPTION_KEY: z
+    .string()
+    .length(32, "ENCRYPTION_KEY must be exactly 32 characters"),
+
+  // Plaid
+  PLAID_CLIENT_ID: z.string().optional(),
+  PLAID_SECRET: z.string().optional(),
+  PLAID_ENV: z.string().default("sandbox"),
+  PLAID_PRODUCTS: z.string().default("auth,transactions,identity"),
+  PLAID_COUNTRY_CODES: z.string().default("US"),
+
+  // Dwolla
+  DWOLLA_KEY: z.string().optional(),
+  DWOLLA_SECRET: z.string().optional(),
+  DWOLLA_BASE_URL: z.string().default("https://api-sandbox.dwolla.com"),
+  DWOLLA_ENV: z.string().default("sandbox"),
+  DWOLLA_WEBHOOK_SECRET: z.string().optional(),
+});
+
+// Validate environment variables
+const env = envSchema.parse(process.env);
+
 export const config = {
-  port: process.env.PORT || 8080,
-  env: process.env.NODE_ENV || "development",
-  clientUrl: process.env.CLIENT_URL || "http://localhost:3000",
-  databaseUrl: process.env.DATABASE_URL,
-  jwtSecret: process.env.JWT_SECRET || "supersecret",
-  encryptionKey: process.env.ENCRYPTION_KEY,
+  port: parseInt(env.PORT, 10),
+  env: env.NODE_ENV,
+  clientUrl: env.CLIENT_URL,
+  databaseUrl: env.DATABASE_URL,
+  jwtSecret: env.JWT_SECRET,
+  encryptionKey: env.ENCRYPTION_KEY,
   plaid: {
-    clientId: process.env.PLAID_CLIENT_ID,
-    secret: process.env.PLAID_SECRET,
-    env: process.env.PLAID_ENV || "sandbox",
-    products: (
-      process.env.PLAID_PRODUCTS || "auth,transactions,identity"
-    ).split(","),
-    countryCodes: (process.env.PLAID_COUNTRY_CODES || "US").split(","),
+    clientId: env.PLAID_CLIENT_ID,
+    secret: env.PLAID_SECRET,
+    env: env.PLAID_ENV,
+    products: env.PLAID_PRODUCTS.split(","),
+    countryCodes: env.PLAID_COUNTRY_CODES.split(","),
   },
   dwolla: {
-    key: process.env.DWOLLA_KEY,
-    secret: process.env.DWOLLA_SECRET,
-    baseUrl: process.env.DWOLLA_BASE_URL || "https://api-sandbox.dwolla.com",
-    env: process.env.DWOLLA_ENV || "sandbox",
-    webhookSecret: process.env.DWOLLA_WEBHOOK_SECRET,
+    key: env.DWOLLA_KEY,
+    secret: env.DWOLLA_SECRET,
+    baseUrl: env.DWOLLA_BASE_URL,
+    env: env.DWOLLA_ENV,
+    webhookSecret: env.DWOLLA_WEBHOOK_SECRET,
   },
 };
+
+export function validateEnv(): void {
+  console.log("✅ Environment variables validated.");
+}

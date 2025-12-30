@@ -1,12 +1,13 @@
 import { Response } from "express";
-import { AuthRequest } from "@/middleware/auth";
 import { z } from "zod";
+import { AuthRequest } from "@/types/auth.types";
 import { bankService } from "@/services/bank.service";
 import { linkBankSchema, transferSchema } from "@/validators/bank.schema";
+import { logger } from "@/middleware/logger";
 
 export const linkBankWithDwolla = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user!.userId;
+    const userId = req.user.userId;
     const { bankId, accountId } = linkBankSchema.parse(req.body);
 
     const result = await bankService.linkBankWithDwolla(
@@ -16,38 +17,48 @@ export const linkBankWithDwolla = async (req: AuthRequest, res: Response) => {
     );
 
     res.json(result);
-  } catch (error: any) {
+  } catch (error) {
     if (error instanceof z.ZodError) {
       res.status(400).json({
         message: "Validation error",
+        code: "VALIDATION_ERROR",
         errors: error.format(),
       });
       return;
     }
-    if (error.message === "User or bank not found") {
-      res.status(404).json({ message: error.message });
+    if (error instanceof Error && error.message === "User or bank not found") {
+      res.status(404).json({
+        message: error.message,
+        code: "NOT_FOUND",
+      });
       return;
     }
-    console.error("Link Bank Error:", error);
-    res.status(500).json({ message: "Failed to link bank with Dwolla" });
+    logger.error({ err: error }, "Link Bank Error");
+    res.status(500).json({
+      message: "Failed to link bank with Dwolla",
+      code: "LINK_BANK_ERROR",
+    });
   }
 };
 
 export const getBanks = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user!.userId;
+    const userId = req.user.userId;
     const banks = await bankService.getBanks(userId);
 
     res.json({ banks });
   } catch (error) {
-    console.error("Get Banks Error:", error);
-    res.status(500).json({ message: "Failed to get banks" });
+    logger.error({ err: error }, "Get Banks Error");
+    res.status(500).json({
+      message: "Failed to get banks",
+      code: "GET_BANKS_ERROR",
+    });
   }
 };
 
 export const initiateTransfer = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user!.userId;
+    const userId = req.user.userId;
     const { sourceBankId, destinationBankId, amount } = transferSchema.parse(
       req.body
     );
@@ -60,26 +71,38 @@ export const initiateTransfer = async (req: AuthRequest, res: Response) => {
     );
 
     res.status(201).json(result);
-  } catch (error: any) {
+  } catch (error) {
     if (error instanceof z.ZodError) {
       res.status(400).json({
         message: "Validation error",
+        code: "VALIDATION_ERROR",
         errors: error.format(),
       });
       return;
     }
-    if (error.message === "Source or destination bank not found") {
-      res.status(404).json({ message: error.message });
-      return;
+    if (error instanceof Error) {
+      if (error.message === "Source or destination bank not found") {
+        res.status(404).json({
+          message: error.message,
+          code: "NOT_FOUND",
+        });
+        return;
+      }
+      if (
+        error.message ===
+        "Both banks must be linked with Dwolla before initiating transfer"
+      ) {
+        res.status(400).json({
+          message: error.message,
+          code: "DWOLLA_NOT_LINKED",
+        });
+        return;
+      }
     }
-    if (
-      error.message ===
-      "Both banks must be linked with Dwolla before initiating transfer"
-    ) {
-      res.status(400).json({ message: error.message });
-      return;
-    }
-    console.error("Transfer Error:", error);
-    res.status(500).json({ message: "Failed to initiate transfer" });
+    logger.error({ err: error }, "Transfer Error");
+    res.status(500).json({
+      message: "Failed to initiate transfer",
+      code: "TRANSFER_ERROR",
+    });
   }
 };
