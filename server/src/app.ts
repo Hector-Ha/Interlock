@@ -10,6 +10,10 @@ import plaidRoutes from "./routes/plaid.routes";
 import bankRoutes from "./routes/bank.routes";
 import webhooksRoutes from "./routes/webhooks.routes";
 
+interface RequestWithRawBody extends express.Request {
+  rawBody?: Buffer;
+}
+
 const app: express.Application = express();
 
 app.use(
@@ -21,7 +25,7 @@ app.use(
 app.use(helmet());
 app.use(
   express.json({
-    verify: (req: any, res, buf) => {
+    verify: (req: RequestWithRawBody, res, buf) => {
       req.rawBody = buf;
     },
   })

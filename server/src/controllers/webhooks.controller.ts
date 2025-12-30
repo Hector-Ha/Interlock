@@ -39,7 +39,7 @@ export const handleDwollaWebhook = async (req: Request, res: Response) => {
     const resourceUrl = event._links.resource.href;
     const resourceId = resourceUrl.split("/").pop();
 
-    console.log(`Received Dwolla Webhook: ${topic} for ${resourceId}`);
+    console.info(`Received Dwolla Webhook: ${topic} for ${resourceId}`);
 
     switch (topic) {
       case "customer_transfer_completed":
@@ -56,7 +56,7 @@ export const handleDwollaWebhook = async (req: Request, res: Response) => {
         break;
 
       default:
-        console.log(`Unhandled topic: ${topic}`);
+        console.info(`Unhandled topic: ${topic}`);
     }
 
     res.status(200).send();
@@ -69,17 +69,26 @@ export const handleDwollaWebhook = async (req: Request, res: Response) => {
 const updateTransactionStatus = async (
   transferId: string,
   status: "SUCCESS" | "FAILED" | "RETURNED"
-) => {
-  const transaction = await prisma.transaction.update({
-    where: { dwollaTransferId: transferId },
-    data: { status },
-  });
+): Promise<void> => {
+  try {
+    const transaction = await prisma.transaction.findFirst({
+      where: { dwollaTransferId: transferId },
+    });
 
-  if (transaction) {
-    console.log(
+    if (!transaction) {
+      console.warn(`Transaction not found for Dwolla ID: ${transferId}`);
+      return;
+    }
+
+    await prisma.transaction.update({
+      where: { id: transaction.id },
+      data: { status },
+    });
+
+    console.info(
       `Updated transaction ${transaction.id} (Dwolla ID: ${transferId}) to ${status}`
     );
-  } else {
-    console.warn(`Transaction not found for Dwolla ID: ${transferId}`);
+  } catch (error) {
+    console.error(`Failed to update transaction ${transferId}:`, error);
   }
 };

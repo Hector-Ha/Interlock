@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/node";
-// Profiling got commented out as it may cause issues with Bun
+// Profiling got commented out as it cause issues with Bun
 // import { nodeProfilingIntegration } from "@sentry/profiling-node";
 
 if (!process.env.SENTRY_DSN) {
@@ -14,7 +14,7 @@ if (!process.env.SENTRY_DSN) {
       tracesSampleRate: 1.0,
       profilesSampleRate: 1.0,
     });
-    console.log("Sentry initialized successfully.");
+    console.info("Sentry initialized successfully.");
   } catch (error) {
     console.error("Failed to initialize Sentry:", error);
   }
