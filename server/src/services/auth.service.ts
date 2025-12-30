@@ -1,9 +1,9 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { z } from "zod";
 import { prisma } from "@/db";
 import { config } from "@/config";
 import { encrypt } from "@/utils/encryption";
-import { z } from "zod";
 import { authSchema } from "@/validators/auth.schema";
 
 type SignUpInput = z.infer<typeof authSchema>;

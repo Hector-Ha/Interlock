@@ -99,5 +99,17 @@ model Session {
   createdAt    DateTime @default(now())
 
   @@index([userId])
+
   @@index([expiresAt])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  resource  String
+  details   Json?
+  ipAddress String?
+  
+  createdAt DateTime @default(now())
 }

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { config } from "@/config";
 import { authService } from "@/services/auth.service";
 import { authSchema, signInSchema } from "@/validators/auth.schema";
+import { logger } from "@/middleware/logger";
 import type { AuthRequest } from "@/types/auth.types";
 
 export const signUp = async (req: Request, res: Response) => {
@@ -35,7 +36,7 @@ export const signUp = async (req: Request, res: Response) => {
       });
       return;
     }
-    console.error("Sign Up Error:", error);
+    logger.error({ err: error }, "Sign Up Error");
     res.status(500).json({
       message: "Error creating user",
       code: "SIGNUP_ERROR",
@@ -89,7 +90,7 @@ export const signIn = async (req: Request, res: Response) => {
         return;
       }
     }
-    console.error("Sign In Error:", error);
+    logger.error({ err: error }, "Sign In Error");
     res.status(500).json({
       message: "Server error",
       code: "SERVER_ERROR",
@@ -111,7 +112,7 @@ export const getMe = async (req: AuthRequest, res: Response) => {
 
     res.json({ user });
   } catch (error) {
-    console.error("Get Me Error:", error);
+    logger.error({ err: error }, "Get Me Error");
     res.status(500).json({
       message: "Server error",
       code: "SERVER_ERROR",

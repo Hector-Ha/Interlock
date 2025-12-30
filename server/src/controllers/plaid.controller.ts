@@ -1,29 +1,31 @@
-import { Response, NextFunction } from "express";
-import { AuthRequest } from "@/types/auth.types";
+import { Response } from "express";
 import { z } from "zod";
-
+import { AuthRequest } from "@/types/auth.types";
 import { createLinkToken, exchangePublicToken } from "@/services/plaid.service";
 import { exchangeTokenSchema } from "@/validators/plaid.schema";
+import { logger } from "@/middleware/logger";
 
 export const createLinkTokenHandler = async (
   req: AuthRequest,
   res: Response
 ) => {
   try {
-    const userId = req.user!.userId;
+    const userId = req.user.userId;
     const linkToken = await createLinkToken(userId);
 
     res.json({ link_token: linkToken });
   } catch (error) {
-    console.error("Plaid Link Token Error:", error);
-    res.status(500).json({ message: "Failed to create link token" });
+    logger.error({ err: error }, "Plaid Link Token Error");
+    res.status(500).json({
+      message: "Failed to create link token",
+      code: "LINK_TOKEN_ERROR",
+    });
   }
 };
 
 export const exchangeTokenHandler = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user!.userId;
-
+    const userId = req.user.userId;
     const { publicToken, metadata } = exchangeTokenSchema.parse(req.body);
 
     const bank = await exchangePublicToken(userId, publicToken, metadata);
@@ -33,12 +35,16 @@ export const exchangeTokenHandler = async (req: AuthRequest, res: Response) => {
     if (error instanceof z.ZodError) {
       res.status(400).json({
         message: "Validation error",
+        code: "VALIDATION_ERROR",
         errors: error.format(),
       });
       return;
     }
 
-    console.error("Plaid Exchange Token Error:", error);
-    res.status(500).json({ message: "Failed to exchange token" });
+    logger.error({ err: error }, "Plaid Exchange Token Error");
+    res.status(500).json({
+      message: "Failed to exchange token",
+      code: "EXCHANGE_TOKEN_ERROR",
+    });
   }
 };
