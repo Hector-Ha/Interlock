@@ -20,9 +20,9 @@ export const authService = {
 
     const addressString = JSON.stringify({
       address1: data.address,
+      city: data.city,
       state: data.state,
       postalCode: data.postalCode,
-      city: "US",
     });
 
     const encryptedAddress = encrypt(addressString);

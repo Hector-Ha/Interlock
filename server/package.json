@@ -6,9 +6,7 @@
     "dev": "bun --watch src/index.ts",
     "start": "bun src/index.ts",
     "prisma:generate": "prisma generate",
-    "prisma:studio": "prisma studio",
-    "verify:auth": "bun scripts/verify-auth.ts",
-    "verify:plaid": "bun scripts/verify-plaid.ts"
+    "prisma:studio": "prisma studio"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
