@@ -12,6 +12,7 @@ type SignUpInput = z.infer<typeof authSchema>;
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MINUTES = 30;
 
+// Creates a new user account with encrypted PII and generates an access token.
 export const signUp = async (data: SignUpInput) => {
   const existingUser = await prisma.user.findUnique({
     where: { email: data.email },
@@ -48,12 +49,13 @@ export const signUp = async (data: SignUpInput) => {
   });
 
   const token = jwt.sign({ userId: newUser.id }, config.jwtSecret, {
-    expiresIn: "1d",
+    expiresIn: "15m", // Short-lived access token
   });
 
   return { user: newUser, token };
 };
 
+// Authenticates a user and generates an access token with account lockout.
 export const signIn = async (email: string, password: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
 
@@ -110,13 +112,21 @@ export const signIn = async (email: string, password: string) => {
   }
 
   const token = jwt.sign({ userId: user.id }, config.jwtSecret, {
-    expiresIn: "1d",
+    expiresIn: "15m", // Short-lived access token
   });
 
   return { user, token };
 };
 
-export const getUserById = async (userId: string) => {
+// Retrieves a user by ID with basic profile information.
+export const getUserById = async (
+  userId: string
+): Promise<{
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+} | null> => {
   return prisma.user.findUnique({
     where: { id: userId },
     select: { id: true, email: true, firstName: true, lastName: true },
@@ -127,6 +137,7 @@ export const generateRefreshToken = (): string => {
   return crypto.randomBytes(64).toString("hex");
 };
 
+// Creates a new session with refresh token for a user.
 export const createSession = async (
   userId: string,
   userAgent?: string,
@@ -149,7 +160,15 @@ export const createSession = async (
   return refreshToken;
 };
 
-export const validateRefreshToken = async (refreshToken: string) => {
+// Validates a refresh token and returns the associated session .
+export const validateRefreshToken = async (
+  refreshToken: string
+): Promise<
+  | (Awaited<ReturnType<typeof prisma.session.findUnique>> & {
+      user: Awaited<ReturnType<typeof prisma.user.findUnique>>;
+    })
+  | null
+> => {
   const session = await prisma.session.findUnique({
     where: { refreshToken },
     include: { user: true },
@@ -168,6 +187,7 @@ export const validateRefreshToken = async (refreshToken: string) => {
   return session;
 };
 
+// Rotates a refresh token by invalidating the old one and creating a new session.
 export const rotateRefreshToken = async (
   oldRefreshToken: string,
   userAgent?: string,
@@ -179,10 +199,8 @@ export const rotateRefreshToken = async (
     return null;
   }
 
-  // Delete old session
   await prisma.session.delete({ where: { id: session.id } });
 
-  // Create new session
   const newRefreshToken = await createSession(
     session.userId,
     userAgent,
@@ -202,6 +220,7 @@ export const invalidateAllSessions = async (
   return result.count;
 };
 
+// Changes a user's password after verifying the current password.
 export const changePassword = async (
   userId: string,
   currentPassword: string,
@@ -222,7 +241,7 @@ export const changePassword = async (
     throw new Error("Current password is incorrect");
   }
 
-  const salt = await bcrypt.genSalt(10);
+  const salt = await bcrypt.genSalt(12);
   const newPasswordHash = await bcrypt.hash(newPassword, salt);
 
   await prisma.user.update({
@@ -230,16 +249,22 @@ export const changePassword = async (
     data: { passwordHash: newPasswordHash },
   });
 
-  // force re-login
+  // Force re-login by invalidating all sessions
   await invalidateAllSessions(userId);
 
   return true;
 };
 
+// Updates user profile information
 export const updateProfile = async (
   userId: string,
   data: { firstName?: string; lastName?: string }
-) => {
+): Promise<{
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+}> => {
   const user = await prisma.user.update({
     where: { id: userId },
     data,
