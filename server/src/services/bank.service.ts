@@ -1,11 +1,13 @@
 import { prisma } from "@/db";
 import { decrypt } from "@/utils/encryption";
-import { createProcessorToken } from "@/services/plaid.service";
+import { createProcessorToken, plaidClient } from "@/services/plaid.service";
 import {
+  dwollaClient,
   ensureCustomer,
   addFundingSource,
   createTransfer,
 } from "@/services/dwolla.service";
+import { logger } from "@/middleware/logger";
 
 export const bankService = {
   async linkBankWithDwolla(userId: string, bankId: string, accountId: string) {
@@ -59,6 +61,63 @@ export const bankService = {
         createdAt: true,
       },
     });
+  },
+
+  async getBankById(bankId: string, userId: string) {
+    const bank = await prisma.bank.findFirst({
+      where: { id: bankId, userId },
+      include: {
+        transactions: {
+          take: 5,
+          orderBy: { date: "desc" },
+        },
+      },
+    });
+
+    if (!bank) {
+      return null;
+    }
+
+    return bank;
+  },
+
+  async disconnectBank(bankId: string, userId: string) {
+    const bank = await prisma.bank.findFirst({
+      where: { id: bankId, userId },
+    });
+
+    if (!bank) {
+      throw new Error("Bank not found");
+    }
+
+    // Remove from Plaid
+    try {
+      const accessToken = decrypt(bank.plaidAccessToken);
+      await plaidClient.itemRemove({ access_token: accessToken });
+    } catch (error) {
+      logger.warn({ err: error, bankId }, "Failed to remove item from Plaid");
+    }
+
+    // Remove from Dwolla
+    if (bank.dwollaFundingUrl) {
+      try {
+        await dwollaClient.post(`${bank.dwollaFundingUrl}`, {
+          removed: true,
+        });
+      } catch (error) {
+        logger.warn(
+          { err: error, bankId },
+          "Failed to remove funding source from Dwolla"
+        );
+      }
+    }
+
+    // Remove from Database
+    await prisma.bank.delete({
+      where: { id: bankId },
+    });
+
+    return true;
   },
 
   async initiateTransfer(

@@ -56,6 +56,71 @@ export const getBanks = async (req: AuthRequest, res: Response) => {
   }
 };
 
+export const getBank = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user.userId;
+    const { bankId } = req.params;
+
+    if (!bankId) {
+      res
+        .status(400)
+        .json({ message: "Bank ID is required", code: "VALIDATION_ERROR" });
+      return;
+    }
+
+    const bank = await bankService.getBankById(bankId, userId);
+
+    if (!bank) {
+      res.status(404).json({
+        message: "Bank not found",
+        code: "NOT_FOUND",
+      });
+      return;
+    }
+
+    res.json({ bank });
+  } catch (error) {
+    logger.error({ err: error }, "Get Bank Error");
+    res.status(500).json({
+      message: "Failed to get bank details",
+      code: "GET_BANK_ERROR",
+    });
+  }
+};
+
+export const disconnectBank = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user.userId;
+    const { bankId } = req.params;
+
+    if (!bankId) {
+      res
+        .status(400)
+        .json({ message: "Bank ID is required", code: "VALIDATION_ERROR" });
+      return;
+    }
+
+    await bankService.disconnectBank(bankId, userId);
+
+    res.json({
+      message: "Bank disconnected successfully",
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === "Bank not found") {
+      res.status(404).json({
+        message: error.message,
+        code: "NOT_FOUND",
+      });
+      return;
+    }
+    logger.error({ err: error }, "Disconnect Bank Error");
+    res.status(500).json({
+      message: "Failed to disconnect bank",
+      code: "DISCONNECT_BANK_ERROR",
+    });
+  }
+};
+
 export const initiateTransfer = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user.userId;

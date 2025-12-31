@@ -41,7 +41,7 @@ app.use(
 );
 app.use(cookieParser());
 
-// Health check (exclude from logging if desired)
+// Health check
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });

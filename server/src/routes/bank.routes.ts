@@ -3,6 +3,8 @@ import {
   linkBankWithDwolla,
   getBanks,
   initiateTransfer,
+  getBank,
+  disconnectBank,
 } from "@/controllers/bank.controller";
 import {
   getAccounts,
@@ -20,6 +22,10 @@ const router: Router = Router();
 router.get("/", authenticate, getBanks as RequestHandler);
 router.post("/link-dwolla", authenticate, linkBankWithDwolla as RequestHandler);
 router.post("/transfer", authenticate, initiateTransfer as RequestHandler);
+
+// Bank Management Endpoints
+router.get("/:bankId", authenticate, getBank as RequestHandler);
+router.delete("/:bankId", authenticate, disconnectBank as RequestHandler);
 
 // Account Endpoints
 router.get("/:bankId/accounts", authenticate, getAccounts as RequestHandler);
