@@ -19,14 +19,24 @@ export const signUp = async (req: Request, res: Response) => {
 
     const { user, token } = await authService.signUp(data);
 
+    // Create session with refresh token
+    const refreshToken = await authService.createSession(
+      user.id,
+      req.get("User-Agent"),
+      req.ip
+    );
+
     res.cookie("token", token, {
       httpOnly: true,
       secure: config.env === "production",
       sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 15 * 60 * 1000, // 15 minutes to match token expiry
     });
 
-    res.status(201).json({ user: { id: user.id, email: user.email } });
+    res.status(201).json({
+      user: { id: user.id, email: user.email },
+      refreshToken,
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       res.status(400).json({
@@ -57,14 +67,24 @@ export const signIn = async (req: Request, res: Response) => {
 
     const { user, token } = await authService.signIn(email, password);
 
+    // Create session with refresh token
+    const refreshToken = await authService.createSession(
+      user.id,
+      req.get("User-Agent"),
+      req.ip
+    );
+
     res.cookie("token", token, {
       httpOnly: true,
       secure: config.env === "production",
       sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 15 * 60 * 1000, // 15 minutes to match token expiry
     });
 
-    res.json({ user: { id: user.id, email: user.email } });
+    res.json({
+      user: { id: user.id, email: user.email },
+      refreshToken,
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       res.status(400).json({
@@ -132,7 +152,7 @@ export const signOut = (_req: Request, res: Response) => {
   res.json({ message: "Signed out successfully" });
 };
 
-// Exchanges refresh token for new access token.
+// Exchanges refresh token for new access token and rotated refresh token.
 export const refreshToken = async (req: Request, res: Response) => {
   try {
     const { refreshToken } = refreshTokenSchema.parse(req.body);
@@ -222,7 +242,7 @@ export const logoutAll = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Changes user password.
+// Changes user password and invalidates all sessions.
 export const changePassword = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user.userId;
@@ -232,6 +252,10 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
 
     await authService.changePassword(userId, currentPassword, newPassword);
 
+    // Clear current session cookie (all sessions are invalidated by service)
+    res.clearCookie("token");
+
+    // Log the action
     await prisma.auditLog.create({
       data: {
         userId,
@@ -241,7 +265,9 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    res.json({ message: "Password changed successfully" });
+    res.json({
+      message: "Password changed successfully. Please sign in again.",
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       res.status(400).json({
@@ -258,7 +284,7 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
     ) {
       res.status(401).json({
         message: "Current password is incorrect",
-        code: "INVALID_PASSWORD",
+        code: "INVALID_CURRENT_PASSWORD",
       });
       return;
     }
@@ -271,7 +297,7 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Updates user profile.
+// Updates user profile information
 export const updateProfile = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user.userId;
