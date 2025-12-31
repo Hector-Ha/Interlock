@@ -2,6 +2,7 @@ import { Response } from "express";
 import { z } from "zod";
 import { AuthRequest } from "@/types/auth.types";
 import { bankService } from "@/services/bank.service";
+import { prisma } from "@/db";
 import {
   bankIdParamsSchema,
   linkBankSchema,
@@ -96,13 +97,23 @@ export const getBank = async (req: AuthRequest, res: Response) => {
 };
 
 // Disconnects a bank and removes all associated data from Plaid, Dwolla, and database.
-
 export const disconnectBank = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user.userId;
     const { bankId } = bankIdParamsSchema.parse(req.params);
 
     await bankService.disconnectBank(bankId, userId);
+
+    // Log the action
+    await prisma.auditLog.create({
+      data: {
+        userId,
+        action: "BANK_DISCONNECT",
+        resource: "Bank",
+        details: { bankId },
+        ipAddress: req.ip,
+      },
+    });
 
     res.json({
       message: "Bank disconnected successfully",

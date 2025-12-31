@@ -55,21 +55,16 @@ export const exchangeTokenHandler = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// Creates a link token in update mode for re-authentication.
 export const createUpdateLinkTokenHandler = async (
   req: AuthRequest,
   res: Response
 ) => {
   try {
     const userId = req.user.userId;
-    const { bankId } = req.body;
-
-    if (!bankId) {
-      res.status(400).json({
-        message: "Bank ID is required",
-        code: "VALIDATION_ERROR",
-      });
-      return;
-    }
+    const { bankId } = z
+      .object({ bankId: z.string().uuid("Invalid bank ID format") })
+      .parse(req.body);
 
     const bank = await prisma.bank.findFirst({
       where: { id: bankId, userId },
@@ -78,7 +73,7 @@ export const createUpdateLinkTokenHandler = async (
     if (!bank) {
       res.status(404).json({
         message: "Bank not found",
-        code: "NOT_FOUND",
+        code: "BANK_NOT_FOUND",
       });
       return;
     }
@@ -88,10 +83,19 @@ export const createUpdateLinkTokenHandler = async (
 
     res.json({ link_token: linkToken });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({
+        message: "Validation error",
+        code: "VALIDATION_ERROR",
+        errors: error.format(),
+      });
+      return;
+    }
+
     logger.error({ err: error }, "Plaid Update Link Token Error");
     res.status(500).json({
       message: "Failed to create update link token",
-      code: "LINK_TOKEN_ERROR",
+      code: "UPDATE_LINK_TOKEN_ERROR",
     });
   }
 };
