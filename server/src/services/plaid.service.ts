@@ -56,6 +56,21 @@ export const createLinkToken = async (userId: string) => {
   return response.data.link_token;
 };
 
+export const createUpdateLinkToken = async (
+  userId: string,
+  accessToken: string
+) => {
+  const response = await plaidClient.linkTokenCreate({
+    user: { client_user_id: userId },
+    client_name: "Interlock",
+    country_codes: config.plaid.countryCodes as CountryCode[],
+    language: "en",
+    access_token: accessToken,
+  });
+
+  return response.data.link_token;
+};
+
 interface PlaidLinkMetadata {
   institution: {
     institution_id: string;

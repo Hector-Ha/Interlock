@@ -8,6 +8,7 @@ import {
   createTransfer,
 } from "@/services/dwolla.service";
 import { logger } from "@/middleware/logger";
+import type { BankDetails, BankListItem } from "@/types/bank.types";
 
 export const bankService = {
   async linkBankWithDwolla(userId: string, bankId: string, accountId: string) {
@@ -49,7 +50,7 @@ export const bankService = {
     };
   },
 
-  async getBanks(userId: string) {
+  async getBanks(userId: string): Promise<BankListItem[]> {
     return prisma.bank.findMany({
       where: { userId },
       select: {
@@ -63,13 +64,30 @@ export const bankService = {
     });
   },
 
-  async getBankById(bankId: string, userId: string) {
+  async getBankById(
+    bankId: string,
+    userId: string
+  ): Promise<BankDetails | null> {
     const bank = await prisma.bank.findFirst({
       where: { id: bankId, userId },
-      include: {
+      select: {
+        id: true,
+        institutionId: true,
+        institutionName: true,
+        status: true,
+        dwollaFundingUrl: true,
+        createdAt: true,
+        updatedAt: true,
         transactions: {
           take: 5,
           orderBy: { date: "desc" },
+          select: {
+            id: true,
+            amount: true,
+            name: true,
+            date: true,
+            status: true,
+          },
         },
       },
     });
@@ -78,10 +96,17 @@ export const bankService = {
       return null;
     }
 
-    return bank;
+    return {
+      ...bank,
+      isDwollaLinked: !!bank.dwollaFundingUrl,
+      transactions: bank.transactions.map((tx) => ({
+        ...tx,
+        amount: Number(tx.amount),
+      })),
+    };
   },
 
-  async disconnectBank(bankId: string, userId: string) {
+  async disconnectBank(bankId: string, userId: string): Promise<void> {
     const bank = await prisma.bank.findFirst({
       where: { id: bankId, userId },
     });
@@ -94,6 +119,7 @@ export const bankService = {
     try {
       const accessToken = decrypt(bank.plaidAccessToken);
       await plaidClient.itemRemove({ access_token: accessToken });
+      logger.info({ bankId }, "Successfully removed item from Plaid");
     } catch (error) {
       logger.warn({ err: error, bankId }, "Failed to remove item from Plaid");
     }
@@ -104,6 +130,10 @@ export const bankService = {
         await dwollaClient.post(`${bank.dwollaFundingUrl}`, {
           removed: true,
         });
+        logger.info(
+          { bankId },
+          "Successfully removed funding source from Dwolla"
+        );
       } catch (error) {
         logger.warn(
           { err: error, bankId },
@@ -117,7 +147,7 @@ export const bankService = {
       where: { id: bankId },
     });
 
-    return true;
+    logger.info({ bankId, userId }, "Bank disconnected successfully");
   },
 
   async initiateTransfer(
