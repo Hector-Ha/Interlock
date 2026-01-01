@@ -1,8 +1,8 @@
 import React from "react";
-import HeaderBox from "@/src/components/HeaderBox";
+import HeaderBox from "@/src/components/shared/HeaderBox";
 import { first } from "slate";
-import TotalBalanceBox from "@/src/components/TotalBalanceBox";
-import RightSideBar from "@/src/components/RightSideBar";
+import TotalBalanceBox from "@/src/components/features/bank/TotalBalanceBox";
+import RightSideBar from "@/src/components/layout/RightSideBar";
 
 const Dashboard = () => {
   const loggedInUser = { firstName: "Hector", lastName: "Ha" };
