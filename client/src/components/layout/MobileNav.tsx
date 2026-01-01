@@ -11,10 +11,10 @@ import {
 import Image from "next/image";
 import { Menu } from "lucide-react";
 import Link from "next/link";
-import InterlockLogo from "../assets/logos/Interlock.svg";
-import { sidebarLinks } from "../constants/sidebarLinks";
+import InterlockLogo from "../../assets/logos/Interlock.svg";
+import { sidebarLinks } from "../../constants/sidebarLinks";
 import { usePathname } from "next/navigation";
-import { cn } from "../lib/utils";
+import { cn } from "../../lib/utils";
 
 const MobileNav = ({ user }: MobileNavProps) => {
   const pathname = usePathname();

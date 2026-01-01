@@ -1,7 +1,7 @@
-import Sidebar from "@/src/components/Sidebar";
+import Sidebar from "@/src/components/layout/Sidebar";
 import Image from "next/image";
 import InterlockLogo from "@/src/assets/logos/Interlock.svg";
-import MobileNav from "@/src/components/MobileNav";
+import MobileNav from "@/src/components/layout/MobileNav";
 
 export default function RootLayout({
   children,
