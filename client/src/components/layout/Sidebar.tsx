@@ -3,11 +3,11 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { sidebarLinks } from "../constants/sidebarLinks";
+import { sidebarLinks } from "../../constants/sidebarLinks";
 import { usePathname } from "next/navigation";
-import { cn } from "../lib/utils";
+import { cn } from "../../lib/utils";
 
-import InterlockLogo from "../assets/logos/Interlock.svg";
+import InterlockLogo from "../../assets/logos/Interlock.svg";
 
 const Sidebar = ({ user }: SidebarProps) => {
   const pathname = usePathname();

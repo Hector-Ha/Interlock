@@ -1,6 +1,6 @@
 import React from "react";
-import AnimatedBalanceCounter from "./AnimatedBalanceCounter";
-import DoughnutChart from "./DoughnutChart";
+import AnimatedBalanceCounter from "../../shared/AnimatedBalanceCounter";
+import DoughnutChart from "../../shared/DoughnutChart";
 
 const TotalBalanceBox = ({
   account,
