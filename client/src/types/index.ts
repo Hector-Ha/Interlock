@@ -1,25 +1,27 @@
-interface HeaderBoxProps {
+export * from "./auth";
+export * from "./bank";
+export interface HeaderBoxProps {
   type: "greeting" | "title";
   title: string;
   subtext?: string;
   user?: string;
 }
 
-interface TotalBalanceBoxProps {
+export interface TotalBalanceBoxProps {
   account: [];
   totalBanks: number;
   totalCurrentBalance: number;
 }
 
-interface DoughnutChartProps {
+export interface DoughnutChartProps {
   account: [];
 }
 
-interface SidebarProps {
+export interface SidebarProps {
   user: User;
 }
 
-interface User {
+export interface User {
   id: string;
   email: string;
   userID: string;
@@ -38,11 +40,11 @@ interface User {
   ssn: string;
 }
 
-interface MobileNavProps {
+export interface MobileNavProps {
   user: User;
 }
 
-interface RightSideBarProps {
+export interface RightSideBarProps {
   user: User;
   transactions: [];
   banks: [];
