@@ -1,4 +1,3 @@
-// Core UI Components
 export { Button, buttonVariants, type ButtonProps } from "./Button";
 export { Input, type InputProps } from "./Input";
 export {
@@ -23,7 +22,6 @@ export {
   ModalFooter,
 } from "./Modal";
 
-// Re-export shadcn components
 export {
   Dialog,
   DialogPortal,

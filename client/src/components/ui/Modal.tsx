@@ -120,7 +120,9 @@ function ModalDescription({
   className?: string;
 }) {
   return (
-    <Dialog.Description className={cn("text-sm text-slate-500 mt-1", className)}>
+    <Dialog.Description
+      className={cn("text-sm text-slate-500 mt-1", className)}
+    >
       {children}
     </Dialog.Description>
   );
