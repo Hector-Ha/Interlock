@@ -29,7 +29,7 @@ export interface DoughnutChartProps {
 }
 
 export interface SidebarProps {
-  user: User;
+  user?: User;
 }
 
 export interface MobileNavProps {

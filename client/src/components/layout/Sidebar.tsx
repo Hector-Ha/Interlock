@@ -8,12 +8,16 @@ import { usePathname } from "next/navigation";
 import { cn } from "../../lib/utils";
 
 import InterlockLogo from "../../assets/logos/Interlock.svg";
+import { SidebarProps } from "../../types";
 
-const Sidebar = ({ user }: SidebarProps) => {
+const Sidebar = ({
+  user,
+  className,
+}: SidebarProps & { className?: string }) => {
   const pathname = usePathname();
 
   return (
-    <section className="sidebar">
+    <section className={cn("sidebar", className)}>
       <nav className="sidebar-nav">
         <Link href="/" className="mb-12 cursor-pointer flex items-center gap-2">
           <Image
@@ -58,4 +62,4 @@ const Sidebar = ({ user }: SidebarProps) => {
   );
 };
 
-export default Sidebar;
+export { Sidebar };
