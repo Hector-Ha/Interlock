@@ -1,16 +1,14 @@
 import { create } from "zustand";
 import { bankService } from "@/services/bank.service";
-import { Bank, Account } from "@/types/bank";
+import type { Bank, Account } from "@/types/bank";
 
 interface BankState {
-  // State
   banks: Bank[];
   selectedBank: Bank | null;
   accounts: Account[];
   isLoading: boolean;
   error: string | null;
 
-  // Actions
   fetchBanks: () => Promise<void>;
   selectBank: (bankId: string | null) => Promise<void>;
   fetchAccounts: (bankId: string) => Promise<void>;
@@ -32,7 +30,6 @@ const initialState = {
 export const useBankStore = create<BankState>((set, get) => ({
   ...initialState,
 
-  // Fetch all user's banks
   fetchBanks: async () => {
     try {
       set({ isLoading: true, error: null });
@@ -45,7 +42,6 @@ export const useBankStore = create<BankState>((set, get) => ({
     }
   },
 
-  // Select a bank and fetch its details
   selectBank: async (bankId: string | null) => {
     if (!bankId) {
       set({ selectedBank: null, accounts: [] });
@@ -75,7 +71,6 @@ export const useBankStore = create<BankState>((set, get) => ({
     }
   },
 
-  // Fetch accounts for a specific bank
   fetchAccounts: async (bankId: string) => {
     try {
       set({ isLoading: true, error: null });
@@ -88,14 +83,12 @@ export const useBankStore = create<BankState>((set, get) => ({
     }
   },
 
-  // Add a new bank to the list
   addBank: (bank: Bank) => {
     set((state) => ({
       banks: [...state.banks, bank],
     }));
   },
 
-  // Remove a bank from the list
   removeBank: (bankId: string) => {
     set((state) => ({
       banks: state.banks.filter((b) => b.id !== bankId),
@@ -104,7 +97,6 @@ export const useBankStore = create<BankState>((set, get) => ({
     }));
   },
 
-  // Update a bank
   updateBank: (bankId: string, updates: Partial<Bank>) => {
     set((state) => ({
       banks: state.banks.map((b) =>

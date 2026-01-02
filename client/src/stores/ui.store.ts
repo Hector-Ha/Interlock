@@ -20,7 +20,6 @@ interface UIState {
   // Toasts
   toasts: Toast[];
 
-  // Actions
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
@@ -34,26 +33,21 @@ interface UIState {
 }
 
 export const useUIStore = create<UIState>((set) => ({
-  // Initial state
   sidebarOpen: false,
   sidebarCollapsed: false,
   activeModal: null,
   modalData: {},
   toasts: [],
 
-  // Sidebar actions
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
   setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
-
-  // Modal actions
   openModal: (modalId, data = {}) =>
     set({ activeModal: modalId, modalData: data }),
   closeModal: () => set({ activeModal: null, modalData: {} }),
 
-  // Toast actions
   addToast: (toast) => {
-    const id = Math.random().toString(36).substr(2, 9);
+    const id = Math.random().toString(36).substring(2, 11);
     set((state) => ({
       toasts: [...state.toasts, { ...toast, id }],
     }));
@@ -77,7 +71,6 @@ export const useUIStore = create<UIState>((set) => ({
   clearToasts: () => set({ toasts: [] }),
 }));
 
-// Helper hook for toast notifications
 export const useToast = () => {
   const addToast = useUIStore((state) => state.addToast);
 

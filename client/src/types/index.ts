@@ -1,6 +1,16 @@
 export * from "./auth";
 export * from "./bank";
 export * from "./transfer";
+
+export interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  dwollaCustomerId?: string;
+  dwollaCustomerUrl?: string;
+}
+
 export interface HeaderBoxProps {
   type: "greeting" | "title";
   title: string;
@@ -9,36 +19,17 @@ export interface HeaderBoxProps {
 }
 
 export interface TotalBalanceBoxProps {
-  account: [];
+  accounts: Account[];
   totalBanks: number;
   totalCurrentBalance: number;
 }
 
 export interface DoughnutChartProps {
-  account: [];
+  accounts: Account[];
 }
 
 export interface SidebarProps {
   user: User;
-}
-
-export interface User {
-  id: string;
-  email: string;
-  userID: string;
-  dwollaCustomerID: string;
-  dwollaCustomerURL: string;
-
-  phoneNumber: string;
-
-  firstName: string;
-  lastName: string;
-  address: string;
-  city: string;
-  country: string;
-  postalCode: string;
-  dateOfBirth: string;
-  ssn: string;
 }
 
 export interface MobileNavProps {
@@ -47,6 +38,8 @@ export interface MobileNavProps {
 
 export interface RightSideBarProps {
   user: User;
-  transactions: [];
-  banks: [];
+  transactions: Transaction[];
+  banks: Bank[];
 }
+
+import type { Account, Bank, Transaction } from "./bank";

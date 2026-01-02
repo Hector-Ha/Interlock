@@ -1,37 +1,51 @@
-import apiClient from "./api-client";
-import { SignInParams, SignUpParams } from "@/types/auth";
-import { User } from "@/types/index";
+import { api } from "./api-client";
+import type { User, SignInParams, SignUpParams } from "@/types";
+
+export interface AuthResponse {
+  user: User;
+}
+
+export interface UpdateProfileData {
+  firstName?: string;
+  lastName?: string;
+}
+
+export interface ChangePasswordData {
+  currentPassword: string;
+  newPassword: string;
+}
 
 export const authService = {
-  async signIn(user: SignInParams) {
-    const response = await apiClient.post("/auth/sign-in", user);
-    if (response.data.token) {
-      if (typeof window !== "undefined") {
-        localStorage.setItem("token", response.data.token);
-      }
-    }
-    return response.data;
+  signUp: async (data: SignUpParams): Promise<AuthResponse> => {
+    return api.post<AuthResponse>("/auth/sign-up", data);
   },
 
-  async signUp(userData: SignUpParams) {
-    const response = await apiClient.post("/auth/sign-up", userData);
-    if (response.data.token) {
-      if (typeof window !== "undefined") {
-        localStorage.setItem("token", response.data.token);
-      }
-    }
-    return response.data;
+  signIn: async (data: SignInParams): Promise<AuthResponse> => {
+    return api.post<AuthResponse>("/auth/sign-in", data);
   },
 
-  async logout() {
-    await apiClient.post("/auth/logout");
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("token");
-    }
+  signOut: async (): Promise<void> => {
+    await api.post("/auth/sign-out");
   },
 
-  async getLoggedInUser() {
-    const response = await apiClient.get<User>("/users/get-logged-in-user");
-    return response.data;
+  getMe: async (): Promise<AuthResponse> => {
+    return api.get<AuthResponse>("/auth/me");
+  },
+
+  updateProfile: async (data: UpdateProfileData): Promise<{ user: User }> => {
+    return api.patch<{ user: User }>("/auth/profile", data);
+  },
+
+  changePassword: async (
+    data: ChangePasswordData
+  ): Promise<{ message: string }> => {
+    return api.post<{ message: string }>("/auth/change-password", data);
+  },
+
+  logoutAll: async (): Promise<{
+    message: string;
+    sessionsInvalidated: number;
+  }> => {
+    return api.post("/auth/logout-all");
   },
 };

@@ -1,61 +1,93 @@
-import axios, { AxiosInstance } from "axios";
-import { API_BASE_URL } from "@/lib/constants";
+import axios, {
+  AxiosError,
+  type AxiosInstance,
+  type AxiosResponse,
+} from "axios";
+import { API_URL } from "@/lib/constants";
 
-// Axios instance
-const apiClient: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  timeout: 10000,
-});
+export interface ApiError {
+  message: string;
+  code: string;
+  errors?: Record<string, string[]>;
+}
 
-// Request interceptor
-apiClient.interceptors.request.use(
-  (config) => {
-    // TODO: Retrieve token from secure storage. For now, checks localStorage directly as a fallback
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
-      if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+function createApiClient(): AxiosInstance {
+  const client = axios.create({
+    baseURL: API_URL,
+    withCredentials: true,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    timeout: 30000,
+  });
 
-// Response interceptor
-apiClient.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    // Handle specific error codes
-    if (error.response) {
-      const { status } = error.response;
+  // Request interceptor
+  client.interceptors.request.use(
+    (config) => {
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
 
-      switch (status) {
-        case 401:
-          // TODO: Implement logout logic via store
+  // Response interceptor
+  client.interceptors.response.use(
+    (response: AxiosResponse) => response,
+    async (error: AxiosError<ApiError>) => {
+      const originalRequest = error.config;
+
+      if (error.response?.status === 401 && originalRequest) {
+        try {
+          await client.post("/auth/refresh");
+          return client.request(originalRequest);
+        } catch {
           if (typeof window !== "undefined") {
+            window.location.href = "/sign-in";
           }
-          break;
-        case 403:
-          // Forbidden
-          console.error("Access forbidden");
-          break;
-        case 500:
-          // Server Error
-          console.error("Server error");
-          break;
+          return Promise.reject(error);
+        }
       }
-    }
 
-    return Promise.reject(error);
-  }
-);
+      // Extract error message
+      const apiError: ApiError = {
+        message:
+          error.response?.data?.message || error.message || "An error occurred",
+        code: error.response?.data?.code || "UNKNOWN_ERROR",
+        errors: error.response?.data?.errors,
+      };
+
+      return Promise.reject(apiError);
+    }
+  );
+
+  return client;
+}
+
+export const apiClient = createApiClient();
+
+export const api = {
+  get: <T>(url: string, config?: Parameters<typeof apiClient.get>[1]) =>
+    apiClient.get<T>(url, config).then((res) => res.data),
+
+  post: <T>(
+    url: string,
+    data?: unknown,
+    config?: Parameters<typeof apiClient.post>[2]
+  ) => apiClient.post<T>(url, data, config).then((res) => res.data),
+
+  patch: <T>(
+    url: string,
+    data?: unknown,
+    config?: Parameters<typeof apiClient.patch>[2]
+  ) => apiClient.patch<T>(url, data, config).then((res) => res.data),
+
+  put: <T>(
+    url: string,
+    data?: unknown,
+    config?: Parameters<typeof apiClient.put>[2]
+  ) => apiClient.put<T>(url, data, config).then((res) => res.data),
+
+  delete: <T>(url: string, config?: Parameters<typeof apiClient.delete>[1]) =>
+    apiClient.delete<T>(url, config).then((res) => res.data),
+};
 
 export default apiClient;

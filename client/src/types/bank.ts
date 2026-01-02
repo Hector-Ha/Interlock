@@ -1,36 +1,37 @@
 export interface Bank {
   id: string;
-  name: string;
-  mask: string;
   institutionId: string;
-  availableBalance: number;
-  currentBalance: number;
-  officialName: string;
-  shareableId: string;
-  userId: string;
+  institutionName: string;
+  status: "ACTIVE" | "LOGIN_REQUIRED";
+  dwollaFundingUrl: string | null;
+  isDwollaLinked: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Account {
   id: string;
-  availableBalance: number;
-  currentBalance: number;
-  officialName: string;
-  mask: string;
-  institutionId: string;
   name: string;
+  officialName: string | null;
   type: string;
-  subtype: string;
-  appwriteItemId: string;
-  shareableId: string;
+  subtype: string | null;
+  mask: string | null;
+  balance: {
+    available: number | null;
+    current: number | null;
+    limit: number | null;
+    currency: string | null;
+  };
 }
 
 export interface Transaction {
   id: string;
-  name: string;
   amount: number;
+  name: string;
+  merchantName: string | null;
   date: string;
-  paymentChannel: string;
-  category: string;
-  type: string;
-  image?: string;
+  status: "PENDING" | "SUCCESS" | "FAILED" | "RETURNED";
+  category: string | null;
+  channel: string;
+  pending: boolean;
 }

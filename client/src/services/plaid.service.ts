@@ -1,22 +1,49 @@
-import apiClient from "./api-client";
-import { User } from "@/types/index";
+import { api } from "./api-client";
+
+export interface LinkTokenResponse {
+  link_token: string;
+}
+
+export interface ExchangeTokenData {
+  publicToken: string;
+  metadata: {
+    institution: {
+      institution_id: string;
+      name: string;
+    };
+    accounts: Array<{
+      id: string;
+      name: string;
+      mask: string;
+      type: string;
+      subtype: string;
+    }>;
+  };
+}
+
+export interface ExchangeTokenResponse {
+  id: string;
+  institutionId: string;
+  institutionName: string;
+  status: string;
+}
 
 export const plaidService = {
-  // Create a link token to initialize Plaid Link
-  async createLinkToken(user: User) {
-    const response = await apiClient.post<{ linkToken: string }>(
-      "/plaid/create-link-token",
-      { user }
-    );
-    return response.data;
+  createLinkToken: async (): Promise<LinkTokenResponse> => {
+    return api.post<LinkTokenResponse>("/plaid/link-token");
   },
 
-  // Exchange public token for access token
-  async exchangePublicToken(publicToken: string) {
-    const response = await apiClient.post<{
-      accessToken: string;
-      itemId: string;
-    }>("/plaid/exchange-public-token", { publicToken });
-    return response.data;
+  createUpdateLinkToken: async (
+    bankId: string
+  ): Promise<{ linkToken: string }> => {
+    return api.post<{ linkToken: string }>("/plaid/update-link-token", {
+      bankId,
+    });
+  },
+
+  exchangeToken: async (
+    data: ExchangeTokenData
+  ): Promise<ExchangeTokenResponse> => {
+    return api.post<ExchangeTokenResponse>("/plaid/exchange-token", data);
   },
 };

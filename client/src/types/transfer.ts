@@ -1,18 +1,23 @@
 export interface Transfer {
   id: string;
-  sourceBankId: string;
-  destinationBankId: string;
   amount: number;
-  currency: string;
-  status: "pending" | "processing" | "completed" | "cancelled" | "failed";
+  status: "PENDING" | "SUCCESS" | "FAILED" | "RETURNED";
+  sourceBankName: string;
+  destinationBankName: string;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface TransferDetails extends Transfer {
-  sourceBankName: string;
-  destinationBankName: string;
-  transactionId?: string;
+  sourceBank: {
+    id: string;
+    institutionName: string;
+  };
+  destinationBank: {
+    id: string;
+    institutionName: string;
+  };
+  dwollaTransferId: string | null;
+  updatedAt: string;
 }
 
 export interface TransfersResponse {
@@ -37,5 +42,4 @@ export interface InitiateTransferData {
   sourceBankId: string;
   destinationBankId: string;
   amount: number;
-  memo?: string;
 }
