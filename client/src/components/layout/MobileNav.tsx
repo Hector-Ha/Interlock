@@ -7,7 +7,7 @@ import {
   SheetTitle,
   SheetTrigger,
   SheetClose,
-} from "@/components/ui/sheet";
+} from "@/components/ui/Sheet";
 import Image from "next/image";
 import { Menu } from "lucide-react";
 import Link from "next/link";

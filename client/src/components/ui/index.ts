@@ -1,7 +1,39 @@
-export * from "./alert";
-export * from "./badge";
-export * from "./button";
-export * from "./card";
-export * from "./dialog";
-export * from "./input";
-export * from "./sheet";
+// Core UI Components
+export { Button, buttonVariants, type ButtonProps } from "./Button";
+export { Input, type InputProps } from "./Input";
+export {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+  type CardProps,
+} from "./Card";
+export { Spinner } from "./Spinner";
+export { Badge, badgeVariants, type BadgeProps } from "./Badge";
+export { Alert, AlertTitle, AlertDescription, type AlertProps } from "./Alert";
+export {
+  Modal,
+  ModalTrigger,
+  ModalContent,
+  ModalHeader,
+  ModalTitle,
+  ModalDescription,
+  ModalFooter,
+} from "./Modal";
+
+// Re-export shadcn components
+export {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogClose,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from "./Dialog";
+export { Sheet, SheetContent, SheetTrigger } from "./Sheet";
