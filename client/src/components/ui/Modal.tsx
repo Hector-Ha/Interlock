@@ -60,7 +60,7 @@ function ModalContent({
       <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
         <Dialog.Content
           className={cn(
-            "pointer-events-auto w-full p-6 bg-white rounded-2xl shadow-xl",
+            "pointer-events-auto w-full p-6 bg-background rounded-2xl shadow-xl",
             "data-[state=open]:animate-in data-[state=closed]:animate-out",
             "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
             "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
@@ -72,7 +72,7 @@ function ModalContent({
           {showClose && (
             <Dialog.Close asChild>
               <button
-                className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                className="absolute right-4 top-4 rounded-lg p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />
@@ -104,7 +104,7 @@ function ModalTitle({
 }) {
   return (
     <Dialog.Title
-      className={cn("text-lg font-semibold text-slate-900", className)}
+      className={cn("text-lg font-semibold text-foreground", className)}
     >
       {children}
     </Dialog.Title>
@@ -120,7 +120,7 @@ function ModalDescription({
 }) {
   return (
     <Dialog.Description
-      className={cn("text-sm text-slate-500 mt-1", className)}
+      className={cn("text-sm text-muted-foreground mt-1", className)}
     >
       {children}
     </Dialog.Description>
@@ -137,7 +137,7 @@ function ModalFooter({
   return (
     <div
       className={cn(
-        "flex items-center justify-end gap-3 mt-6 pt-4 border-t border-slate-100",
+        "flex items-center justify-end gap-3 mt-6 pt-4 border-t border-border",
         className
       )}
     >

@@ -105,7 +105,7 @@ export function MobileSidebar({ open }: MobileSidebarProps) {
                   <p className="truncate text-sm font-medium text-gray-900">
                     {user.firstName} {user.lastName}
                   </p>
-                  <p className="truncate text-xs text-slate-500">
+                  <p className="truncate text-xs text-muted-foreground">
                     {user.email}
                   </p>
                 </div>

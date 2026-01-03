@@ -17,32 +17,32 @@ export function SettingsMenu({ onSignOut, className }: SettingsMenuProps) {
         variant="ghost"
         size="icon"
         aria-label="Settings"
-        className={cn("text-slate-400 hover:text-slate-600", className)}
+        className={cn("text-muted-foreground hover:text-foreground", className)}
       >
         <Settings className="h-5 w-5" />
       </Button>
       <Popover
         placement="top start"
         offset={8}
-        className="w-56 overflow-auto rounded-xl bg-white p-1 shadow-lg ring-1 ring-slate-900/5 dark:bg-gray-800 dark:ring-white/10 animate-in fade-in zoom-in-95 data-[exiting]:animate-out data-[exiting]:fade-out data-[exiting]:zoom-out-95"
+        className="w-56 overflow-auto rounded-xl bg-background p-1 shadow-lg ring-1 ring-border dark:ring-white/10 animate-in fade-in zoom-in-95 data-[exiting]:animate-out data-[exiting]:fade-out data-[exiting]:zoom-out-95"
       >
         <Menu className="outline-none">
           <MenuItem
-            className="group flex w-full items-center gap-2 rounded-lg py-1.5 px-3 outline-none data-[focused]:bg-slate-100 dark:data-[focused]:bg-gray-700 cursor-default"
+            className="group flex w-full items-center gap-2 rounded-lg py-1.5 px-3 outline-none data-[focused]:bg-muted cursor-default"
             onAction={() => alert("Profile settings placeholder")}
           >
-            <User className="h-4 w-4 text-slate-500 group-data-[focused]:text-slate-700" />
-            <span className="text-sm font-medium text-slate-700 group-data-[focused]:text-slate-900">
+            <User className="h-4 w-4 text-muted-foreground group-data-[focused]:text-foreground" />
+            <span className="text-sm font-medium text-foreground">
               Profile
             </span>
           </MenuItem>
-          <div className="my-1 h-px bg-slate-100" />
+          <div className="my-1 h-px bg-border" />
           <MenuItem
-            className="group flex w-full items-center gap-2 rounded-lg py-1.5 px-3 outline-none data-[focused]:bg-red-50 cursor-pointer"
+            className="group flex w-full items-center gap-2 rounded-lg py-1.5 px-3 outline-none data-[focused]:bg-error-surface cursor-pointer"
             onAction={onSignOut}
           >
-            <LogOut className="h-4 w-4 text-slate-500 group-data-[focused]:text-red-600" />
-            <span className="text-sm font-medium text-slate-700 group-data-[focused]:text-red-700">
+            <LogOut className="h-4 w-4 text-muted-foreground group-data-[focused]:text-error-main" />
+            <span className="text-sm font-medium text-foreground group-data-[focused]:text-error-main">
               Sign out
             </span>
           </MenuItem>

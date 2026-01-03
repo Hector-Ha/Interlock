@@ -33,7 +33,7 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
         <div className="flex h-screen w-full items-center justify-center">
           <div className="flex flex-col items-center gap-4">
             <Spinner size="lg" />
-            <p className="text-sm text-slate-500">Loading...</p>
+            <p className="text-sm text-muted-foreground">Loading...</p>
           </div>
         </div>
       )

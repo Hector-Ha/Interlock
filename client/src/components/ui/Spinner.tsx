@@ -9,7 +9,7 @@ function Spinner({ size = "md", className }: SpinnerProps) {
   return (
     <div
       className={cn(
-        "animate-spin rounded-full border-2 border-current border-t-transparent text-[#7839EE]",
+        "animate-spin rounded-full border-2 border-current border-t-transparent text-brand-main",
         {
           "h-4 w-4": size === "sm",
           "h-6 w-6": size === "md",
