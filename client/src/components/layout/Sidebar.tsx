@@ -24,7 +24,7 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
   return (
     <aside
       className={cn(
-        "group/sidebar sticky left-0 top-0 z-40 flex h-screen flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out shadow-xl", // Added shadow-xl
+        "group/sidebar sticky left-0 top-0 z-40 flex h-screen flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out shadow-sm", // Reduced shadow to match Header
         sidebarCollapsed ? "w-[88px]" : "w-[280px]",
         className
       )}
@@ -48,7 +48,7 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
       {/* Header */}
       <div
         className={cn(
-          "flex h-[60px] items-center border-b border-gray-200 transition-all duration-300",
+          "flex h-[64px] items-center border-b border-gray-200 transition-all duration-300",
           sidebarCollapsed ? "justify-center px-0" : "px-6"
         )}
       >

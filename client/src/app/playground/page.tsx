@@ -43,6 +43,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/Sheet";
+import { Header } from "@/components/layout/Header";
 import HeaderBox from "@/components/shared/HeaderBox";
 import BankCard from "@/components/features/bank/BankCard";
 import TotalBalanceBox from "@/components/features/bank/TotalBalanceBox";
@@ -60,10 +61,11 @@ export default function PlaygroundPage() {
         {/* Header */}
         <div className="space-y-4">
           <h1 className="text-4xl font-bold tracking-tight text-foreground font-google-sans">
-            Design System
+            Design System & Playground
           </h1>
           <p className="text-xl text-muted-foreground">
-            Core styles and components for the Interlock application.
+            Core styles, components, and layout blocks for the Interlock
+            application.
           </p>
         </div>
 
