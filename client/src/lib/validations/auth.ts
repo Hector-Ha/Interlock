@@ -11,7 +11,7 @@ export const signUpSchema = z.object({
     .trim()
     .min(2, "First name must be at least 2 characters"),
   lastName: z.string().trim().min(2, "Last name must be at least 2 characters"),
-  address1: z.string().trim().min(5, "Address must be at least 5 characters"),
+  address: z.string().trim().min(5, "Address must be at least 5 characters"),
   city: z.string().trim().min(2, "City must be at least 2 characters"),
   state: z.string().trim().length(2, "State must be 2 characters (e.g., NY)"),
   postalCode: z
