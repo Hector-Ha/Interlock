@@ -1,49 +1,45 @@
-interface HeaderBoxProps {
+export * from "./auth";
+export * from "./bank";
+export * from "./transfer";
+
+export interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  dwollaCustomerId?: string;
+  dwollaCustomerUrl?: string;
+}
+
+export interface HeaderBoxProps {
   type: "greeting" | "title";
   title: string;
   subtext?: string;
   user?: string;
 }
 
-interface TotalBalanceBoxProps {
-  account: [];
+export interface TotalBalanceBoxProps {
+  accounts: Account[];
   totalBanks: number;
   totalCurrentBalance: number;
 }
 
-interface DoughnutChartProps {
-  account: [];
+export interface DoughnutChartProps {
+  accounts: Account[];
 }
 
-interface SidebarProps {
+export interface SidebarProps {
+  user?: User;
+}
+
+export interface MobileNavProps {
   user: User;
 }
 
-interface User {
-  id: string;
-  email: string;
-  userID: string;
-  dwollaCustomerID: string;
-  dwollaCustomerURL: string;
-
-  phoneNumber: string;
-
-  firstName: string;
-  lastName: string;
-  address: string;
-  city: string;
-  country: string;
-  postalCode: string;
-  dateOfBirth: string;
-  ssn: string;
-}
-
-interface MobileNavProps {
+export interface RightSideBarProps {
   user: User;
+  transactions: Transaction[];
+  banks: Bank[];
 }
 
-interface RightSideBarProps {
-  user: User;
-  transactions: [];
-  banks: [];
-}
+import type { Account, Bank, Transaction } from "./bank";

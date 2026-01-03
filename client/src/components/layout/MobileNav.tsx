@@ -7,7 +7,7 @@ import {
   SheetTitle,
   SheetTrigger,
   SheetClose,
-} from "@/components/ui/sheet";
+} from "@/components/ui/Sheet";
 import Image from "next/image";
 import { Menu } from "lucide-react";
 import Link from "next/link";
@@ -15,6 +15,7 @@ import InterlockLogo from "../../assets/logos/Interlock.svg";
 import { sidebarLinks } from "../../constants/sidebarLinks";
 import { usePathname } from "next/navigation";
 import { cn } from "../../lib/utils";
+import { MobileNavProps } from "@/types";
 
 const MobileNav = ({ user }: MobileNavProps) => {
   const pathname = usePathname();
@@ -36,9 +37,7 @@ const MobileNav = ({ user }: MobileNavProps) => {
               width={34}
               height={34}
             />
-            <h1 className="text-26 font-bold font-google-sans text-[#7839EE]">
-              Interlock
-            </h1>
+            <h1 className="sidebar-logo">Interlock</h1>
           </Link>
           <div className="mobile-nav-sheet">
             <SheetClose asChild>
@@ -66,8 +65,8 @@ const MobileNav = ({ user }: MobileNavProps) => {
                         />
 
                         <p
-                          className={cn("text-16 font-semibold text-black-2", {
-                            "text-white": isActive,
+                          className={cn("sidebar-label", {
+                            "!text-white": isActive,
                           })}
                         >
                           {link.name}

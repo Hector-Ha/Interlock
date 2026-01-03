@@ -1,11 +1,16 @@
 import React from "react";
-import HeaderBox from "@/src/components/shared/HeaderBox";
+import HeaderBox from "@/components/shared/HeaderBox";
 import { first } from "slate";
-import TotalBalanceBox from "@/src/components/features/bank/TotalBalanceBox";
-import RightSideBar from "@/src/components/layout/RightSideBar";
+import TotalBalanceBox from "@/components/features/bank/TotalBalanceBox";
+import RightSideBar from "@/components/layout/RightSideBar";
 
 const Dashboard = () => {
-  const loggedInUser = { firstName: "Hector", lastName: "Ha" };
+  const loggedInUser = {
+    id: "1",
+    email: "hector@example.com",
+    firstName: "Hector",
+    lastName: "Ha",
+  };
 
   return (
     <div>
@@ -21,7 +26,7 @@ const Dashboard = () => {
             />
 
             <TotalBalanceBox
-              account={[]}
+              accounts={[]}
               totalBanks={0}
               totalCurrentBalance={100000}
             />
