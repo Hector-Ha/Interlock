@@ -67,7 +67,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             error && "border-destructive focus-visible:ring-destructive",
             success &&
               !error &&
-              "border-green-500 focus-visible:ring-green-500",
+              "border-success-main focus-visible:ring-success-main",
             readOnly && "bg-muted cursor-default focus-visible:ring-0",
             className
           )}

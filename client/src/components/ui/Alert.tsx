@@ -6,19 +6,16 @@ import { AlertCircle, CheckCircle, Info, XCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const alertVariants = cva(
-  "relative w-full rounded-xl border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4",
+  "relative w-full overflow-hidden rounded-xl shadow-sm flex items-stretch ring-1 ring-border/50",
   {
     variants: {
       variant: {
-        default: "bg-background text-foreground [&>svg]:text-foreground",
-        destructive:
-          "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
-        info: "bg-blue-50 text-blue-800 border-blue-200 [&>svg]:text-blue-500",
-        success:
-          "bg-emerald-50 text-emerald-800 border-emerald-200 [&>svg]:text-emerald-500",
-        warning:
-          "bg-amber-50 text-amber-800 border-amber-200 [&>svg]:text-amber-500",
-        error: "bg-red-50 text-red-800 border-red-200 [&>svg]:text-red-500",
+        default: "bg-card text-foreground",
+        destructive: "bg-error-surface text-destructive",
+        info: "bg-brand-surface text-brand-text",
+        success: "bg-success-surface text-success-text",
+        warning: "bg-warning-surface text-warning-text",
+        error: "bg-error-surface text-error-text",
       },
     },
     defaultVariants: {
@@ -26,6 +23,15 @@ const alertVariants = cva(
     },
   }
 );
+
+const alertIconStyles = {
+  default: "bg-muted text-muted-foreground",
+  destructive: "bg-destructive text-destructive-foreground",
+  info: "bg-brand-main text-brand-surface",
+  success: "bg-success-main text-success-surface",
+  warning: "bg-warning-main text-warning-surface",
+  error: "bg-error-main text-error-surface",
+};
 
 const alertIcons = {
   default: Info,
@@ -39,9 +45,7 @@ const alertIcons = {
 export interface AlertProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof alertVariants> {
-  /** Optional callback when dismiss button is clicked */
   onDismiss?: () => void;
-  /** Whether to show the variant-specific icon */
   showIcon?: boolean;
 }
 
@@ -51,6 +55,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
     ref
   ) => {
     const Icon = alertIcons[variant || "default"];
+    const iconClass = alertIconStyles[variant || "default"];
 
     return (
       <div
@@ -59,12 +64,23 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         className={cn(alertVariants({ variant }), className)}
         {...props}
       >
-        {showIcon && <Icon className="h-4 w-4" />}
-        <div className="flex-1">{children}</div>
+        {/* Left colored strip with Icon */}
+        <div
+          className={cn(
+            "flex w-12 items-center justify-center shrink-0",
+            iconClass
+          )}
+        >
+          <Icon className="h-5 w-5" />
+        </div>
+
+        {/* Content Area */}
+        <div className="flex-1 p-3 pl-4">{children}</div>
+
         {onDismiss && (
           <button
             onClick={onDismiss}
-            className="absolute right-4 top-4 rounded-lg p-1 opacity-70 hover:opacity-100 transition-opacity"
+            className="absolute right-3 top-3 rounded-lg p-1 opacity-70 hover:opacity-100 transition-opacity hover:bg-muted"
             aria-label="Dismiss"
           >
             <X className="h-4 w-4" />
@@ -82,7 +98,7 @@ const AlertTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h5
     ref={ref}
-    className={cn("mb-1 font-medium leading-none tracking-tight", className)}
+    className={cn("mb-1 font-semibold leading-none tracking-tight", className)}
     {...props}
   />
 ));
@@ -94,7 +110,7 @@ const AlertDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("text-sm [&_p]:leading-relaxed", className)}
+    className={cn("text-xs leading-relaxed opacity-90", className)}
     {...props}
   />
 ));

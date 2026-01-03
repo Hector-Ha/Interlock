@@ -8,21 +8,31 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+          "border-transparent bg-brand-main text-white hover:bg-brand-hover",
         secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "border-transparent bg-gray-main text-white hover:bg-gray-hover",
         destructive:
-          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+          "border-transparent bg-error-main text-white hover:bg-error-hover",
         outline: "text-foreground",
+        // Solid Statuses
         success:
-          "border-transparent bg-green-100 text-green-800 hover:bg-green-100/80",
+          "border-transparent bg-success-main text-white hover:bg-success-hover",
         warning:
-          "border-transparent bg-yellow-100 text-yellow-800 hover:bg-yellow-100/80",
-        danger:
-          "border-transparent bg-red-100 text-red-800 hover:bg-red-100/80",
-        info: "border-transparent bg-blue-100 text-blue-800 hover:bg-blue-100/80",
-        primary:
-          "border-transparent bg-primary/10 text-primary hover:bg-primary/20",
+          "border-transparent bg-warning-main text-white hover:bg-warning-hover",
+        error:
+          "border-transparent bg-error-main text-white hover:bg-error-hover",
+        info: "border-transparent bg-brand-main text-white hover:bg-brand-hover",
+        // Soft Statuses (Tinted)
+        "success-soft":
+          "border-transparent bg-success-soft text-success-text hover:bg-success-soft/80",
+        "warning-soft":
+          "border-transparent bg-warning-soft text-warning-text hover:bg-warning-soft/80",
+        "error-soft":
+          "border-transparent bg-error-soft text-error-text hover:bg-error-soft/80",
+        "info-soft":
+          "border-transparent bg-brand-soft text-brand-text hover:bg-brand-soft/80",
+        "gray-soft":
+          "border-transparent bg-gray-soft text-gray-text hover:bg-gray-soft/80",
       },
     },
     defaultVariants: {

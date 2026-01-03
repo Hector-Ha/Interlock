@@ -19,12 +19,37 @@ import {
   Mail,
   ArrowRight,
   Loader2,
-  CheckCircle,
-  AlertCircle,
   Phone,
   CreditCard,
+  Plus,
+  AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+// New Component Imports
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/Dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/Sheet";
+import HeaderBox from "@/components/shared/HeaderBox";
+import BankCard from "@/components/features/bank/BankCard";
+import TotalBalanceBox from "@/components/features/bank/TotalBalanceBox";
+import DoughnutChart from "@/components/shared/DoughnutChart";
+import AnimatedBalanceCounter from "@/components/shared/AnimatedBalanceCounter";
+import { SettingsMenu } from "@/components/layout/SettingsMenu";
+import { Modal, ModalContent, ModalTrigger } from "@/components/ui/Modal";
 
 export default function PlaygroundPage() {
   const [inputValue, setInputValue] = useState("");
@@ -527,20 +552,249 @@ export default function PlaygroundPage() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Alerts</h3>
               <div className="grid gap-4 max-w-2xl">
-                <Alert>
-                  <CheckCircle className="h-4 w-4" />
-                  <AlertTitle>Success</AlertTitle>
+                <Alert variant="default">
+                  <span className="text-2xl mr-3">ℹ️</span>
+                  <AlertTitle>Default Alert</AlertTitle>
                   <AlertDescription>
-                    Your changes have been saved successfully.
+                    Standard alert with default styling.
                   </AlertDescription>
                 </Alert>
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Critical Error</AlertTitle>
+                <Alert variant="info" showIcon>
+                  <AlertTitle>Info Alert</AlertTitle>
                   <AlertDescription>
-                    Something went wrong. Please try again later.
+                    This is an informational message using the new brand colors.
                   </AlertDescription>
                 </Alert>
+                <Alert variant="success" showIcon>
+                  <AlertTitle>Success Alert</AlertTitle>
+                  <AlertDescription>
+                    Operation completed successfully!
+                  </AlertDescription>
+                </Alert>
+                <Alert variant="warning" showIcon>
+                  <AlertTitle>Warning Alert</AlertTitle>
+                  <AlertDescription>
+                    Please be careful with this action.
+                  </AlertDescription>
+                </Alert>
+                <Alert variant="error" showIcon>
+                  <AlertTitle>Error Alert</AlertTitle>
+                  <AlertDescription>
+                    Something went wrong. Please try again.
+                  </AlertDescription>
+                </Alert>
+                <Alert variant="destructive" showIcon>
+                  <AlertTitle>Destructive Alert</AlertTitle>
+                  <AlertDescription>
+                    Critical system error occurred.
+                  </AlertDescription>
+                </Alert>
+              </div>
+            </div>
+
+            {/* Icon Buttons */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Icon Buttons</h3>
+              <div className="flex flex-wrap gap-4 items-center">
+                <Button>
+                  <Mail className="mr-2 h-4 w-4" /> Login with Email
+                </Button>
+                <Button variant="secondary">
+                  Next Step <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="icon">
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </Button>
+                <Button variant="destructive">
+                  <AlertCircle className="mr-2 h-4 w-4" /> Delete Account
+                </Button>
+              </div>
+            </div>
+            {/* Alerts - Updated Design */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">
+                Alerts (New Split Design)
+              </h3>
+              <div className="grid gap-4 max-w-2xl">
+                <Alert variant="default" showIcon>
+                  <AlertTitle>Default Alert</AlertTitle>
+                  <AlertDescription>
+                    Standard alert with split layout.
+                  </AlertDescription>
+                </Alert>
+                <Alert variant="info" showIcon>
+                  <AlertTitle>Info Alert</AlertTitle>
+                  <AlertDescription>
+                    This is an informational message using the new brand colors.
+                  </AlertDescription>
+                </Alert>
+                <Alert variant="success" showIcon>
+                  <AlertTitle>Success Alert</AlertTitle>
+                  <AlertDescription>
+                    Operation completed successfully!
+                  </AlertDescription>
+                </Alert>
+                <Alert variant="warning" showIcon>
+                  <AlertTitle>Warning Alert</AlertTitle>
+                  <AlertDescription>
+                    Please be careful with this action.
+                  </AlertDescription>
+                </Alert>
+                <Alert variant="error" showIcon>
+                  <AlertTitle>Error Alert</AlertTitle>
+                  <AlertDescription>
+                    Something went wrong. Please try again.
+                  </AlertDescription>
+                </Alert>
+                <Alert variant="destructive" showIcon>
+                  <AlertTitle>Destructive Alert</AlertTitle>
+                  <AlertDescription>
+                    Critical failure. System halted.
+                  </AlertDescription>
+                </Alert>
+              </div>
+            </div>
+
+            {/* Overlays (Dialog, Sheet, Modal) */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Overlays</h3>
+              <div className="flex flex-wrap gap-4">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">Open Dialog</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Edit profile</DialogTitle>
+                      <DialogDescription>
+                        Make changes to your profile here. Click save when
+                        you're done.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <label htmlFor="name" className="text-right text-sm">
+                          Name
+                        </label>
+                        <Input
+                          id="name"
+                          defaultValue="Pedro Duarte"
+                          className="col-span-3"
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button type="submit">Save changes</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="outline">Open Sheet</Button>
+                  </SheetTrigger>
+                  <SheetContent>
+                    <SheetHeader>
+                      <SheetTitle>Sheet Title</SheetTitle>
+                      <SheetDescription>
+                        This is a side sheet description.
+                      </SheetDescription>
+                    </SheetHeader>
+                    <div className="py-4">Sheet content goes here.</div>
+                  </SheetContent>
+                </Sheet>
+
+                <Modal open={false} onOpenChange={() => {}}>
+                  <ModalTrigger>
+                    <Button variant="secondary">Open Modal (Wrapper)</Button>
+                  </ModalTrigger>
+                  {/* Modal content needs state control, just showing trigger for now */}
+                  <ModalContent>
+                    <h2 className="text-lg font-bold">Modal Wrapper</h2>
+                    <p>This wraps the primitive dialog.</p>
+                  </ModalContent>
+                </Modal>
+              </div>
+            </div>
+
+            {/* Feature Components */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Feature Components</h3>
+              <div className="space-y-8 p-6 border rounded-xl bg-gray-surface">
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">Header Box</h4>
+                  <HeaderBox
+                    type="greeting"
+                    title="Welcome"
+                    user="Guest"
+                    subtext="Access and manage your account and transactions efficiently."
+                  />
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">
+                    Total Balance Box
+                  </h4>
+                  {/* Mocking data props */}
+                  <TotalBalanceBox
+                    accounts={[]}
+                    totalBanks={3}
+                    totalCurrentBalance={12500.5}
+                  />
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">Bank Cards</h4>
+                  <div className="flex gap-4 overflow-x-auto p-4">
+                    {/* BankCard expects props usually, passing mockup */}
+                    <BankCard />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Other Components */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Other Shared Components</h3>
+              <div className="grid md:grid-cols-2 gap-8 items-start">
+                {/* Charts */}
+                <div className="p-4 border rounded-lg space-y-4">
+                  <h4 className="text-sm font-medium">Doughnut Chart</h4>
+                  <div className="w-full max-w-[200px] mx-auto">
+                    <DoughnutChart accounts={[]} />
+                  </div>
+                </div>
+
+                {/* Loaders & Counters */}
+                <div className="space-y-8">
+                  <div className="p-4 border rounded-lg space-y-4">
+                    <h4 className="text-sm font-medium">Spinner</h4>
+                    <div className="flex gap-4 items-center">
+                      <Spinner size="sm" />
+                      <Spinner size="md" />
+                      <Spinner size="lg" />
+                    </div>
+                  </div>
+
+                  <div className="p-4 border rounded-lg space-y-4">
+                    <h4 className="text-sm font-medium">Animated Counter</h4>
+                    <div className="text-2xl font-bold font-google-sans">
+                      <AnimatedBalanceCounter amount={5432.1} />
+                    </div>
+                  </div>
+
+                  <div className="p-4 border rounded-lg space-y-4">
+                    <h4 className="text-sm font-medium">Settings Menu</h4>
+                    <div className="flex justify-start">
+                      <SettingsMenu
+                        onSignOut={() => alert("Sign out clicked")}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
