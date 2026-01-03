@@ -1,31 +1,36 @@
 import {
-  LucideArrowRightLeft,
-  LucideCardSim,
-  LucideHistory,
-  LucideHome,
+  Home,
+  Landmark,
+  History,
+  ArrowRightLeft,
   LucideIcon,
-  LucideLandmark,
 } from "lucide-react";
 
-export const sidebarLinks = [
+export interface SidebarLink {
+  imgURL: LucideIcon;
+  route: string;
+  name: string;
+}
+
+export const sidebarLinks: SidebarLink[] = [
   {
-    imgURL: LucideHome,
+    imgURL: Home,
     route: "/",
     name: "Dashboard",
   },
   {
-    imgURL: LucideLandmark,
+    imgURL: Landmark,
     route: "/my-banks",
     name: "My Banks",
   },
   {
-    imgURL: LucideHistory,
+    imgURL: History,
     route: "/transactions-history",
     name: "Transactions History",
   },
   {
-    imgURL: LucideArrowRightLeft,
+    imgURL: ArrowRightLeft,
     route: "/payment-transfer",
-    name: "Payment & Transfer",
+    name: "Transfer Funds",
   },
 ];

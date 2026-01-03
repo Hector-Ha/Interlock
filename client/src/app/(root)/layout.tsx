@@ -1,4 +1,4 @@
-import Sidebar from "@/components/layout/Sidebar";
+import { Sidebar } from "@/components/layout/Sidebar";
 import Image from "next/image";
 import InterlockLogo from "@/assets/logos/Interlock.svg";
 import MobileNav from "@/components/layout/MobileNav";
@@ -9,6 +9,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const loggedInUser = {
+    id: "1",
     firstName: "Hector",
     lastName: "Ha",
     email: "hector@interlock.com",

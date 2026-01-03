@@ -15,11 +15,11 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cn(
-          "rounded-2xl bg-white",
+          "rounded-2xl bg-card text-card-foreground",
           {
-            "border border-slate-200":
+            "border border-border":
               variant === "default" || variant === "bordered",
-            "shadow-lg shadow-slate-200/50": variant === "elevated",
+            "shadow-lg shadow-muted/50": variant === "elevated",
           },
           {
             "p-0": padding === "none",
