@@ -21,6 +21,8 @@ import {
   Loader2,
   CheckCircle,
   AlertCircle,
+  Phone,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -140,68 +142,188 @@ export default function PlaygroundPage() {
           <div className="border-b pb-4">
             <h2 className="text-2xl font-bold text-foreground">Colors</h2>
             <p className="text-muted-foreground">
-              Core brand and functional color palette.
+              New Reduced Palette: Surface, Soft (Selected), Disabled
+              (Unselectable), Main, Hover, Text.
             </p>
           </div>
 
           <div className="space-y-8">
-            {/* Brand Colors */}
+            {/* Base Colors */}
             <div>
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-                Brand
+                Base
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
                 <ColorSwatch
-                  name="Primary"
-                  variable="var(--primary)"
-                  hex="#7839EE"
+                  name="White"
+                  variable="var(--color-white)"
+                  hex="#FFFFFF"
+                  className="border"
                 />
                 <ColorSwatch
-                  name="Secondary"
-                  variable="var(--secondary)"
-                  hex="#FF6384"
+                  name="Black"
+                  variable="var(--color-black)"
+                  hex="#000000"
                 />
-                <ColorSwatch name="Accent" variable="var(--accent)" />
               </div>
             </div>
 
-            {/* UI Colors */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-                UI Elements
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                <ColorSwatch
-                  name="Background"
-                  variable="var(--background)"
-                  className="border"
-                />
-                <ColorSwatch name="Foreground" variable="var(--foreground)" />
-                <ColorSwatch
-                  name="Card"
-                  variable="var(--card)"
-                  className="border"
-                />
-                <ColorSwatch name="Border" variable="var(--border)" />
-                <ColorSwatch name="Input" variable="var(--input)" />
-                <ColorSwatch name="Muted" variable="var(--muted)" />
+            {/* Palette Groups */}
+            {[
+              {
+                label: "Grayscale (Slate)",
+                prefix: "gray",
+                colors: [
+                  {
+                    name: "Surface",
+                    var: "--color-gray-surface",
+                    hex: "#F8F9FA",
+                  },
+                  {
+                    name: "Soft (Selected)",
+                    var: "--color-gray-soft",
+                    hex: "#E9ECEF",
+                  },
+                  {
+                    name: "Disabled",
+                    var: "--color-gray-disabled",
+                    hex: "#DEE2E6",
+                  },
+                  { name: "Main", var: "--color-gray-main", hex: "#70707B" },
+                  { name: "Hover", var: "--color-gray-hover", hex: "#495057" },
+                  { name: "Text", var: "--color-gray-text", hex: "#212529" },
+                ],
+              },
+              {
+                label: "Brand (Violet)",
+                prefix: "brand",
+                colors: [
+                  {
+                    name: "Surface",
+                    var: "--color-brand-surface",
+                    hex: "#F5F3FF",
+                  },
+                  {
+                    name: "Soft (Selected)",
+                    var: "--color-brand-soft",
+                    hex: "#EDE9FE",
+                  },
+                  {
+                    name: "Disabled",
+                    var: "--color-brand-disabled",
+                    hex: "#C4B5FD",
+                  },
+                  {
+                    name: "Brand Main",
+                    var: "--color-brand-main",
+                    hex: "#7839EE",
+                  },
+                  { name: "Hover", var: "--color-brand-hover", hex: "#6D28D9" },
+                  { name: "Text", var: "--color-brand-text", hex: "#4C1D95" },
+                ],
+              },
+              {
+                label: "Error (Red)",
+                prefix: "error",
+                colors: [
+                  {
+                    name: "Surface",
+                    var: "--color-error-surface",
+                    hex: "#FEF2F2",
+                  },
+                  {
+                    name: "Soft (Selected)",
+                    var: "--color-error-soft",
+                    hex: "#FEE2E2",
+                  },
+                  {
+                    name: "Disabled",
+                    var: "--color-error-disabled",
+                    hex: "#FECACA",
+                  },
+                  { name: "Main", var: "--color-error-main", hex: "#EF4444" },
+                  { name: "Hover", var: "--color-error-hover", hex: "#DC2626" },
+                  { name: "Text", var: "--color-error-text", hex: "#7F1D1D" },
+                ],
+              },
+              {
+                label: "Warning (Amber)",
+                prefix: "warning",
+                colors: [
+                  {
+                    name: "Surface",
+                    var: "--color-warning-surface",
+                    hex: "#FFFBEB",
+                  },
+                  {
+                    name: "Soft (Selected)",
+                    var: "--color-warning-soft",
+                    hex: "#FEF3C7",
+                  },
+                  {
+                    name: "Disabled",
+                    var: "--color-warning-disabled",
+                    hex: "#FDE68A",
+                  },
+                  { name: "Main", var: "--color-warning-main", hex: "#F59E0B" },
+                  {
+                    name: "Hover",
+                    var: "--color-warning-hover",
+                    hex: "#D97706",
+                  },
+                  { name: "Text", var: "--color-warning-text", hex: "#78350F" },
+                ],
+              },
+              {
+                label: "Success (Emerald)",
+                prefix: "success",
+                colors: [
+                  {
+                    name: "Surface",
+                    var: "--color-success-surface",
+                    hex: "#ECFDF5",
+                  },
+                  {
+                    name: "Soft (Selected)",
+                    var: "--color-success-soft",
+                    hex: "#D1FAE5",
+                  },
+                  {
+                    name: "Disabled",
+                    var: "--color-success-disabled",
+                    hex: "#A7F3D0",
+                  },
+                  { name: "Main", var: "--color-success-main", hex: "#10B981" },
+                  {
+                    name: "Hover",
+                    var: "--color-success-hover",
+                    hex: "#059669",
+                  },
+                  { name: "Text", var: "--color-success-text", hex: "#064E3B" },
+                ],
+              },
+            ].map((group) => (
+              <div key={group.label}>
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+                  {group.label}
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+                  {group.colors.map((color) => (
+                    <ColorSwatch
+                      key={color.name}
+                      name={color.name}
+                      variable={`var(${color.var})`}
+                      hex={color.hex}
+                      className={
+                        color.name === "Surface" || color.name === "Soft"
+                          ? "border"
+                          : ""
+                      }
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-
-            {/* Status Colors */}
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-                Functional & Status
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                <ColorSwatch name="Destructive" variable="var(--destructive)" />
-                <ColorSwatch name="Chart 1" variable="var(--chart-1)" />
-                <ColorSwatch name="Chart 2" variable="var(--chart-2)" />
-                <ColorSwatch name="Chart 3" variable="var(--chart-3)" />
-                <ColorSwatch name="Chart 4" variable="var(--chart-4)" />
-                <ColorSwatch name="Chart 5" variable="var(--chart-5)" />
-              </div>
-            </div>
+            ))}
           </div>
         </section>
 
@@ -302,15 +424,62 @@ export default function PlaygroundPage() {
                   </label>
                   <Input type="email" placeholder="Email address" />
                 </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">
+                    Password (with Toggle)
+                  </label>
+                  <Input
+                    type="password"
+                    placeholder="Enter password"
+                    showPasswordToggle
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">
+                    Phone Number (Start Icon)
+                  </label>
+                  <Input
+                    type="tel"
+                    placeholder="555-0123"
+                    startIcon={<Phone className="h-4 w-4" />}
+                    numericOnly
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">
+                    CVV (End Icon)
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="123"
+                    maxLength={3}
+                    endIcon={<CreditCard className="h-4 w-4" />}
+                    numericOnly
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">
+                    Success State
+                  </label>
+                  <Input type="text" defaultValue="Valid Input" success />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none">
+                    Read Only
+                  </label>
+                  <Input type="text" defaultValue="Read Only Value" readOnly />
+                </div>
+
                 <div className="space-y-2">
                   <label className="text-sm font-medium leading-none text-red-500">
                     Error State
                   </label>
-                  <Input
-                    type="text"
-                    placeholder="Error input"
-                    className="border-red-500 focus-visible:ring-red-500"
-                  />
+                  <Input type="text" placeholder="Error input" error />
                   <p className="text-[0.8rem] text-red-500">
                     Invalid email address
                   </p>
@@ -396,7 +565,7 @@ function ColorSwatch({
     <div className="space-y-2">
       <div
         className={cn(
-          "h-20 w-full rounded-lg shadow-sm border border-slate-100",
+          "h-20 w-full rounded-lg shadow-sm border border-border",
           className
         )}
         style={{ backgroundColor: variable }}

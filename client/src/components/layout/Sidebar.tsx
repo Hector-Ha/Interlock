@@ -10,7 +10,9 @@ import { useUIStore } from "../../stores/ui.store";
 import { ChevronLeft, LogOut, Loader2 } from "lucide-react";
 
 import InterlockLogo from "../../assets/logos/Interlock.svg";
+import { SettingsMenu } from "./SettingsMenu";
 import { SidebarProps } from "../../types";
+import { Button } from "../ui/Button";
 
 const Sidebar = ({
   user: propUser,
@@ -29,20 +31,40 @@ const Sidebar = ({
   return (
     <section
       className={cn(
-        "sidebar sticky left-0 top-0 flex h-screen flex-col justify-between border-r border-gray-200 bg-white pt-8 max-md:hidden transition-all duration-300",
+        "sidebar sticky left-0 top-0 flex h-screen flex-col justify-between border-r border-gray-200 bg-white pt-8 max-md:hidden transition-all duration-300 relative",
         sidebarCollapsed ? "w-[90px]" : "w-[264px]",
         className
       )}
     >
-      <div className="flex w-full flex-col">
-        <div className="flex h-16 items-center justify-between px-6">
+      <Button
+        onPress={() => setSidebarCollapsed(!sidebarCollapsed)}
+        variant="secondary"
+        size="icon"
+        className="absolute left-full top-9 z-50 h-8 w-8 rounded-full border border-gray-200 bg-white shadow-md transition-all hover:bg-gray-100 p-0"
+        aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+      >
+        <ChevronLeft
+          className={cn(
+            "h-4 w-4 text-slate-600 transition-transform",
+            sidebarCollapsed && "rotate-180"
+          )}
+        />
+      </Button>
+
+      <div className="flex w-full flex-col flex-1 overflow-y-auto custom-scrollbar">
+        <div
+          className={cn(
+            "flex h-14 items-center px-6",
+            sidebarCollapsed ? "justify-center" : "justify-between"
+          )}
+        >
           <Link href="/" className="flex items-center gap-2">
             <Image
               src={InterlockLogo}
               alt="Interlock Logo"
               width={34}
               height={34}
-              className="size-[24px] max-xl:size-14"
+              className="size-[24px]"
             />
             {!sidebarCollapsed && (
               <h1 className="sidebar-logo text-2xl font-bold text-[#7839EE] ml-2 font-sans">
@@ -50,23 +72,6 @@ const Sidebar = ({
               </h1>
             )}
           </Link>
-        </div>
-
-        <div className="flex justify-end pr-4 mt-2">
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
-            aria-label={
-              sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"
-            }
-          >
-            <ChevronLeft
-              className={cn(
-                "h-5 w-5 transition-transform",
-                sidebarCollapsed && "rotate-180"
-              )}
-            />
-          </button>
         </div>
 
         <nav className="flex flex-col gap-4 px-4 mt-6">
@@ -113,44 +118,45 @@ const Sidebar = ({
         </nav>
       </div>
 
-      <div className="border-t border-slate-200 p-4">
+      <div className="border-t border-slate-200 p-4 mt-auto">
         {user ? (
           <div
             className={cn(
-              "flex items-center gap-3 rounded-xl p-2",
-              !sidebarCollapsed && "mb-2"
+              "flex items-center gap-3 rounded-xl p-2 w-full",
+              !sidebarCollapsed ? "justify-between" : "justify-center"
             )}
           >
-            <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-700 font-bold">
-              {user.firstName[0]}
-            </div>
-            {!sidebarCollapsed && (
+            <div
+              className={cn(
+                "flex items-center gap-3 min-w-0",
+                sidebarCollapsed && "hidden"
+              )}
+            >
+              <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-700 font-bold">
+                {user.firstName[0]}
+              </div>
               <div className="flex-1 overflow-hidden">
                 <p className="truncate text-sm font-bold text-slate-900">
-                  {user.firstName} {user.lastName}
+                  {user.firstName}
                 </p>
                 <p className="truncate text-xs text-slate-500">{user.email}</p>
               </div>
+            </div>
+
+            {sidebarCollapsed && (
+              <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-700 font-bold">
+                {user.firstName[0]}
+              </div>
             )}
+
+            <SettingsMenu onSignOut={handleSignOut} />
           </div>
         ) : isLoading ? (
           <div className="flex justify-center p-2">
             <Loader2 className="animate-spin text-slate-400" />
           </div>
         ) : null}
-
-        <button
-          onClick={handleSignOut}
-          className={cn(
-            "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium",
-            "text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors",
-            sidebarCollapsed && "justify-center"
-          )}
-          title={sidebarCollapsed ? "Sign Out" : undefined}
-        >
-          <LogOut className="size-5" />
-          {!sidebarCollapsed && <span>Sign Out</span>}
-        </button>
+        {/* Sign Out logic handled by SettingsMenu */}
       </div>
     </section>
   );
