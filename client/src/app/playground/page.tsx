@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useUIStore } from "@/stores/ui.store";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/Button";
 import {
@@ -795,6 +796,79 @@ export default function PlaygroundPage() {
                         onSignOut={() => alert("Sign out clicked")}
                       />
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Layout & Global */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Layout & Global</h3>
+              <div className="p-6 border rounded-xl bg-gray-surface space-y-8">
+                <div>
+                  <h4 className="text-sm font-semibold mb-4">Mobile Sidebar</h4>
+                  <Button
+                    onClick={() => useUIStore.getState().setSidebarOpen(true)}
+                  >
+                    Open Mobile Sidebar
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    (Wraps content in a Sheet overlay. Visible on mobile
+                    breakpoints usually, forcing open here via global store.)
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-semibold mb-4">Toasts</h4>
+                  <div className="flex flex-wrap gap-4">
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        useUIStore.getState().addToast({
+                          type: "success",
+                          title: "Success",
+                          message: "Operation completed successfully.",
+                        })
+                      }
+                    >
+                      Success Toast
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        useUIStore.getState().addToast({
+                          type: "error",
+                          title: "Error",
+                          message: "Something went wrong.",
+                        })
+                      }
+                    >
+                      Error Toast
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        useUIStore.getState().addToast({
+                          type: "warning",
+                          title: "Warning",
+                          message: "Check your input.",
+                        })
+                      }
+                    >
+                      Warning Toast
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        useUIStore.getState().addToast({
+                          type: "info",
+                          title: "Info",
+                          message: "Here is some information.",
+                        })
+                      }
+                    >
+                      Info Toast
+                    </Button>
                   </div>
                 </div>
               </div>

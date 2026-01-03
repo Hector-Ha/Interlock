@@ -34,4 +34,13 @@ export {
   DialogTitle,
   DialogDescription,
 } from "./Dialog";
-export { Sheet, SheetContent, SheetTrigger } from "./Sheet";
+export {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetClose,
+  SheetHeader,
+  SheetFooter,
+  SheetTitle,
+  SheetDescription,
+} from "./Sheet";
