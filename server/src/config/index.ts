@@ -28,6 +28,10 @@ const envSchema = z.object({
   DWOLLA_BASE_URL: z.string().default("https://api-sandbox.dwolla.com"),
   DWOLLA_ENV: z.string().default("sandbox"),
   DWOLLA_WEBHOOK_SECRET: z.string().optional(),
+
+  // SendGrid
+  SENDGRID_API_KEY: z.string().optional(),
+  SENDGRID_SENDER_EMAIL: z.string().optional(),
 });
 
 // Validate environment variables
@@ -53,6 +57,10 @@ export const config = {
     baseUrl: env.DWOLLA_BASE_URL,
     env: env.DWOLLA_ENV,
     webhookSecret: env.DWOLLA_WEBHOOK_SECRET,
+  },
+  email: {
+    sendgridApiKey: env.SENDGRID_API_KEY,
+    senderEmail: env.SENDGRID_SENDER_EMAIL,
   },
 };
 

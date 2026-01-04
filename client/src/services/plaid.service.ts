@@ -22,10 +22,12 @@ export interface ExchangeTokenData {
 }
 
 export interface ExchangeTokenResponse {
-  id: string;
-  institutionId: string;
-  institutionName: string;
-  status: string;
+  bank: {
+    id: string;
+    institutionId: string;
+    institutionName: string;
+    status: string;
+  };
 }
 
 export const plaidService = {
@@ -35,8 +37,8 @@ export const plaidService = {
 
   createUpdateLinkToken: async (
     bankId: string
-  ): Promise<{ linkToken: string }> => {
-    return api.post<{ linkToken: string }>("/plaid/update-link-token", {
+  ): Promise<{ link_token: string }> => {
+    return api.post<{ link_token: string }>("/plaid/update-link-token", {
       bankId,
     });
   },

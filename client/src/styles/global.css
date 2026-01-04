@@ -101,11 +101,6 @@
   }
 }
 
-/* 
-  Mapping abstract UI variables to our specific palette.
-  This ensures compatibility with shadcn-like components if they use these vars,
-  while enforcing our new palette.
-*/
 @layer base {
   :root {
     --background: var(--color-white);
@@ -145,11 +140,6 @@
   }
 
   .dark {
-    /* Ideally we would have dark mode mappings here, but for now we map to the same or inverted if simple. 
-       Since user didn't explicitly ask for dark mode palette logic, we'll keep it simple or use the text colors as backgrounds?
-       Let's try to map sensibly for a basic dark mode if valid, but the prompt focused on the palette generation.
-       I will use dark grays for background.
-    */
     --background: var(--color-gray-text); /* #212529 */
     --foreground: var(--color-white);
 

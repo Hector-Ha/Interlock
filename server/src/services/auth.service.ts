@@ -6,6 +6,7 @@ import { prisma } from "@/db";
 import { config } from "@/config";
 import { encrypt } from "@/utils/encryption";
 import { authSchema } from "@/validators/auth.schema";
+import { emailService } from "./email.service";
 
 type SignUpInput = z.infer<typeof authSchema>;
 
@@ -279,6 +280,67 @@ export const updateProfile = async (
   return user;
 };
 
+export const forgotPassword = async (email: string): Promise<void> => {
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user) {
+    // Fail silently to prevent enumeration
+    return;
+  }
+
+  const token = jwt.sign(
+    { userId: user.id, purpose: "password_reset" },
+    config.jwtSecret,
+    { expiresIn: "1h" }
+  );
+
+  await emailService.sendPasswordResetEmail(user.email, token);
+};
+
+export const resetPasswordWithToken = async (
+  token: string,
+  newPassword: string
+): Promise<void> => {
+  try {
+    const decoded = jwt.verify(token, config.jwtSecret) as {
+      userId: string;
+      purpose: string;
+    };
+
+    if (decoded.purpose !== "password_reset") {
+      throw new Error("Invalid token purpose");
+    }
+
+    const salt = await bcrypt.genSalt(12);
+    const newPasswordHash = await bcrypt.hash(newPassword, salt);
+
+    await prisma.user.update({
+      where: { id: decoded.userId },
+      data: { passwordHash: newPasswordHash },
+    });
+
+    // Invalidate sessions
+    await invalidateAllSessions(decoded.userId);
+  } catch (error) {
+    throw new Error("Invalid or expired password reset token");
+  }
+};
+
+export const sendVerification = async (userId: string): Promise<void> => {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const token = jwt.sign(
+    { userId: user.id, purpose: "email_verification" },
+    config.jwtSecret,
+    { expiresIn: "24h" }
+  );
+
+  await emailService.sendVerificationEmail(user.email, token);
+};
+
 export const authService = {
   signUp,
   signIn,
@@ -290,4 +352,7 @@ export const authService = {
   invalidateAllSessions,
   changePassword,
   updateProfile,
+  forgotPassword,
+  resetPasswordWithToken,
+  sendVerification,
 };
