@@ -13,7 +13,9 @@ const verifySignature = (req: WebhookRequest): boolean => {
   const secret = config.dwolla.webhookSecret;
 
   if (!signature || !secret || !req.rawBody) {
-    logger.warn("Webhook verification failed: Missing signature, secret, or body");
+    logger.warn(
+      "Webhook verification failed: Missing signature, secret, or body"
+    );
     return false;
   }
 
@@ -37,8 +39,30 @@ export const handleDwollaWebhook = async (req: Request, res: Response) => {
     const topic = event.topic;
     const resourceUrl = event._links.resource.href;
     const resourceId = resourceUrl.split("/").pop();
+    const eventId = event.id;
 
-    logger.info({ topic, resourceId }, "Received Dwolla Webhook");
+    // Idempotency Check
+    const existingEvent = await prisma.webhookEvent.findUnique({
+      where: { eventId },
+    });
+
+    if (existingEvent) {
+      logger.info({ eventId }, "Webhook event already processed");
+      res.status(200).send();
+      return;
+    }
+
+    // We create it first to reserve the ID. If this fails (race condition), it returns 500 (or caught below).
+    await prisma.webhookEvent.create({
+      data: {
+        eventId,
+        provider: "dwolla",
+        eventType: topic,
+        payload: event as any, // Store raw payload
+      },
+    });
+
+    logger.info({ topic, resourceId, eventId }, "Received Dwolla Webhook");
 
     switch (topic) {
       case "customer_transfer_completed":

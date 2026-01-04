@@ -8,10 +8,9 @@ import { encrypt } from "@/utils/encryption";
 import { authSchema } from "@/validators/auth.schema";
 import { emailService } from "./email.service";
 
-type SignUpInput = z.infer<typeof authSchema>;
+import { AUTH_CONSTANTS } from "@/config/constants";
 
-const MAX_FAILED_ATTEMPTS = 5;
-const LOCKOUT_DURATION_MINUTES = 30;
+type SignUpInput = z.infer<typeof authSchema>;
 
 // Creates a new user account with encrypted PII and generates an access token.
 export const signUp = async (data: SignUpInput) => {
@@ -80,21 +79,27 @@ export const signIn = async (email: string, password: string) => {
   if (!isMatch) {
     // Increment failed attempts
     const failedAttempts = user.failedLoginAttempts + 1;
-    const shouldLock = failedAttempts >= MAX_FAILED_ATTEMPTS;
+    let lockedUntil: Date | null = null;
+    let shouldLock = false;
+
+    if (failedAttempts >= AUTH_CONSTANTS.MAX_FAILED_ATTEMPTS) {
+      shouldLock = true;
+      lockedUntil = new Date(
+        Date.now() + AUTH_CONSTANTS.LOCKOUT_DURATION_MINUTES * 60 * 1000
+      );
+    }
 
     await prisma.user.update({
       where: { id: user.id },
       data: {
         failedLoginAttempts: failedAttempts,
-        lockedUntil: shouldLock
-          ? new Date(Date.now() + LOCKOUT_DURATION_MINUTES * 60 * 1000)
-          : null,
+        lockedUntil: lockedUntil,
       },
     });
 
     if (shouldLock) {
       throw new Error(
-        `Too many failed attempts. Account locked for ${LOCKOUT_DURATION_MINUTES} minutes.`
+        `Too many failed attempts. Account locked for ${AUTH_CONSTANTS.LOCKOUT_DURATION_MINUTES} minutes.`
       );
     }
 

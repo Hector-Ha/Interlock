@@ -3,6 +3,7 @@ import type { User, SignInParams, SignUpParams } from "@/types";
 
 export interface AuthResponse {
   user: User;
+  refreshToken?: string;
 }
 
 export interface UpdateProfileData {
