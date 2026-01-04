@@ -42,3 +42,17 @@ export const signInSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
 });
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Invalid email address"),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, "Token is required"),
+  newPassword: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(passwordPatterns.uppercase, "Must contain uppercase letter")
+    .regex(passwordPatterns.lowercase, "Must contain lowercase letter")
+    .regex(passwordPatterns.number, "Must contain number"),
+});

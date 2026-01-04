@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/client"
 }
 
 datasource db {
@@ -25,6 +26,7 @@ model User {
 
   banks             Bank[]
   sessions          Session[]
+  auditLogs         AuditLog[]
 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -100,21 +102,33 @@ model Session {
   userAgent    String?
   ipAddress    String?
   expiresAt    DateTime
-  
   createdAt    DateTime @default(now())
-
+  
   @@index([userId])
-
   @@index([expiresAt])
+}
+
+model WebhookEvent {
+  id        String   @id @default(uuid())
+  eventId   String   @unique // The unique ID from the provider (e.g. Dwolla event ID)
+  provider  String   // "dwolla", "plaid", etc.
+  eventType String
+  payload   Json?
+  
+  processedAt DateTime @default(now())
+
+  @@index([eventId, provider])
 }
 
 model AuditLog {
   id        String   @id @default(uuid())
-  userId    String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   action    String
   resource  String
   details   Json?
   ipAddress String?
-  
   createdAt DateTime @default(now())
+
+  @@index([userId])
 }

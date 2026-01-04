@@ -4,7 +4,12 @@ import jwt from "jsonwebtoken";
 import { config } from "@/config";
 import { prisma } from "@/db";
 import { authService } from "@/services/auth.service";
-import { authSchema, signInSchema } from "@/validators/auth.schema";
+import {
+  authSchema,
+  signInSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from "@/validators/auth.schema";
 import {
   updateProfileSchema,
   changePasswordSchema,
@@ -34,7 +39,12 @@ export const signUp = async (req: Request, res: Response) => {
     });
 
     res.status(201).json({
-      user: { id: user.id, email: user.email },
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
       refreshToken,
     });
   } catch (error) {
@@ -82,7 +92,12 @@ export const signIn = async (req: Request, res: Response) => {
     });
 
     res.json({
-      user: { id: user.id, email: user.email },
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
       refreshToken,
     });
   } catch (error) {
@@ -321,5 +336,81 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
       message: "Failed to update profile",
       code: "UPDATE_PROFILE_ERROR",
     });
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = forgotPasswordSchema.parse(req.body);
+    await authService.forgotPassword(email);
+    res.json({
+      message: "If an account exists, a password reset email has been sent.",
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res
+        .status(400)
+        .json({
+          message: "Validation error",
+          code: "VALIDATION_ERROR",
+          errors: error.format(),
+        });
+      return;
+    }
+    logger.error({ err: error }, "Forgot Password Error");
+    res
+      .status(500)
+      .json({
+        message: "Failed to process request",
+        code: "FORGOT_PASSWORD_ERROR",
+      });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { token, newPassword } = resetPasswordSchema.parse(req.body);
+    await authService.resetPasswordWithToken(token, newPassword);
+    res.json({ message: "Password has been reset successfully." });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res
+        .status(400)
+        .json({
+          message: "Validation error",
+          code: "VALIDATION_ERROR",
+          errors: error.format(),
+        });
+      return;
+    }
+    if (
+      error instanceof Error &&
+      error.message.includes("Invalid or expired")
+    ) {
+      res.status(400).json({ message: error.message, code: "INVALID_TOKEN" });
+      return;
+    }
+    logger.error({ err: error }, "Reset Password Error");
+    res
+      .status(500)
+      .json({
+        message: "Failed to reset password",
+        code: "RESET_PASSWORD_ERROR",
+      });
+  }
+};
+
+export const sendVerification = async (req: AuthRequest, res: Response) => {
+  try {
+    await authService.sendVerification(req.user.userId);
+    res.json({ message: "Verification email sent." });
+  } catch (error) {
+    logger.error({ err: error }, "Send Verification Error");
+    res
+      .status(500)
+      .json({
+        message: "Failed to send verification email",
+        code: "SEND_VERIFICATION_ERROR",
+      });
   }
 };
