@@ -1,0 +1,96 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths-ignore:
+      - "**.md"
+      - "LICENSE"
+      - "docs/**"
+  pull_request:
+    branches: [main, develop]
+    paths-ignore:
+      - "**.md"
+      - "LICENSE"
+      - "docs/**"
+
+jobs:
+  backend-tests:
+    name: Backend Phase 0 & 1 Gates
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: interlock_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: cd server && bun install
+
+      - name: Generate Prisma Client
+        # Explicit generate to ensure the client is built for the CI environment (linux)
+        run: cd server && bunx prisma generate
+
+      - name: Run Database Migrations
+        # Deploy migrations to the test database service
+        run: cd server && bunx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/interlock_test
+
+      - name: Run Phase 0 (Environment) Tests
+        run: cd server && bun test src/__tests__/setup.test.ts
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/interlock_test
+          JWT_SECRET: test-secret-key-must-be-long-enough-for-ci
+          ENCRYPTION_KEY: 12345678901234567890123456789012
+          PLAID_CLIENT_ID: test_client_id
+          PLAID_SECRET: test_plaid_secret
+          DWOLLA_KEY: test_dwolla_key
+          DWOLLA_SECRET: test_dwolla_secret
+
+      - name: Run Phase 1 (Security) Tests
+        run: cd server && bun test src/__tests__/phase1-security.test.ts
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/interlock_test
+          JWT_SECRET: test-secret-key-must-be-long-enough-for-ci
+          ENCRYPTION_KEY: 12345678901234567890123456789012
+          PLAID_CLIENT_ID: test_client_id
+          PLAID_SECRET: test_plaid_secret
+          DWOLLA_KEY: test_dwolla_key
+          DWOLLA_SECRET: test_dwolla_secret
+
+  frontend-tests:
+    name: Frontend Foundation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: cd client && bun install
+
+      - name: Run Component Tests
+        # Included for future phases, currently placeholder or basic setup check
+        run: |
+          if [ -f "client/src/__tests__/setup.ts" ]; then
+             cd client && bun test
+          else
+             echo "Frontend tests not yet configured, skipping."
+          fi
