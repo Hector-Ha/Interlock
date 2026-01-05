@@ -57,6 +57,20 @@ export async function createTestBank(userId: string, overrides = {}) {
   });
 }
 
+export async function createTestTransaction(bankId: string, overrides = {}) {
+  return prisma.transaction.create({
+    data: {
+      bankId,
+      amount: 100,
+      name: "Test Transaction",
+      date: new Date(),
+      status: "SUCCESS",
+      channel: "online",
+      ...overrides,
+    },
+  });
+}
+
 // Cleanup helper
 export async function cleanupTestData(userId: string) {
   try {
