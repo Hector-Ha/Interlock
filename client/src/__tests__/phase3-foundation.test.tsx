@@ -62,6 +62,10 @@ describe("Phase 3: Frontend Foundation", () => {
 
       await user.type(emailInput, "newuser@example.com");
       await user.type(passwordInput, "Password123!");
+      await user.type(
+        screen.getByLabelText("Confirm Password"),
+        "Password123!"
+      );
 
       const nextButton = screen.getByRole("button", { name: /Next/i });
       await user.click(nextButton);
@@ -89,7 +93,6 @@ describe("Phase 3: Frontend Foundation", () => {
       );
       await user.type(addressInput, "123 Main St");
 
-      // Select inputs might need userEvent.selectOptions or just typing if it's a text input
       await user.type(screen.getByLabelText("City"), "New York");
       await user.type(screen.getByLabelText("State"), "NY");
       await user.type(screen.getByLabelText("Postal Code"), "10001");
@@ -112,6 +115,27 @@ describe("Phase 3: Frontend Foundation", () => {
       await waitFor(() => {
         expect(authService.signUp).toHaveBeenCalled();
       });
+    });
+
+    it("SignUpForm - should show error when passwords do not match", async () => {
+      const user = userEvent.setup();
+      render(<SignUpForm />);
+
+      const emailInput = screen.getByLabelText("Email");
+      const passwordInput = screen.getByLabelText("Password");
+      const confirmPasswordInput = screen.getByLabelText("Confirm Password");
+
+      await user.type(emailInput, "newuser@example.com");
+      await user.type(passwordInput, "Password123!");
+      await user.type(confirmPasswordInput, "DifferentPassword123!");
+
+      const nextButton = screen.getByRole("button", { name: /Next/i });
+      await user.click(nextButton);
+
+      expect(
+        await screen.findByText("Passwords do not match")
+      ).toBeInTheDocument();
+      expect(screen.queryByLabelText("First Name")).not.toBeInTheDocument();
     });
   });
 

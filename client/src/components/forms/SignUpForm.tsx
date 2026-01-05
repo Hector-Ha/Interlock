@@ -15,7 +15,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
 const STEPS = [
-  { id: 1, name: "Account", fields: ["email", "password"] },
+  { id: 1, name: "Account", fields: ["email", "password", "confirmPassword"] },
   { id: 2, name: "Personal", fields: ["firstName", "lastName", "dateOfBirth"] },
   {
     id: 3,
@@ -36,6 +36,8 @@ export function SignUpForm() {
     register,
     handleSubmit,
     trigger,
+    getValues,
+    setError: setFormError,
     formState: { errors },
   } = useForm<SignUpSchema>({
     resolver: zodResolver(signUpSchema),
@@ -50,6 +52,7 @@ export function SignUpForm() {
       ssn: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
     mode: "onChange",
   });
@@ -57,6 +60,17 @@ export function SignUpForm() {
   const handleNext = async () => {
     const currentStepFields = STEPS[step - 1].fields as (keyof SignUpSchema)[];
     const isStepValid = await trigger(currentStepFields);
+
+    if (step === 1) {
+      const { password, confirmPassword } = getValues();
+      if (password !== confirmPassword) {
+        setFormError("confirmPassword", {
+          type: "manual",
+          message: "Passwords do not match",
+        });
+        return;
+      }
+    }
 
     if (isStepValid) {
       setStep((prev) => Math.min(prev + 1, STEPS.length));
@@ -147,6 +161,17 @@ export function SignUpForm() {
                     disabled={isLoading}
                     error={errors.password?.message}
                     {...register("password")}
+                  />
+                  <Input
+                    id="confirmPassword"
+                    placeholder="Confirm your password"
+                    type="password"
+                    autoComplete="new-password"
+                    label="Confirm Password"
+                    showPasswordToggle
+                    disabled={isLoading}
+                    error={errors.confirmPassword?.message}
+                    {...register("confirmPassword")}
                   />
                 </div>
               </motion.div>
