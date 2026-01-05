@@ -2,13 +2,13 @@ name: Tests
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, testing-implementation]
     paths-ignore:
       - "**.md"
       - "LICENSE"
       - "docs/**"
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, testing-implementation]
     paths-ignore:
       - "**.md"
       - "LICENSE"
@@ -16,7 +16,7 @@ on:
 
 jobs:
   backend-tests:
-    name: Backend Phase 0 & 1 Gates
+    name: Backend Phase 0 & 1 & 2 Gates
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -56,23 +56,34 @@ jobs:
         run: cd server && bun test src/__tests__/setup.test.ts
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/interlock_test
-          JWT_SECRET: test-secret-key-must-be-long-enough-for-ci
-          ENCRYPTION_KEY: 12345678901234567890123456789012
-          PLAID_CLIENT_ID: test_client_id
-          PLAID_SECRET: test_plaid_secret
-          DWOLLA_KEY: test_dwolla_key
-          DWOLLA_SECRET: test_dwolla_secret
+          JWT_SECRET: "test-secret-key-must-be-long-enough-for-ci"
+          ENCRYPTION_KEY: "12345678901234567890123456789012"
+          PLAID_CLIENT_ID: "test_client_id"
+          PLAID_SECRET: "test_plaid_secret"
+          DWOLLA_KEY: "test_dwolla_key"
+          DWOLLA_SECRET: "test_dwolla_secret"
 
       - name: Run Phase 1 (Security) Tests
         run: cd server && bun test src/__tests__/phase1-security.test.ts
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/interlock_test
-          JWT_SECRET: test-secret-key-must-be-long-enough-for-ci
-          ENCRYPTION_KEY: 12345678901234567890123456789012
-          PLAID_CLIENT_ID: test_client_id
-          PLAID_SECRET: test_plaid_secret
-          DWOLLA_KEY: test_dwolla_key
-          DWOLLA_SECRET: test_dwolla_secret
+          JWT_SECRET: "test-secret-key-must-be-long-enough-for-ci"
+          ENCRYPTION_KEY: "12345678901234567890123456789012"
+          PLAID_CLIENT_ID: "test_client_id"
+          PLAID_SECRET: "test_plaid_secret"
+          DWOLLA_KEY: "test_dwolla_key"
+          DWOLLA_SECRET: "test_dwolla_secret"
+
+      - name: Run Phase 2 (API) Tests
+        run: cd server && bun test src/__tests__/phase2-api.test.ts
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/interlock_test
+          JWT_SECRET: "test-secret-key-must-be-long-enough-for-ci"
+          ENCRYPTION_KEY: "12345678901234567890123456789012"
+          PLAID_CLIENT_ID: "test_client_id"
+          PLAID_SECRET: "test_plaid_secret"
+          DWOLLA_KEY: "test_dwolla_key"
+          DWOLLA_SECRET: "test_dwolla_secret"
 
   frontend-tests:
     name: Frontend Foundation
@@ -86,11 +97,5 @@ jobs:
       - name: Install dependencies
         run: cd client && bun install
 
-      - name: Run Component Tests
-        # Included for future phases, currently placeholder or basic setup check
-        run: |
-          if [ -f "client/src/__tests__/setup.ts" ]; then
-             cd client && bun test
-          else
-             echo "Frontend tests not yet configured, skipping."
-          fi
+      - name: Run Phase 3 (Foundation) Tests
+        run: cd client && bun test src/__tests__/phase3-foundation.test.tsx
