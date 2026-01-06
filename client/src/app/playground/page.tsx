@@ -52,6 +52,11 @@ import DoughnutChart from "@/components/shared/DoughnutChart";
 import AnimatedBalanceCounter from "@/components/shared/AnimatedBalanceCounter";
 import { SettingsMenu } from "@/components/layout/SettingsMenu";
 import { Modal, ModalContent, ModalTrigger } from "@/components/ui/Modal";
+import { TotalBalanceCard } from "@/components/features/dashboard/TotalBalanceCard";
+import { BanksList } from "@/components/features/dashboard/BanksList";
+import { QuickActions } from "@/components/features/dashboard/QuickActions";
+import { RecentTransactions } from "@/components/features/dashboard/RecentTransactions";
+import { DashboardSkeleton } from "@/components/features/dashboard/DashboardSkeleton";
 
 export default function PlaygroundPage() {
   const [inputValue, setInputValue] = useState("");
@@ -797,6 +802,120 @@ export default function PlaygroundPage() {
                       />
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Dashboard Components */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Dashboard Widgets (New)</h3>
+              <div className="space-y-8 p-6 border rounded-xl bg-gray-50">
+                {/* Total Balance Card */}
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">
+                    Total Balance Card (with Chart)
+                  </h4>
+                  <TotalBalanceCard
+                    totalCurrentBalance={12500.25}
+                    accounts={[
+                      {
+                        id: "1",
+                        appwriteItemId: "1",
+                        name: "Chase Checking",
+                        officialName: "Chase Checking",
+                        mask: "1234",
+                        institutionId: "ins_1",
+                        balance: { current: 5000, available: 5000 },
+                      } as any,
+                      {
+                        id: "2",
+                        appwriteItemId: "2",
+                        name: "Citi Savings",
+                        officialName: "Citi Savings",
+                        mask: "5678",
+                        institutionId: "ins_2",
+                        balance: { current: 7500.25, available: 7500.25 },
+                      } as any,
+                    ]}
+                    totalBanks={2}
+                  />
+                  <div className="mt-4">
+                    <h4 className="text-sm font-semibold mb-2">
+                      Total Balance Card (Empty State)
+                    </h4>
+                    <TotalBalanceCard
+                      totalCurrentBalance={0}
+                      accounts={[]}
+                      totalBanks={0}
+                    />
+                  </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">Quick Actions</h4>
+                  <QuickActions hasBanks={true} />
+                </div>
+
+                {/* Banks List */}
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">Banks List</h4>
+                  <BanksList
+                    banks={[
+                      {
+                        id: "1",
+                        institutionName: "Chase Bank",
+                        status: "ACTIVE",
+                        createdAt: new Date().toISOString(),
+                      } as any,
+                      {
+                        id: "2",
+                        institutionName: "Bank of America",
+                        status: "LOGIN_REQUIRED",
+                        createdAt: new Date().toISOString(),
+                      } as any,
+                    ]}
+                  />
+                </div>
+
+                {/* Recent Transactions */}
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">
+                    Recent Transactions
+                  </h4>
+                  <RecentTransactions
+                    transactions={[
+                      {
+                        id: "1",
+                        name: "Starbucks",
+                        amount: 5.5,
+                        date: new Date().toISOString(),
+                        status: "SUCCESS",
+                        category: "Food and Drink",
+                        paymentChannel: "online",
+                        type: "debit",
+                        accountId: "1",
+                      } as any,
+                      {
+                        id: "2",
+                        name: "Uber",
+                        amount: 25.0,
+                        date: new Date().toISOString(),
+                        status: "PENDING",
+                        category: "Travel",
+                        paymentChannel: "online",
+                        type: "debit",
+                        accountId: "1",
+                      } as any,
+                    ]}
+                  />
+                </div>
+                {/* Skeleton */}
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">
+                    Dashboard Skeleton
+                  </h4>
+                  <DashboardSkeleton />
                 </div>
               </div>
             </div>

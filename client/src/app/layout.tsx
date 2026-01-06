@@ -8,8 +8,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Interlock - The Future of Security Open Banking",
-  description: "A transparent, secure, and user-friendly open banking platform",
+  title: "Interlock | The Secure Standard for Open Banking",
+  description:
+    "Interlock bridges your financial world with uncompromising security and reliability. Connect accounts, track balances, and move money with confidence.",
+  icons: {
+    icon: "/icons/logo.svg",
+  },
 };
 
 export default function RootLayout({

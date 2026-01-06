@@ -42,24 +42,38 @@ const DashboardPage = () => {
   }
 
   return (
-    <section className="home">
-      <div className="home-content">
-        <header className="home-header">
-          <HeaderBox
-            type="greeting"
-            title={greeting}
-            user={user?.firstName || "Guest"}
-            subtext="Access and manage your account and transactions efficiently."
-          />
+    <section className="min-h-screen bg-gray-50/50">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 py-12 space-y-12">
+        <header className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
+          <div className="w-full md:max-w-xl">
+            <HeaderBox
+              type="greeting"
+              title={greeting}
+              user={user?.firstName || "Guest"}
+              subtext="Access and manage your account and transactions efficiently."
+            />
+          </div>
 
-          <TotalBalanceCard totalBalance={totalBalance} />
+          <div className="w-full md:max-w-[400px]">
+            <TotalBalanceCard
+              totalCurrentBalance={totalBalance}
+              accounts={[]}
+              totalBanks={banks.length}
+            />
+          </div>
         </header>
 
-        <QuickActions />
+        <QuickActions hasBanks={banks.length > 0} />
 
-        <div className="recent-transactions">
-          <BanksList banks={banks} />
-          <RecentTransactions transactions={recentTransactions} />
+        <div className="grid gap-12 lg:grid-cols-[1fr_2fr]">
+          <div className="space-y-6">
+            <h3 className="text-xl font-bold text-gray-900">My Banks</h3>
+            <BanksList banks={banks} />
+          </div>
+
+          <div className="space-y-6">
+            <RecentTransactions transactions={recentTransactions} />
+          </div>
         </div>
       </div>
     </section>
