@@ -73,6 +73,11 @@ export default function PlaygroundPage() {
             Core styles, components, and layout blocks for the Interlock
             application.
           </p>
+          <div className="flex gap-4">
+            <Button variant="outline" asChild>
+              <a href="/playground/banks">View Banks Page Preview</a>
+            </Button>
+          </div>
         </div>
 
         {/* 1. TYPOGRAPHY */}
