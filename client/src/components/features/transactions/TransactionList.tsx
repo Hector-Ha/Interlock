@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Table,
   TableBody,
@@ -6,40 +8,38 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card } from "@/components/ui/Card";
-import { formatCurrency } from "@/lib/utils";
-import type { Transaction } from "@/types/bank";
+import {
+  formatCurrency,
+  formatDateTime,
+  cn,
+  getTransactionCategoryStyles,
+} from "@/lib/utils";
+import type { Transaction } from "@/services/bank.service";
+import { Badge } from "@/components/ui";
 
-interface RecentTransactionsProps {
+interface TransactionListProps {
   transactions: Transaction[];
 }
 
-export function RecentTransactions({ transactions }: RecentTransactionsProps) {
+export function TransactionList({ transactions }: TransactionListProps) {
   if (transactions.length === 0) {
     return (
-      <Card className="p-6 text-center text-slate-500">
-        No recent transactions.
-      </Card>
+      <div className="text-center py-10 border rounded-lg bg-slate-50">
+        <p className="text-slate-500">No recent transactions found.</p>
+      </div>
     );
   }
 
   return (
-    <Card className="rounded-2xl shadow-lg border-gray-100 overflow-hidden">
-      <div className="p-6 border-b border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900">
-          Recent Transactions
-        </h2>
-        <p className="text-sm text-gray-500">
-          Your latest financial activities
-        </p>
-      </div>
+    <div className="border rounded-lg overflow-hidden">
       <Table>
-        <TableHeader className="bg-gray-50/50">
+        <TableHeader>
           <TableRow>
-            <TableHead className="py-4 pl-6">Transaction</TableHead>
-            <TableHead className="py-4">Amount</TableHead>
-            <TableHead className="py-4">Status</TableHead>
-            <TableHead className="py-4 pr-6">Date</TableHead>
+            <TableHead>Transaction</TableHead>
+            <TableHead>Amount</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Date</TableHead>
+            <TableHead>Category</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -90,42 +90,43 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
             const statusConfig = getStatusBadge(tx.status);
 
             return (
-              <TableRow
-                key={tx.id}
-                className="hover:bg-gray-surface/50 transition-colors"
-              >
-                <TableCell className="font-medium py-4 pl-6">
+              <TableRow key={tx.id}>
+                <TableCell className="font-medium">
                   <div className="flex flex-col">
-                    <span>{tx.name}</span>
-                    <span className="text-xs text-gray-main">
-                      {tx.category || "Uncategorized"}
-                    </span>
+                    <span className="truncate max-w-[200px]">{tx.name}</span>
                   </div>
                 </TableCell>
                 <TableCell
-                  className={`py-4 ${
-                    isDebit
-                      ? "text-error-main font-semibold"
-                      : "text-success-main font-semibold"
-                  }`}
+                  className={cn(
+                    "font-semibold",
+                    isDebit ? "text-error-main" : "text-success-main"
+                  )}
                 >
                   {amount}
                 </TableCell>
-                <TableCell className="py-4">
+                <TableCell>
                   <div
-                    className={`w-fit px-2.5 py-1 rounded-full text-xs font-semibold ${statusConfig.className}`}
+                    className={cn(
+                      "w-fit px-2.5 py-1 rounded-full text-xs font-semibold",
+                      statusConfig.className
+                    )}
                   >
                     {statusConfig.label}
                   </div>
                 </TableCell>
-                <TableCell className="text-gray-main py-4 pr-6">
-                  {new Date(tx.date).toLocaleDateString()}
+                <TableCell className="text-gray-main">
+                  {formatDateTime(new Date(tx.date)).dateOnly}
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="truncate max-w-[120px]">
+                    {tx.category[0] || "Uncategorized"}
+                  </Badge>
                 </TableCell>
               </TableRow>
             );
           })}
         </TableBody>
       </Table>
-    </Card>
+    </div>
   );
 }

@@ -124,6 +124,30 @@ const DashboardPlaygroundPage = () => {
       accountId: "1",
       image: "",
     } as any,
+    {
+      id: "6",
+      name: "Canceled Order",
+      amount: 89.99,
+      date: new Date(Date.now() - 400000000).toISOString(),
+      status: "CANCELLED",
+      category: "Shopping",
+      paymentChannel: "online",
+      type: "debit",
+      accountId: "1",
+      image: "",
+    } as any,
+    {
+      id: "7",
+      name: "Declined Transaction",
+      amount: 500.0,
+      date: new Date(Date.now() - 500000000).toISOString(),
+      status: "DECLINED",
+      category: "Transfer",
+      paymentChannel: "online",
+      type: "debit",
+      accountId: "1",
+      image: "",
+    } as any,
   ];
 
   return (

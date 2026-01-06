@@ -1,5 +1,6 @@
 import { api } from "./api-client";
 import type { Bank, Account, Transaction } from "@/types/bank";
+export type { Bank, Account, Transaction };
 
 export interface AccountsResponse {
   accounts: Account[];
