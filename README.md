@@ -1,12 +1,12 @@
 # Interlock - A Modern Open Banking Experience
 
-> **A modern fintech application for secure bank account linking and money transfers.**
+> **A modern and secure fintech application for bank account linking and ACH money transfers.**
 
 ## TL;DR
 
-Interlock is a secure fintech MVP that bridges **Plaid** (banking data) and **Dwolla** (payments). It's a full-stack monorepo built with **Next.js 16** (Frontend) and **Express 5** (Backend), running on the **Bun** runtime.
+Interlock is a fintech MVP that bridges **Plaid** (banking data) and **Dwolla** (ACH payments). It's a full-stack monorepo built with **Next.js 16** (Frontend) and **Express 5** (Backend), running on the **Bun** runtime.
 
-Currently in **Phase 2**, it supports authentication, bank linking, detailed account views, transaction history, and ACH transfers in a sandbox environment.
+Currently in **Phase 3**, the backend is feature-complete with full authentication, bank management, transaction syncing, and ACH transfers. The frontend has core dashboard functionality with additional pages in development.
 
 ### Quick Start
 
@@ -21,56 +21,64 @@ bun install
 bun run dev
 ```
 
-## Project Stage: Phase 2 (Core Features)
+## Project Stage: Phase 3 (User Experience)
 
-The project has advanced to **Phase 2**, with core banking and transaction features implemented.
+The project has completed **Phase 2** (Core Banking APIs) and entered **Phase 3** (User Experience & Frontend).
 
-| Category               | Status        | Notes                                    |
-| ---------------------- | ------------- | ---------------------------------------- |
-| **Authentication**     | ✅ Functional | Secure login/signup with PII encryption  |
-| **Plaid Integration**  | ✅ Functional | Link token, Exchange, & Account Sync     |
-| **Dwolla Integration** | ✅ Functional | Funding sources, Transfers, & Webhooks   |
-| **Bank Management**    | ✅ Functional | Connect, View Accounts, & Disconnect     |
-| **Transactions**       | ✅ Functional | History view & Real-time updates         |
-| **Security**           | ✅ Functional | Rate limiting, Sentry, Helmet, & Logging |
+| Category               | Backend     | Frontend    | Notes                                     |
+| ---------------------- | ----------- | ----------- | ----------------------------------------- |
+| **Authentication**     | ✅ Complete | ✅ Complete | Full flow including password reset        |
+| **Plaid Integration**  | ✅ Complete | ✅ Complete | Link, Exchange, Update Mode, Balance Sync |
+| **Dwolla Integration** | ✅ Complete | ✅ Complete | Funding sources, Transfers, Webhooks      |
+| **Bank Management**    | ✅ Complete | ⚠️ Partial  | Backend ready; `/my-banks` page pending   |
+| **Transactions**       | ✅ Complete | ⚠️ Partial  | Backend ready; history page pending       |
+| **Transfers**          | ✅ Complete | ⚠️ Partial  | Backend ready; transfer page pending      |
+| **Dashboard**          | ✅ Complete | ✅ Complete | Balance, banks list, recent transactions  |
+| **Security**           | ✅ Complete | N/A         | Rate limiting, encryption, webhooks       |
 
 ## Roadmap
 
-### Phase 1: Foundation (Completed)
+### Phase 1: Foundation (Complete)
 
 - [x] Auth System with PII Encryption
 - [x] Basic Plaid & Dwolla Handshakes
 - [x] Security Hardening (Rate Limits, Headers)
 - [x] Standardized Logging (Pino)
 
-### Phase 2: Core Banking (In Progress/Checking)
+### Phase 2: Core Banking (Complete)
 
-- [x] **Account Details**
-- [x] **Transaction History**
-- [x] **Transfers**: Initiate & Monitor ACH transfers
-- [ ] **Transfer Cancellation**
+- [x] Account Details with Real-time Balances
+- [x] Transaction History with Sync
+- [x] ACH Transfers: Initiate & Monitor
+- [x] Transfer Cancellation
+- [x] Webhook Idempotency
 
-### Phase 3: User Experience
+### Phase 3: User Experience (WIP)
 
-- [x] **Dashboard UI**
-- [ ] Password Reset Flow
-- [ ] Email Verification
-- [ ] User Profile Updates
+| Feature                   | Backend | Frontend |
+| ------------------------- | ------- | -------- |
+| Dashboard UI              | ✅      | ✅       |
+| Password Reset Flow       | ✅      | ❌       |
+| Email Verification        | ✅      | ❌       |
+| My Banks Page             | ✅      | ❌       |
+| Transactions History Page | ✅      | ❌       |
+| Transfer Funds Page       | ✅      | ❌       |
+| User Settings Page        | ✅      | ❌       |
 
-### Phase 4: Advanced Features
+### Phase 4: Advanced Features (Planned)
 
 - [ ] Recurring Transfers
+- [ ] Transfer Limits
 - [ ] Push Notifications
 - [ ] API Documentation (Swagger)
 
-## Known Issues
+## Known Limitations
 
-Current limitations of the application:
-
-1.  **Transaction Schema**: The local database schema for Transactions does not yet strictly enforce a `destinationBankId` relationship, relying instead on Dwolla metadata for transfer destinations.
-2.  **Localization**: Currency formatting and date displays are currently hardcoded to US locales (`en-US`).
-3.  **Sandbox Only**: The application is strictly configured for Plaid/Dwolla Sandbox environments. Real money movement is disabled.
-4.  **Transfer Limits**: There is no logic currently enforcing daily or monthly transfer limits per user.
+1. **Transaction Schema**: The `destinationBankId` is derived from Dwolla metadata rather than a strict database relation.
+2. **Localization**: Currency and date formatting uses US locales (`en-US`).
+3. **Sandbox Only**: Configured exclusively for Plaid/Dwolla Sandbox environments.
+4. **Transfer Limits**: No daily/monthly limits enforced yet.
+5. **Missing Pages**: `/my-banks`, `/transactions-history`, `/payment-transfer`, `/forgot-password`, `/reset-password` need frontend implementation.
 
 ## Architecture
 
@@ -79,60 +87,78 @@ Interlock is a full-stack monorepo:
 - **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS, Chart.js
 - **Backend**: Express 5, Bun Runtime, Prisma ORM, PostgreSQL
 - **Integrations**: Plaid (Banking), Dwolla (Payments)
-- **Security**: AES-256-GCM Encryption for PII, Sentry Monitoring
+- **Security**: AES-256-GCM Encryption, bcrypt, JWT with rotation
+- **Monitoring**: Sentry, Pino Logging
+- **Email**: SendGrid (Transactional)
+- **Testing**: Vitest, React Testing Library
 
 ## Getting Started
 
 ### Prerequisites
 
-- [Bun](https://bun.sh) v1.3.3+
-  > **Note**: Install via npm if needed: `npm install -g bun`.
-  > For issues, check the [Bun Documentation](https://bun.com/docs).
+- [Bun](https://bun.sh) v1.3.3+ (`npm install -g bun`)
 - PostgreSQL 18+
-- Node.js 22+ (for Docker)
+- Node.js 22+ (for Docker builds)
 
 ### Installation
 
-1.  **Clone the repository**
+1. **Clone the repository**
 
-    ```bash
-    git clone <repository-url>
-    cd interlock
-    ```
+   ```bash
+   git clone <repository-url>
+   cd interlock
+   ```
 
-2.  **Install dependencies**
+2. **Install dependencies**
 
-    ```bash
-    bun install
-    ```
+   ```bash
+   bun install
+   ```
 
-3.  **Set up Environment Variables**
-    Create a `.env` file in the root based on `.env.example`. You will need API keys for:
+3. **Set up Environment Variables**
 
-    - **Plaid** (Sandbox)
-    - **Dwolla** (Sandbox)
-    - **PostgreSQL** (`DATABASE_URL`)
-    - **Security** (`JWT_SECRET`, `ENCRYPTION_KEY`)
+   Create `.env` files in root and `server/` directories:
 
-4.  **Initialize Database**
+   ```env
+   # Required
+   DATABASE_URL=postgresql://user:pass@localhost:5432/interlock
+   JWT_SECRET=your-256-bit-secret-key
+   ENCRYPTION_KEY=your-64-character-hex-key
 
-    ```bash
-    cd server
-    bun run prisma:generate
-    bun run prisma migrate dev
-    ```
+   # Plaid (Sandbox)
+   PLAID_CLIENT_ID=your-client-id
+   PLAID_SECRET=your-secret
+   PLAID_ENV=sandbox
 
-5.  **Start Development**
-    ```bash
-    # From root
-    bun run dev
-    ```
-    - Frontend: `http://localhost:3000`
-    - Backend: `http://localhost:8080`
+   # Dwolla (Sandbox)
+   DWOLLA_KEY=your-key
+   DWOLLA_SECRET=your-secret
+   DWOLLA_ENV=sandbox
+   DWOLLA_WEBHOOK_SECRET=your-webhook-secret
+
+   # Email (for password reset)
+   SENDGRID_API_KEY=your-sendgrid-key
+   ```
+
+4. **Initialize Database**
+
+   ```bash
+   cd server
+   bun run prisma:generate
+   bun run prisma migrate dev
+   ```
+
+5. **Start Development**
+
+   ```bash
+   # From root
+   bun run dev
+   ```
+
+   - Frontend: `http://localhost:3000`
+   - Backend: `http://localhost:8080`
 
 ### Docker Support
-
-Alternatively, use Docker Compose to run the entire stack (Postgres, Redis, Server, Studio):
 
 ```bash
 docker compose up -d
@@ -140,13 +166,33 @@ docker compose up -d
 
 ## Security Features
 
-- **PII Encryption**: AES-256-GCM for sensitive user data.
-- **Webhook Verification**: HMAC-SHA256 signature checks for Dwolla.
-- **Strict TypeScript**: Zod validation for all inputs.
-- **Secure Headers**: Helmet & CORS configured.
-- **Rate Limiting**: Protected auth endpoints.
-- **Observability**: Pino logging & Sentry integration.
+| Feature            | Implementation                                       |
+| ------------------ | ---------------------------------------------------- |
+| PII Encryption     | AES-256-GCM for addresses, DOB, SSN                  |
+| Password Security  | bcrypt with salt, account lockout (5 attempts)       |
+| Session Management | JWT (15-min) + Refresh tokens (30-day) with rotation |
+| Webhook Security   | HMAC-SHA256 signature verification                   |
+| API Protection     | Rate limiting on auth and API endpoints              |
+| Secure Headers     | Helmet, CORS, SameSite cookies                       |
+| Audit Trail        | Comprehensive logging of security events             |
+
+## Testing
+
+```bash
+# Run all tests
+bun test
+
+# Server tests
+cd server && bun test
+
+# Client tests
+cd client && bun test
+```
 
 ## Contributing
 
 This is a private project. For questions or issues, please contact the maintainers.
+
+## License
+
+GPL-3.0
