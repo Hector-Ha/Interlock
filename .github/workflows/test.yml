@@ -98,4 +98,4 @@ jobs:
         run: cd client && bun install
 
       - name: Run Phase 3 (Foundation) Tests
-        run: cd client && bun test src/__tests__/phase3-foundation.test.tsx
+        run: cd client && bun run test src/__tests__/phase3-foundation.test.tsx
