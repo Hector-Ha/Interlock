@@ -20,17 +20,17 @@ export const sidebarLinks: SidebarLink[] = [
   },
   {
     imgURL: Landmark,
-    route: "/my-banks",
+    route: "/banks",
     name: "My Banks",
   },
   {
     imgURL: History,
-    route: "/transactions-history",
-    name: "Transactions History",
+    route: "/transactions",
+    name: "Transaction History",
   },
   {
     imgURL: ArrowRightLeft,
-    route: "/payment-transfer",
+    route: "/transfers",
     name: "Transfer Funds",
   },
 ];

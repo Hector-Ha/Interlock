@@ -35,6 +35,10 @@ export function formatDateTime(date: Date | string) {
   };
 }
 
+export function formatDate(date: Date | string) {
+  return formatDateTime(date).dateOnly;
+}
+
 export function getTransactionCategoryStyles(category: string | string[]) {
   const cat = Array.isArray(category) ? category[0] : category;
 

@@ -22,14 +22,35 @@ export const ensureCustomer = async (
     };
   }
 
-  const customerResponse = await dwolla.post("customers", {
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    type: "receive-only",
-  });
+  let customerUrl: string;
 
-  const customerUrl = customerResponse.headers.get("location") as string;
+  try {
+    const customerResponse = await dwolla.post("customers", {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      type: "receive-only",
+    });
+
+    customerUrl = customerResponse.headers.get("location") as string;
+  } catch (err: any) {
+    if (
+      err.body &&
+      err.body._embedded &&
+      err.body._embedded.errors &&
+      err.body._embedded.errors.some(
+        (e: any) => e.code === "Duplicate" && e.path === "/email"
+      )
+    ) {
+      const duplicateError = err.body._embedded.errors.find(
+        (e: any) => e.code === "Duplicate" && e.path === "/email"
+      );
+      customerUrl = duplicateError._links.about.href;
+    } else {
+      throw err;
+    }
+  }
+
   const customerId = customerUrl.split("/").pop() as string;
 
   await prisma.user.update({
@@ -48,17 +69,24 @@ export const addFundingSource = async (
   processorToken: string,
   accountName: string
 ): Promise<string> => {
-  const fundingSourceResponse = await dwolla.post(
-    `${dwollaCustomerUrl}/funding-sources`,
-    {
-      plaidToken: processorToken,
-      name: accountName,
-    }
-  );
+  let fundingSourceUrl: string;
 
-  const fundingSourceUrl = fundingSourceResponse.headers.get(
-    "location"
-  ) as string;
+  try {
+    const fundingSourceResponse = await dwolla.post(
+      `${dwollaCustomerUrl}/funding-sources`,
+      {
+        plaidToken: processorToken,
+        name: accountName,
+      }
+    );
+    fundingSourceUrl = fundingSourceResponse.headers.get("location") as string;
+  } catch (err: any) {
+    if (err.body && err.body.code === "DuplicateResource" && err.body._links) {
+      fundingSourceUrl = err.body._links.about.href;
+    } else {
+      throw err;
+    }
+  }
 
   return fundingSourceUrl;
 };

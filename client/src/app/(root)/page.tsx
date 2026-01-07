@@ -15,8 +15,14 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/Alert";
 const DashboardPage = () => {
   const { user } = useAuthStore();
   const { banks } = useBankStore();
-  const { isLoading, error, totalBalance, recentTransactions, greeting } =
-    useDashboard();
+  const {
+    isLoading,
+    error,
+    totalBalance,
+    recentTransactions,
+    accounts,
+    greeting,
+  } = useDashboard();
 
   if (isLoading) {
     return (
@@ -57,7 +63,7 @@ const DashboardPage = () => {
           <div className="w-full md:max-w-[400px]">
             <TotalBalanceCard
               totalCurrentBalance={totalBalance}
-              accounts={[]}
+              accounts={accounts}
               totalBanks={banks.length}
             />
           </div>

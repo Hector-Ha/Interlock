@@ -10,6 +10,7 @@ import { exchangeTokenSchema } from "@/validators/plaid.schema";
 import { logger } from "@/middleware/logger";
 import { prisma } from "@/db";
 import { decrypt } from "@/utils/encryption";
+import { syncTransactions } from "@/services/transaction.service";
 
 export const createLinkTokenHandler = async (
   req: AuthRequest,
@@ -35,6 +36,16 @@ export const exchangeTokenHandler = async (req: AuthRequest, res: Response) => {
     const { publicToken, metadata } = exchangeTokenSchema.parse(req.body);
 
     const bank = await exchangePublicToken(userId, publicToken, metadata);
+
+    // Initial transaction sync
+    try {
+      await syncTransactions(bank.id);
+    } catch (syncError) {
+      logger.warn(
+        { err: syncError, bankId: bank.id },
+        "Failed initial transaction sync"
+      );
+    }
 
     res.status(201).json({ bank });
   } catch (error) {

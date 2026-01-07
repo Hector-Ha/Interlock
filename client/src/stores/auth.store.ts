@@ -58,7 +58,16 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
         } catch (err) {
-          const message = err instanceof Error ? err.message : "Sign in failed";
+          let message = "Sign in failed";
+          if (err instanceof Error) {
+            message = err.message;
+          } else if (
+            typeof err === "object" &&
+            err !== null &&
+            "message" in err
+          ) {
+            message = (err as { message: string }).message;
+          }
           set({ isLoading: false, error: message });
           throw err;
         }

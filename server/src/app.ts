@@ -1,5 +1,5 @@
 import express from "express";
-import * as Sentry from "@sentry/node";
+import * as Sentry from "@sentry/bun";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";

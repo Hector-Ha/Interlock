@@ -1,21 +1,8 @@
-import * as Sentry from "@sentry/node";
-// Profiling got commented out as it cause issues with Bun
-// import { nodeProfilingIntegration } from "@sentry/profiling-node";
+import * as Sentry from "@sentry/bun";
 
-if (!process.env.SENTRY_DSN) {
-  console.warn("SENTRY_DSN not set. Sentry will not be initialized.");
-} else {
-  try {
-    Sentry.init({
-      dsn: process.env.SENTRY_DSN,
-      integrations: [
-        // nodeProfilingIntegration(),
-      ],
-      tracesSampleRate: 1.0,
-      profilesSampleRate: 1.0,
-    });
-    console.info("Sentry initialized successfully.");
-  } catch (error) {
-    console.error("Failed to initialize Sentry:", error);
-  }
-}
+Sentry.init({
+  dsn: "https://0d35c7ca113d8693daafd5de31c48520@o4510608188243968.ingest.de.sentry.io/4510608189620304",
+  tracesSampleRate: 1.0,
+});
+
+console.info("Sentry initialized successfully with @sentry/bun");

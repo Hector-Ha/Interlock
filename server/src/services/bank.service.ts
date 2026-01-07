@@ -51,7 +51,7 @@ export const bankService = {
   },
 
   async getBanks(userId: string): Promise<BankListItem[]> {
-    return prisma.bank.findMany({
+    const banks = await prisma.bank.findMany({
       where: { userId },
       select: {
         id: true,
@@ -62,6 +62,11 @@ export const bankService = {
         createdAt: true,
       },
     });
+
+    return banks.map((bank) => ({
+      ...bank,
+      isDwollaLinked: !!bank.dwollaFundingUrl,
+    }));
   },
 
   async getBankById(

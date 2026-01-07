@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useBankStore } from "@/stores/bank.store";
 import { bankService } from "@/services/bank.service";
 import { transferService } from "@/services/transfer.service";
-import type { Transaction } from "@/types/bank";
+import type { Account, Transaction } from "@/types/bank";
 import type { Transfer } from "@/types/transfer";
 
 interface UseDashboardResult {
@@ -11,6 +11,7 @@ interface UseDashboardResult {
   totalBalance: number;
   recentTransactions: Transaction[];
   pendingTransfers: Transfer[];
+  accounts: Account[];
   greeting: string;
 }
 
@@ -23,6 +24,7 @@ export const useDashboard = (): UseDashboardResult => {
   const [pendingTransfers, setPendingTransfers] = useState<Transfer[]>([]);
   // Use local state for total balance since we calculate it from accounts
   const [totalBalance, setTotalBalance] = useState(0);
+  const [accounts, setAccounts] = useState<Account[]>([]);
 
   const { banks, fetchBanks } = useBankStore();
 
@@ -45,10 +47,12 @@ export const useDashboard = (): UseDashboardResult => {
 
         // Obtaining the list directly is safer in this specific async flow to avoid race conditions with store updates.
         const banksResponse = await bankService.getBanks();
+
         const currentBanks = banksResponse.banks;
 
         let transactions: Transaction[] = [];
         let calculatedBalance = 0;
+        let allAccounts: Account[] = [];
 
         if (currentBanks.length > 0) {
           // Fetch recent transactions from the first bank as a primary source
@@ -61,8 +65,7 @@ export const useDashboard = (): UseDashboardResult => {
             transactions = txResponse.transactions;
           }
 
-          // Fetch accounts for each bank to calculate total balance
-          // Note: This is an aggregation. Ideally backend provides this.
+          // Fetch accounts for each bank to calculate total balance and collect accounts
           const accountsPromises = currentBanks.map((bank) =>
             bankService.getAccounts(bank.id)
           );
@@ -70,6 +73,7 @@ export const useDashboard = (): UseDashboardResult => {
 
           accountsResponses.forEach((response) => {
             response.accounts.forEach((account) => {
+              allAccounts.push(account);
               calculatedBalance +=
                 account.balance.available ?? account.balance.current ?? 0;
             });
@@ -78,7 +82,7 @@ export const useDashboard = (): UseDashboardResult => {
 
         // Fetch pending transfers
         const transfersPromise = transferService.getTransfers({
-          status: "pending",
+          status: "PENDING",
           limit: 5,
         });
         const transfersRes = await transfersPromise;
@@ -87,6 +91,7 @@ export const useDashboard = (): UseDashboardResult => {
           setRecentTransactions(transactions);
           setPendingTransfers(transfersRes.transfers || []);
           setTotalBalance(calculatedBalance);
+          setAccounts(allAccounts);
         }
       } catch (err: any) {
         if (isMounted) {
@@ -113,6 +118,7 @@ export const useDashboard = (): UseDashboardResult => {
     totalBalance,
     recentTransactions,
     pendingTransfers,
+    accounts,
     greeting: getGreeting(),
   };
 };
