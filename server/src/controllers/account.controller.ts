@@ -3,7 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/db";
 import { decrypt } from "@/utils/encryption";
 import { AuthRequest } from "@/types/auth.types";
-import { getAccountsWithBalances } from "@/services/plaid.service";
+import { getEffectiveAccounts } from "@/services/bank.service";
 import {
   getAccountsParamsSchema,
   getAccountBalanceParamsSchema,
@@ -38,8 +38,8 @@ export const getAccounts = async (req: AuthRequest, res: Response) => {
     // Decrypt Access Token
     const accessToken = decrypt(bank.plaidAccessToken);
 
-    // Fetch Accounts from Plaid
-    const accounts = await getAccountsWithBalances(accessToken);
+    // Fetch Accounts from Plaid (with effective balance adjustment)
+    const accounts = await getEffectiveAccounts(bankId, accessToken);
 
     res.json({
       accounts,
@@ -95,7 +95,7 @@ export const getAccountBalance = async (req: AuthRequest, res: Response) => {
     const accessToken = decrypt(bank.plaidAccessToken);
 
     // Fetch Accounts and filter for specific account
-    const accounts = await getAccountsWithBalances(accessToken);
+    const accounts = await getEffectiveAccounts(bankId, accessToken);
     const account = accounts.find((acc) => acc.id === accountId);
 
     if (!account) {

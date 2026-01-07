@@ -10,6 +10,7 @@ export interface Bank {
   lastSyncedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  accounts?: Account[];
 }
 
 export interface Account {

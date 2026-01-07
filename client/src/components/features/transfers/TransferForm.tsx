@@ -1,5 +1,7 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -85,15 +87,10 @@ export function TransferForm() {
         amount: parseFloat(data.amount),
       });
 
-      await transferService.initiateTransfer({
-        sourceBankId: data.sourceBankId,
-        destinationBankId: data.destinationBankId,
-        amount: parseFloat(data.amount),
-      });
-
       toast.success("Transfer Initiated Successfully!");
       router.back();
     } catch (err: any) {
+      Sentry.captureException(err);
       setError(err.message || "Failed to initiate transfer");
     } finally {
       setIsSubmitting(false);

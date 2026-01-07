@@ -119,7 +119,7 @@ export function TransactionList({ transactions }: TransactionListProps) {
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline" className="truncate max-w-[120px]">
-                    {tx.category[0] || "Uncategorized"}
+                    {tx.category?.[0] || "Uncategorized"}
                   </Badge>
                 </TableCell>
               </TableRow>

@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/client"
 }
 
 datasource db {
@@ -70,6 +71,7 @@ model Transaction {
   pending           Boolean @default(false)
   channel           String   
   category          String?
+  type              TxType   @default(DEBIT)
 
   dwollaTransferId  String?  @unique
 
@@ -90,6 +92,11 @@ enum TxStatus {
   SUCCESS
   FAILED
   RETURNED
+}
+
+enum TxType {
+  DEBIT
+  CREDIT
 }
 
 model Session {

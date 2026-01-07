@@ -1,6 +1,11 @@
 import { prisma } from "@/db";
 import { decrypt } from "@/utils/encryption";
-import { createProcessorToken, plaidClient } from "@/services/plaid.service";
+import {
+  createProcessorToken,
+  plaidClient,
+  getAccountsWithBalances,
+} from "@/services/plaid.service";
+import { config } from "@/config";
 import {
   dwollaClient,
   ensureCustomer,
@@ -83,6 +88,7 @@ export const bankService = {
         dwollaFundingUrl: true,
         createdAt: true,
         updatedAt: true,
+        plaidAccessToken: true,
         transactions: {
           take: 5,
           orderBy: { date: "desc" },
@@ -101,6 +107,9 @@ export const bankService = {
       return null;
     }
 
+    const accessToken = decrypt(bank.plaidAccessToken);
+    const accounts = await getEffectiveAccounts(bank.id, accessToken);
+
     return {
       ...bank,
       isDwollaLinked: !!bank.dwollaFundingUrl,
@@ -108,6 +117,7 @@ export const bankService = {
         ...tx,
         amount: Number(tx.amount),
       })),
+      accounts,
     };
   },
 
@@ -178,28 +188,115 @@ export const bankService = {
       );
     }
 
+    // 1. Verify Balance with Plaid
+    const accessToken = decrypt(sourceBank.plaidAccessToken);
+    try {
+      const accounts = await getEffectiveAccounts(sourceBank.id, accessToken);
+
+      // Find the checking account (or use the first depository if no specific checking)
+      const sourceAccount =
+        accounts.find((acc) => acc.subtype === "checking") ||
+        accounts.find((acc) => acc.type === "depository");
+
+      if (sourceAccount && sourceAccount.balance.available !== null) {
+        if (sourceAccount.balance.available < amount) {
+          throw new Error(
+            `Insufficient funds. Available balance: $${sourceAccount.balance.available}`
+          );
+        }
+      }
+    } catch (error: any) {
+      // If it's the insufficient funds error we just threw, rethrow it
+      if (error.message.startsWith("Insufficient funds")) {
+        throw error;
+      }
+      // Otherwise log warning but allow seeing if Dwolla handles it (optimistic)
+      // or simplistic handling: just warn
+      logger.warn(
+        { err: error },
+        "Failed to verify balance with Plaid before transfer"
+      );
+    }
+
     const { transferUrl, transferId } = await createTransfer(
       sourceBank.dwollaFundingUrl,
       destBank.dwollaFundingUrl,
       amount
     );
 
-    const transaction = await prisma.transaction.create({
-      data: {
-        bankId: sourceBankId,
-        amount,
-        name: `Transfer to ${destBank.institutionName}`,
-        date: new Date(),
-        channel: "ACH",
-        status: "PENDING",
-        dwollaTransferId: transferId,
-      },
-    });
+    const [debitTx, creditTx] = await prisma.$transaction([
+      prisma.transaction.create({
+        data: {
+          bankId: sourceBankId,
+          amount,
+          name: `Transfer to ${destBank.institutionName}`,
+          date: new Date(),
+          channel: "ACH",
+          status: "PENDING",
+          dwollaTransferId: transferId,
+          type: "DEBIT",
+        },
+      }),
+      prisma.transaction.create({
+        data: {
+          bankId: destinationBankId,
+          amount,
+          name: `Transfer from ${sourceBank.institutionName}`,
+          date: new Date(),
+          channel: "ACH",
+          status: "PENDING",
+          dwollaTransferId: `${transferId}_CREDIT`,
+          type: "CREDIT",
+        },
+      }),
+    ]);
 
     return {
       message: "Transfer initiated",
       transferId,
-      transactionId: transaction.id,
+      transactionId: debitTx.id,
     };
   },
 };
+
+export async function getEffectiveAccounts(
+  bankId: string,
+  accessToken: string
+) {
+  const accounts = await getAccountsWithBalances(accessToken);
+
+  if (config.plaid.env === "sandbox") {
+    const pendingTransactions = await prisma.transaction.findMany({
+      where: {
+        bankId,
+        dwollaTransferId: { not: null },
+        status: { in: ["PENDING", "SUCCESS"] },
+      },
+    });
+
+    const debits = pendingTransactions
+      .filter((tx) => tx.type === "DEBIT")
+      .reduce((sum, tx) => sum + Number(tx.amount), 0);
+
+    const credits = pendingTransactions
+      .filter((tx) => tx.type === "CREDIT")
+      .reduce((sum, tx) => sum + Number(tx.amount), 0);
+
+    // Find checking account or first account
+    const checkingAccount =
+      accounts.find((a) => a.subtype === "checking") ||
+      accounts.find((a) => a.type === "depository") ||
+      accounts[0];
+
+    if (checkingAccount && checkingAccount.balance.available !== null) {
+      checkingAccount.balance.available =
+        checkingAccount.balance.available - debits + credits;
+      if (checkingAccount.balance.current !== null) {
+        checkingAccount.balance.current =
+          checkingAccount.balance.current - debits + credits;
+      }
+    }
+  }
+
+  return accounts;
+}

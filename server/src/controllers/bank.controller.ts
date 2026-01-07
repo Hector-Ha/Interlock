@@ -186,6 +186,13 @@ export const initiateTransfer = async (req: AuthRequest, res: Response) => {
         });
         return;
       }
+      if (error.message.startsWith("Insufficient funds")) {
+        res.status(400).json({
+          message: error.message,
+          code: "INSUFFICIENT_FUNDS",
+        });
+        return;
+      }
     }
     logger.error({ err: error }, "Transfer Error");
     res.status(500).json({

@@ -118,3 +118,19 @@ export const getAccountBalance = async (fundingSourceUrl: string) => {
   const response = await dwolla.get(`${fundingSourceUrl}/balance`);
   return response.body;
 };
+
+export const simulateSandboxProcessing = async () => {
+  if (config.dwolla.env !== "sandbox") {
+    throw new Error("Cannot simulate processing in production environment");
+  }
+
+  // This endpoint simulates bank transfer processing in Sandbox
+  // It processes pending ACH transfers to "processed"
+  const response = await dwolla.post("sandbox-simulations", {});
+  return response.body;
+};
+
+export const getTransfer = async (transferId: string) => {
+  const response = await dwolla.get(`transfers/${transferId}`);
+  return response.body;
+};

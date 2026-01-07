@@ -8,93 +8,48 @@ import {
   getAccounts,
 } from "../services/plaid.service";
 import { syncTransactions } from "../services/transaction.service";
+import { dwollaClient } from "../services/dwolla.service";
 import { encrypt, decrypt } from "../utils/encryption";
 import bcrypt from "bcryptjs";
 import { Products, CountryCode } from "plaid";
 
 // Helper to generate distinct test data for each bank
 function getCustomUserConfig(index: number) {
-  // Define distinct balances for easier tracking
+  // Define distinct, round balances for easier tracking
   const configs = [
     {
       // Bank 1: High balance
       checking: 5000,
-      savings: 25000,
+      savings: 1000,
       nameSuffix: "Alpha",
     },
     {
-      // Bank 2: Medium balance
-      checking: 1500,
-      savings: 5000,
-      nameSuffix: "Beta",
-    },
-    {
-      // Bank 3: Low balance
-      checking: 100,
+      // Bank 2: Lower balance
+      checking: 2000,
       savings: 500,
-      nameSuffix: "Gamma",
+      nameSuffix: "Beta",
     },
   ];
 
   const conf = configs[index] || configs[0];
-  const today = new Date();
 
-  // Generate some recent transactions
-  const transactions = Array.from({ length: 15 }).map((_, i) => {
-    const date = new Date(today);
-    date.setDate(today.getDate() - i);
-    const dateStr = date.toISOString().split("T")[0];
-
-    // Mix of debit/credit
-    const isCredit = i % 3 === 0;
-    const amount = isCredit
-      ? -50
-      : Number((Math.random() * 50 + 10).toFixed(2));
-
-    return {
-      date_transacted: dateStr,
-      date_posted: dateStr,
-      amount: amount,
-      description: isCredit ? "Direct Deposit" : `Test Transaction ${i + 1}`,
-      currency: "USD",
-    };
-  });
-
+  // Schema for Custom User
+  // We use a simple setup with just 2 accounts per bank
   return JSON.stringify({
     version: "2",
     override_accounts: [
       {
         type: "depository",
         subtype: "checking",
-        numbers: {
-          account: `111122223333000${index}`,
-          ach: {
-            account: `111122223333000${index}`,
-            routing: `01100001${index}`,
-          },
-          eft: {
-            account: `111122223333000${index}`,
-            institution: `01100001${index}`,
-            branch: "123",
-          },
-        },
         starting_balance: conf.checking,
         meta: {
           name: `Plaid Checking ${conf.nameSuffix}`,
           limit: 5000,
         },
-        transactions: transactions,
       },
       {
         type: "depository",
         subtype: "savings",
-        numbers: {
-          account: `444455556666000${index}`,
-          ach: {
-            account: `444455556666000${index}`,
-            routing: `01100001${index}`,
-          },
-        },
         starting_balance: conf.savings,
         meta: {
           name: `Plaid Saving ${conf.nameSuffix}`,
@@ -153,25 +108,51 @@ async function main() {
 
   console.log(`User created: ${user.id}`);
 
-  // 3. Ensure Dwolla Customer
-  console.log("Creating/Ensuring Dwolla Customer...");
+  // 3. Create Verified Dwolla Customer
+  console.log("Creating Verified Dwolla Customer...");
   let dwollaCustomerUrl: string | null = null;
   try {
-    const res = await ensureCustomer(user);
-    dwollaCustomerUrl = res.customerUrl;
-    console.log(`Dwolla Customer URL: ${dwollaCustomerUrl}`);
-  } catch (error) {
-    console.warn(
-      "Failed to create Dwolla Customer. Dwolla features will be unavailable.",
-      error
-    );
+    // Sandbox Verified Customer Data
+    // Use unique email to avoid "Duplicate" error and ensure we get a fresh Verified customer (since old one was receive-only)
+    const dwollaEmail = `test-${Date.now()}@interlock.com`;
+
+    const customerData = {
+      firstName: "Test",
+      lastName: "User",
+      email: dwollaEmail,
+      type: "personal",
+      address1: "123 Test St",
+      city: "Test City",
+      state: "NY",
+      postalCode: "10001",
+      dateOfBirth: "1990-01-01",
+      ssn: "1234",
+    };
+
+    const customerResponse = await dwollaClient.post("customers", customerData);
+    dwollaCustomerUrl = customerResponse.headers.get("location");
+    const customerId = dwollaCustomerUrl?.split("/").pop();
+
+    console.log(`Dwolla Customer Created: ${dwollaCustomerUrl}`);
+
+    // Update user with Dwolla ID
+    if (dwollaCustomerUrl && customerId) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          dwollaCustomerId: customerId,
+          dwollaCustomerUrl: dwollaCustomerUrl,
+        },
+      });
+    }
+  } catch (error: any) {
+    console.warn("Failed to create Dwolla Customer.", error?.body || error);
   }
 
   // 4. Create Banks and Funding Sources
   const institutions = [
     { id: "ins_109508", name: "First Platypus Bank" },
     { id: "ins_109509", name: "Second Platypus Bank" },
-    { id: "ins_109511", name: "Tartaruga Bank" },
   ];
 
   console.log(`\n🏦 Creating ${institutions.length} banks...`);

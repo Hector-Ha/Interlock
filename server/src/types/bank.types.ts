@@ -1,4 +1,5 @@
 import type { TxStatus } from "@prisma/client";
+import type { Account } from "./account.types";
 
 export interface TransactionSummary {
   id: string;
@@ -18,6 +19,7 @@ export interface BankDetails {
   createdAt: Date;
   updatedAt: Date;
   transactions: TransactionSummary[];
+  accounts: Account[];
 }
 
 export interface BankListItem {
