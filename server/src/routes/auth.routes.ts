@@ -13,8 +13,12 @@ import {
   sendVerification,
 } from "@/controllers/auth.controller";
 import { authenticate } from "@/middleware/auth";
+import { authLimiter } from "@/middleware/rateLimit";
 
 const router: Router = Router();
+
+// Apply rate limiting to all auth routes
+router.use(authLimiter);
 
 router.post("/sign-up", signUp as RequestHandler);
 router.post("/sign-in", signIn as RequestHandler);

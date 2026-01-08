@@ -19,4 +19,4 @@ EXPOSE 8080
 USER bun
 
 # Command to run the application
-CMD ["bun", "run", "src/index.ts"]
+CMD ["bun", "start"]

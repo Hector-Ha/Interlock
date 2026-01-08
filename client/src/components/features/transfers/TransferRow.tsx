@@ -1,17 +1,22 @@
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { Transfer } from "@/types/transfer";
 import { Badge } from "@/components/ui/Badge";
-import { ArrowRight, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 interface TransferRowProps {
   transfer: Transfer;
+  onClick?: () => void;
 }
 
-export function TransferRow({ transfer }: TransferRowProps) {
-  const isIncoming = false;
-
+export function TransferRow({ transfer, onClick }: TransferRowProps) {
   return (
-    <div className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors">
+    <div
+      className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors cursor-pointer"
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === "Enter" && onClick?.()}
+    >
       <div className="flex items-center gap-4">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
           <ArrowRight className="h-5 w-5 text-slate-600" />

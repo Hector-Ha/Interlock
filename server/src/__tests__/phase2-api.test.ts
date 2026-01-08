@@ -42,6 +42,47 @@ vi.mock("@/services/dwolla.service", () => ({
   }),
 }));
 
+// Mock Plaid Service
+vi.mock("@/services/plaid.service", () => ({
+  createLinkToken: vi.fn().mockResolvedValue("link-sandbox-123"),
+  exchangePublicToken: vi.fn(), // Not used directly in this test but good to have
+  createProcessorToken: vi.fn().mockResolvedValue("processor-sandbox-123"),
+  getAccountsWithBalances: vi.fn().mockResolvedValue([
+    {
+      id: "acc_123",
+      name: "Test Checking",
+      type: "depository",
+      subtype: "checking",
+      mask: "0000",
+      officialName: "Plaid Gold Standard 0% Interest Checking",
+      balance: {
+        available: 1000,
+        current: 1000,
+        limit: null,
+        currency: "USD",
+      },
+    },
+    {
+      id: "acc_456",
+      name: "Test Savings",
+      type: "depository",
+      subtype: "savings",
+      mask: "1111",
+      officialName: "Plaid Silver Standard 0.1% Interest Savings",
+      balance: {
+        available: 2000,
+        current: 2000,
+        limit: null,
+        currency: "USD",
+      },
+    },
+  ]),
+  plaidClient: {
+    // If specific client methods are called directly
+    accountsBalanceGet: vi.fn(),
+  },
+}));
+
 describe("Phase 2: API Tests", () => {
   let authCookie: string;
   let testUserId: string;

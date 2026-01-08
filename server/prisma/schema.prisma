@@ -73,6 +73,8 @@ model Transaction {
   category          String?
   type              TxType   @default(DEBIT)
 
+  destinationBankId String?  // For transfer tracking
+
   dwollaTransferId  String?  @unique
 
   @@index([bankId, date])

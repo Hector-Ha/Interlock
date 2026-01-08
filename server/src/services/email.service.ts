@@ -12,15 +12,8 @@ interface EmailOptions {
 
 // Create reusable transporter object
 const createTransporter = () => {
-  console.log("DEBUG: createTransporter called");
-  console.log(
-    "DEBUG: config.email.sendgridApiKey exists?",
-    !!config.email.sendgridApiKey
-  );
-
   // Check for SendGrid configuration
   if (config.email.sendgridApiKey) {
-    console.log("DEBUG: Using SendGrid transporter");
     return nodemailer.createTransport({
       host: "smtp.sendgrid.net",
       port: 587,
@@ -78,7 +71,6 @@ export const emailService = {
       }
     } catch (error) {
       logger.error({ err: error, to }, "Failed to send email");
-      console.error("DEBUG: Failed to send email:", error);
       throw error; // Rethrow to let caller know
     }
   },

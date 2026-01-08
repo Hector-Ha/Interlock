@@ -48,7 +48,7 @@ app.get("/health", (_req, res) => {
 });
 
 // API routes with rate limiting
-app.use("/api/v1/auth", authLimiter, authRoutes);
+app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/plaid", apiLimiter, plaidRoutes);
 app.use("/api/v1/bank", apiLimiter, bankRoutes);
 app.use("/api/v1/transaction", apiLimiter, transactionRoutes);

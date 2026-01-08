@@ -4,18 +4,28 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { Plus, Filter } from "lucide-react";
 import { transferService } from "@/services/transfer.service";
-import type { Transfer, TransferFilters } from "@/types/transfer";
+import type {
+  Transfer,
+  TransferDetails,
+  TransferFilters,
+} from "@/types/transfer";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { TransferRow } from "@/components/features/transfers/TransferRow";
 import { TransferFiltersModal } from "@/components/features/transfers/TransferFiltersModal";
+import { TransferDetailModal } from "@/components/features/transfers/TransferDetailModal";
 import { Spinner } from "@/components/ui/Spinner";
+import { useToast } from "@/stores/ui.store";
 
 export default function TransfersPage() {
   const [transfers, setTransfers] = useState<Transfer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<TransferFilters>({});
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedTransfer, setSelectedTransfer] =
+    useState<TransferDetails | null>(null);
+  const [showDetail, setShowDetail] = useState(false);
+  const toast = useToast();
   const [pagination, setPagination] = useState({
     total: 0,
     hasMore: false,
@@ -55,6 +65,22 @@ export default function TransfersPage() {
 
   const handlePageChange = (newOffset: number) => {
     loadTransfers(filters, newOffset);
+  };
+
+  const handleTransferClick = async (transferId: string) => {
+    try {
+      const { transfer } = await transferService.getTransfer(transferId);
+      setSelectedTransfer(transfer);
+      setShowDetail(true);
+    } catch (err) {
+      console.error("Failed to load transfer details", err);
+    }
+  };
+
+  const handleCancelTransfer = async (transferId: string) => {
+    await transferService.cancelTransfer(transferId);
+    toast.success("Transfer cancelled successfully");
+    loadTransfers(); // Refresh the list
   };
 
   return (
@@ -104,7 +130,11 @@ export default function TransfersPage() {
         ) : (
           <div className="divide-y divide-slate-100">
             {transfers.map((transfer) => (
-              <TransferRow key={transfer.id} transfer={transfer} />
+              <TransferRow
+                key={transfer.id}
+                transfer={transfer}
+                onClick={() => handleTransferClick(transfer.id)}
+              />
             ))}
           </div>
         )}
@@ -150,6 +180,13 @@ export default function TransfersPage() {
         onOpenChange={setShowFilters}
         filters={filters}
         onApply={handleApplyFilters}
+      />
+
+      <TransferDetailModal
+        transfer={selectedTransfer}
+        open={showDetail}
+        onOpenChange={setShowDetail}
+        onCancel={handleCancelTransfer}
       />
     </div>
   );
