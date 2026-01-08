@@ -16,7 +16,7 @@ on:
 
 jobs:
   backend-tests:
-    name: Backend Phase 0 & 1 & 2 Gates
+    name: Backend Phase 0, 1, 2 & 4.5 Gates
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -85,8 +85,19 @@ jobs:
           DWOLLA_KEY: "test_dwolla_key"
           DWOLLA_SECRET: "test_dwolla_secret"
 
+      - name: Run Phase 4.5 (P2P) Tests
+        run: cd server && bun test src/__tests__/phase4.5-p2p.test.ts
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/interlock_test
+          JWT_SECRET: "test-secret-key-must-be-long-enough-for-ci"
+          ENCRYPTION_KEY: "12345678901234567890123456789012"
+          PLAID_CLIENT_ID: "test_client_id"
+          PLAID_SECRET: "test_plaid_secret"
+          DWOLLA_KEY: "test_dwolla_key"
+          DWOLLA_SECRET: "test_dwolla_secret"
+
   frontend-tests:
-    name: Frontend Foundation
+    name: Frontend Phase 3 & 4 Gates
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -99,3 +110,9 @@ jobs:
 
       - name: Run Phase 3 (Foundation) Tests
         run: cd client && bun run test src/__tests__/phase3-foundation.test.tsx
+
+      - name: Run Phase 4 (Features) Tests
+        run: cd client && bun run test src/__tests__/phase4-features.test.tsx
+
+      - name: Run Phase 4.5 (P2P Frontend) Tests
+        run: cd client && bun run test src/__tests__/phase4.5-p2p.test.tsx
