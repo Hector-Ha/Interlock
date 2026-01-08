@@ -24,6 +24,14 @@ model User {
   failedLoginAttempts Int       @default(0)
   lockedUntil         DateTime?
 
+  // P2P Discovery (Phase 4.5)
+  phoneNumber     String?   @unique
+  phoneVerified   Boolean   @default(false)
+
+  // P2P Transaction Relations (Phase 4.5)
+  sentTransactions      Transaction[] @relation("SentTransactions")
+  receivedTransactions  Transaction[] @relation("ReceivedTransactions")
+
   banks             Bank[]
   sessions          Session[]
   auditLogs         AuditLog[]
@@ -77,8 +85,17 @@ model Transaction {
 
   dwollaTransferId  String?  @unique
 
+  // P2P Fields (Phase 4.5)
+  senderId      String?
+  recipientId   String?
+  sender        User?   @relation("SentTransactions", fields: [senderId], references: [id])
+  recipient     User?   @relation("ReceivedTransactions", fields: [recipientId], references: [id])
+  note          String?  // Optional note for P2P transfers
+
   @@index([bankId, date])
   @@index([status])
+  @@index([senderId])
+  @@index([recipientId])
 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -97,8 +114,11 @@ enum TxStatus {
 }
 
 enum TxType {
-  DEBIT
-  CREDIT
+  DEBIT           // Regular bank transaction (outflow)
+  CREDIT          // Regular bank transaction (inflow)
+  INTERNAL        // Same user, different accounts
+  P2P_SENT        // Sent to another user
+  P2P_RECEIVED    // Received from another user
 }
 
 model Session {
