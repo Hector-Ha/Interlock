@@ -134,3 +134,42 @@ export const getTransfer = async (transferId: string) => {
   const response = await dwolla.get(`transfers/${transferId}`);
   return response.body;
 };
+
+/**
+ * Creates a P2P transfer between two Dwolla customers.
+ * @param senderFundingSourceUrl - Sender's Dwolla funding source URL
+ * @param recipientFundingSourceUrl - Recipient's Dwolla funding source URL
+ * @param amount - Amount in dollars (e.g., 50.00)
+ * @param metadata - Optional metadata including note
+ * @returns Dwolla transfer URL for tracking
+ */
+export const createP2PTransfer = async (
+  senderFundingSourceUrl: string,
+  recipientFundingSourceUrl: string,
+  amount: number,
+  metadata?: { note?: string }
+): Promise<string> => {
+  const requestBody: Record<string, unknown> = {
+    _links: {
+      source: { href: senderFundingSourceUrl },
+      destination: { href: recipientFundingSourceUrl },
+    },
+    amount: {
+      currency: "USD",
+      value: amount.toFixed(2),
+    },
+  };
+
+  if (metadata?.note) {
+    requestBody.metadata = { note: metadata.note };
+  }
+
+  const response = await dwolla.post("transfers", requestBody);
+  const transferUrl = response.headers.get("location");
+
+  if (!transferUrl) {
+    throw new Error("Dwolla did not return transfer URL");
+  }
+
+  return transferUrl;
+};
