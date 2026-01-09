@@ -1,9 +1,10 @@
 import { prisma } from "@/db";
 import { createP2PTransfer as dwollaP2PTransfer } from "./dwolla.service";
 import { notificationService } from "./notification.service";
+import { emailService } from "./email.service";
 import type { Transaction } from "@prisma/client";
 
-// Constants - Transfer limits in cents for precision
+// Transfer limits in cents for precision
 const P2P_LIMITS = {
   PER_TRANSACTION: 200000, // $2,000
   DAILY: 500000, // $5,000
@@ -38,12 +39,10 @@ interface CreateP2PTransferOptions {
   note?: string;
 }
 
-// Service
+// P2P Service
 export const p2pService = {
-  /**
-   * Searches for users by email or phone number.
-   * Excludes the current user and returns whether they can receive transfers.
-   */
+  // Searches for users by email or phone number.
+  // Excludes the current user and returns whether they can receive transfers.
   async searchRecipients(
     query: string,
     currentUserId: string
@@ -87,10 +86,7 @@ export const p2pService = {
     }));
   },
 
-  /**
-   * Validates that a transfer doesn't exceed P2P limits.
-   * Checks per-transaction, daily, and weekly limits.
-   */
+  // Validates that a transfer doesn't exceed P2P limits.
   async validateLimits(
     senderId: string,
     amount: number
@@ -160,10 +156,7 @@ export const p2pService = {
     return { valid: true };
   },
 
-  /**
-   * Creates a P2P transfer between two users.
-   * Handles Dwolla transfer, database records, and notifications.
-   */
+  // Creates a P2P transfer between two users.
   async createTransfer(
     options: CreateP2PTransferOptions
   ): Promise<P2PTransferResult> {
@@ -193,7 +186,7 @@ export const p2pService = {
       throw new Error("Sender bank not linked to Dwolla");
     }
 
-    // Get recipient's primary bank (first with Dwolla linked)
+    // Get recipient's primary bank
     const recipientBank = await prisma.bank.findFirst({
       where: {
         userId: recipientId,
@@ -272,7 +265,7 @@ export const p2pService = {
       ]
     );
 
-    // Create in-app notifications (non-blocking)
+    // Create in-app notifications
     Promise.all([
       notificationService.create({
         recipientUserId: senderId,
@@ -292,11 +285,23 @@ export const p2pService = {
       console.error("Failed to create notifications:", error);
     });
 
-    // TODO: Add P2P email notifications (Commit 4.5.2.4)
-    // Email methods will be added in a future commit
-    console.log(
-      `P2P transfer: ${senderName} -> ${recipientName}, $${amount.toFixed(2)}`
-    );
+    // Send email notifications
+    Promise.all([
+      recipient.email &&
+        emailService.sendP2PReceivedNotification(
+          recipient.email,
+          senderName,
+          amount
+        ),
+      sender.email &&
+        emailService.sendP2PSentConfirmation(
+          sender.email,
+          recipientName,
+          amount
+        ),
+    ]).catch((error) => {
+      console.error("Failed to send P2P emails:", error);
+    });
 
     return {
       senderTransaction,

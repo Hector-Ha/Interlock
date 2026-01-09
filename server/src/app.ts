@@ -13,6 +13,8 @@ import bankRoutes from "./routes/bank.routes";
 import webhooksRoutes from "./routes/webhooks.routes";
 import transactionRoutes from "./routes/transaction.routes";
 import transferRoutes from "./routes/transfer.routes";
+import p2pRoutes from "./routes/p2p.routes";
+import notificationRoutes from "./routes/notification.routes";
 
 interface RequestWithRawBody extends express.Request {
   rawBody?: Buffer;
@@ -53,6 +55,8 @@ app.use("/api/v1/plaid", apiLimiter, plaidRoutes);
 app.use("/api/v1/bank", apiLimiter, bankRoutes);
 app.use("/api/v1/transaction", apiLimiter, transactionRoutes);
 app.use("/api/v1/transfers", apiLimiter, transferRoutes);
+app.use("/api/v1/transfers/p2p", p2pRoutes);
+app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/webhooks", webhooksRoutes);
 
 // Sentry error handling

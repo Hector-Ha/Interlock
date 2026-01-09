@@ -2,7 +2,11 @@ import nodemailer from "nodemailer";
 import { config } from "@/config";
 
 import { logger } from "@/middleware/logger";
-import { generateEmailHtml } from "@/utils/email-template";
+import { renderEmailLayout } from "@/emails/base.email";
+import { getPasswordResetEmail } from "@/emails/password-reset.email";
+import { getVerificationEmail } from "@/emails/verification.email";
+import { getP2PReceivedEmail } from "@/emails/p2p-received.email";
+import { getP2PSentEmail } from "@/emails/p2p-sent.email";
 
 interface EmailOptions {
   to: string;
@@ -76,19 +80,8 @@ export const emailService = {
   },
 
   sendPasswordResetEmail: async (to: string, token: string): Promise<void> => {
-    const resetLink = `${config.clientUrl}/reset-password?token=${token}`;
-
-    const html = generateEmailHtml({
-      title: "Reset Your Password",
-      body: `
-        <p>Hello,</p>
-        <p>We received a request to reset your password for your Interlock account.</p>
-        <p>To proceed with the password reset, please click the button below. This link will expire in 1 hour.</p>
-        <p>If you didn't request a password reset, you can safely ignore this email.</p>
-      `,
-      ctaText: "Reset Password",
-      ctaLink: resetLink,
-    });
+    const content = getPasswordResetEmail(token);
+    const html = renderEmailLayout(content);
 
     await emailService.sendEmail({
       to,
@@ -98,22 +91,44 @@ export const emailService = {
   },
 
   sendVerificationEmail: async (to: string, token: string): Promise<void> => {
-    const verifyLink = `${config.clientUrl}/verify-email?token=${token}`;
-
-    const html = generateEmailHtml({
-      title: "Verify Your Email Address",
-      body: `
-        <p>Welcome to Interlock!</p>
-        <p>We're excited to have you on board. To get started, please verify your email address by clicking the button below.</p>
-        <p>This verification link will expire in 24 hours.</p>
-      `,
-      ctaText: "Verify Email",
-      ctaLink: verifyLink,
-    });
+    const content = getVerificationEmail(token);
+    const html = renderEmailLayout(content);
 
     await emailService.sendEmail({
       to,
       subject: "Verify Your Email - Interlock",
+      html,
+    });
+  },
+
+  // Sends notification email when user receives P2P transfer.
+  sendP2PReceivedNotification: async (
+    to: string,
+    senderName: string,
+    amount: number
+  ): Promise<void> => {
+    const content = getP2PReceivedEmail(senderName, amount);
+    const html = renderEmailLayout(content);
+
+    await emailService.sendEmail({
+      to,
+      subject: `${senderName} sent you $${amount.toFixed(2)}`,
+      html,
+    });
+  },
+
+  // Sends confirmation email when user sends P2P transfer.
+  sendP2PSentConfirmation: async (
+    to: string,
+    recipientName: string,
+    amount: number
+  ): Promise<void> => {
+    const content = getP2PSentEmail(recipientName, amount);
+    const html = renderEmailLayout(content);
+
+    await emailService.sendEmail({
+      to,
+      subject: `You sent $${amount.toFixed(2)} to ${recipientName}`,
       html,
     });
   },
