@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import * as Sentry from "@sentry/nextjs";
 import { notificationService } from "@/services/notification.service";
 import type { Notification } from "@/types/p2p";
 
@@ -63,8 +64,10 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       set({ unreadCount: count });
     } catch (err) {
       // Silently fail for unread count (non-critical operation)
-      // Note: console.error is for debugging in browser context
-      console.error("Failed to fetch unread count:", err);
+      // Log to Sentry for production monitoring
+      Sentry.captureException(err, {
+        tags: { component: "notification-store", action: "fetchUnreadCount" },
+      });
     }
   },
 

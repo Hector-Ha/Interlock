@@ -241,9 +241,8 @@ describe("Phase 4.5: P2P Transfers", () => {
         expect(response.status).toBe(400);
       });
 
-      // Skip this test as it requires proper Dwolla integration mock
-      // The actual P2P transfer flow works correctly when Dwolla returns a valid URL
-      it.skip("should create P2P transfer successfully", async () => {
+      // Uses the Dwolla mock defined (createP2PTransfer)
+      it("should create P2P transfer successfully", async () => {
         const response = await request(app)
           .post("/api/v1/transfers/p2p")
           .set("Cookie", sender.cookie)
