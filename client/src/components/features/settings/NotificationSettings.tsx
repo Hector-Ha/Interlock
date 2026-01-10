@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Info } from "lucide-react";
+import { Bell } from "lucide-react";
 import { Card, Alert } from "@/components/ui";
 
 export function NotificationSettings() {
@@ -20,7 +20,7 @@ export function NotificationSettings() {
         </div>
       </div>
 
-      <Alert variant="info" icon={<Info className="h-4 w-4" />}>
+      <Alert variant="info">
         Notification preferences will be available when P2P transfers are
         enabled. You&apos;ll be able to control email and in-app notifications
         for transfers, payments, and security alerts.

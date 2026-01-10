@@ -5,6 +5,7 @@ export { bankService } from "./bank.service";
 export { plaidService } from "./plaid.service";
 export { transferService } from "./transfer.service";
 export { p2pService } from "./p2p.service";
+export { notificationService } from "./notification.service";
 
 export type {
   AuthResponse,
@@ -25,3 +26,9 @@ export type {
   ExchangeTokenData,
   ExchangeTokenResponse,
 } from "./plaid.service";
+
+export type {
+  NotificationListResponse,
+  UnreadCountResponse,
+  GetNotificationsOptions,
+} from "./notification.service";
