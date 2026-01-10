@@ -1,9 +1,10 @@
 "use client";
 
-import { Menu, Bell, Search } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { useUIStore } from "@/stores/ui.store";
 import { useAuthStore } from "@/stores/auth.store";
 import { Button, Input } from "@/components/ui";
+import { NotificationBell } from "./NotificationBell";
 
 export function Header() {
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
@@ -42,10 +43,7 @@ export function Header() {
         </Button>
 
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
-        </Button>
+        <NotificationBell />
 
         {/* User avatar */}
         {user && (
