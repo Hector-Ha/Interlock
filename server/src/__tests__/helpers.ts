@@ -74,8 +74,19 @@ export async function createTestTransaction(bankId: string, overrides = {}) {
 // Cleanup helper
 export async function cleanupTestData(userId: string) {
   try {
+    // Delete notifications first
+    await prisma.notification.deleteMany({
+      where: { recipientUserId: userId },
+    });
+    // Delete transactions
     await prisma.transaction.deleteMany({
-      where: { bank: { userId } },
+      where: {
+        OR: [
+          { bank: { userId } },
+          { senderId: userId },
+          { recipientId: userId },
+        ],
+      },
     });
     await prisma.bank.deleteMany({
       where: { userId },
