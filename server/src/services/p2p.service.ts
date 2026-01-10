@@ -227,6 +227,12 @@ export const p2pService = {
       { note }
     );
 
+    // Extract Transfer ID from URL
+    const transferId = transferUrl.split("/").pop();
+    if (!transferId) {
+      throw new Error("Invalid transfer URL returned from Dwolla");
+    }
+
     // Create transactions for both sender and recipient
     const [senderTransaction, recipientTransaction] = await prisma.$transaction(
       [
@@ -243,7 +249,7 @@ export const p2pService = {
             status: "PENDING",
             pending: true,
             channel: "p2p",
-            dwollaTransferId: transferUrl,
+            dwollaTransferId: transferId,
             note,
           },
         }),
@@ -260,7 +266,7 @@ export const p2pService = {
             status: "PENDING",
             pending: true,
             channel: "p2p",
-            dwollaTransferId: transferUrl,
+            dwollaTransferId: `${transferId}_CREDIT`,
             note,
           },
         }),

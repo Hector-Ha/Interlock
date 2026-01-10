@@ -47,7 +47,7 @@ export function Header() {
 
         {/* User avatar */}
         {user && (
-          <div className="md:hidden flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-brand-600)] to-[var(--color-brand-500)] text-white text-sm font-medium">
+          <div className="md:hidden flex h-9 w-9 items-center justify-center rounded-full bg-brand-main text-white text-sm font-medium shadow-sm">
             {user.firstName[0]}
             {user.lastName[0]}
           </div>
