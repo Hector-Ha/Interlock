@@ -1,6 +1,7 @@
 export * from "./auth";
 export * from "./bank";
 export * from "./transfer";
+export * from "./p2p";
 
 export interface User {
   id: string;

@@ -4,6 +4,7 @@ export { authService } from "./auth.service";
 export { bankService } from "./bank.service";
 export { plaidService } from "./plaid.service";
 export { transferService } from "./transfer.service";
+export { p2pService } from "./p2p.service";
 
 export type {
   AuthResponse,
