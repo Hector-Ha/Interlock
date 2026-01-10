@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [main, develop, testing-implementation]
+    branches: [main, feature/api-v4, testing-implementation]
     paths-ignore:
       - "**.md"
       - "LICENSE"

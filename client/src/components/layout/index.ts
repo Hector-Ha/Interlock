@@ -5,3 +5,4 @@ export { MobileSidebar } from "./MobileSidebar";
 export { ToastContainer } from "./ToastContainer";
 export { SettingsMenu } from "./SettingsMenu";
 export { SidebarItem } from "./SidebarItem";
+export { NotificationBell } from "./NotificationBell";
