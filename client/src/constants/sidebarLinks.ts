@@ -3,6 +3,7 @@ import {
   Landmark,
   History,
   ArrowRightLeft,
+  Send,
   Settings,
   LucideIcon,
 } from "lucide-react";
@@ -33,6 +34,11 @@ export const sidebarLinks: SidebarLink[] = [
     imgURL: ArrowRightLeft,
     route: "/transfers",
     name: "Transfer Funds",
+  },
+  {
+    imgURL: Send,
+    route: "/transfers/new?type=p2p",
+    name: "Send Money",
   },
   {
     imgURL: Settings,

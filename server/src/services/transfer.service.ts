@@ -37,7 +37,7 @@ export const getTransferById = async (
       institutionName: transfer.bank.institutionName,
     },
     destinationBank: {
-      //TODO: In Production, adding destinationBankId to the Transaction schema.
+      // TODO: Add destinationBankId to Transaction schema for proper bank tracking
       id: "",
       institutionName: transfer.name.replace("Transfer to ", ""),
     },

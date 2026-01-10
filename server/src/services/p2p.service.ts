@@ -2,6 +2,7 @@ import { prisma } from "@/db";
 import { createP2PTransfer as dwollaP2PTransfer } from "./dwolla.service";
 import { notificationService } from "./notification.service";
 import { emailService } from "./email.service";
+import { logger } from "@/middleware/logger";
 import type { Transaction } from "@prisma/client";
 
 // Transfer limits in cents for precision
@@ -157,6 +158,7 @@ export const p2pService = {
   },
 
   // Creates a P2P transfer between two users.
+  // Handles Dwolla transfer, creates local transactions, and sends notifications.
   async createTransfer(
     options: CreateP2PTransferOptions
   ): Promise<P2PTransferResult> {
@@ -282,7 +284,7 @@ export const p2pService = {
         relatedTransactionId: recipientTransaction.id,
       }),
     ]).catch((error) => {
-      console.error("Failed to create notifications:", error);
+      logger.error({ err: error }, "Failed to create P2P notifications");
     });
 
     // Send email notifications
@@ -300,7 +302,7 @@ export const p2pService = {
           amount
         ),
     ]).catch((error) => {
-      console.error("Failed to send P2P emails:", error);
+      logger.error({ err: error }, "Failed to send P2P email notifications");
     });
 
     return {

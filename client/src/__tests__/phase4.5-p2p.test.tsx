@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useNotificationStore } from "@/stores/notification.store";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
@@ -14,7 +15,7 @@ vi.mock("next/navigation", () => ({
   useParams: () => ({}),
 }));
 
-// Mock P2P service (to be implemented)
+// Mock P2P service - use inline mock values to avoid hoisting issues
 vi.mock("@/services/p2p.service", () => ({
   p2pService: {
     searchRecipients: vi.fn().mockResolvedValue({
@@ -26,18 +27,44 @@ vi.mock("@/services/p2p.service", () => ({
           email: "john@test.com",
           hasLinkedBank: true,
         },
+        {
+          id: "2",
+          firstName: "Jane",
+          lastName: "Smith",
+          email: "jane@test.com",
+          hasLinkedBank: false,
+        },
       ],
     }),
     createTransfer: vi.fn().mockResolvedValue({ transactionId: "tx-123" }),
   },
 }));
 
-// Mock notification service (to be implemented)
+// Mock notification service
 vi.mock("@/services/notification.service", () => ({
   notificationService: {
     getNotifications: vi.fn().mockResolvedValue({
-      notifications: [],
-      total: 0,
+      notifications: [
+        {
+          id: "n1",
+          type: "P2P_RECEIVED",
+          title: "Money Received",
+          message: "You received $50 from John",
+          isRead: false,
+          readAt: null,
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: "n2",
+          type: "P2P_SENT",
+          title: "Money Sent",
+          message: "You sent $25 to Jane",
+          isRead: true,
+          readAt: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+        },
+      ],
+      total: 2,
       hasMore: false,
     }),
     getUnreadCount: vi.fn().mockResolvedValue({ count: 3 }),
@@ -65,152 +92,411 @@ describe("Phase 4.5: P2P Frontend Components", () => {
       vi.clearAllMocks();
     });
 
-    it.skip("should render search input", async () => {
-      // TODO: Implement after RecipientSearch component is created
-      // const { RecipientSearch } = await import(
-      //   "@/components/features/p2p/RecipientSearch"
-      // );
-      // render(<RecipientSearch onSelect={vi.fn()} />);
-      // expect(
-      //   screen.getByPlaceholderText(/search by email/i)
-      // ).toBeInTheDocument();
+    it("should render search input", async () => {
+      const { RecipientSearch } = await import(
+        "@/components/features/p2p/RecipientSearch"
+      );
+      render(<RecipientSearch onSelect={vi.fn()} />);
+
+      expect(
+        screen.getByPlaceholderText(/search by email or phone/i)
+      ).toBeInTheDocument();
     });
 
-    it.skip("should search after 3+ characters typed", async () => {
-      // TODO: Implement after RecipientSearch component is created
-      // Should debounce and call searchRecipients after user types 3+ chars
+    it("should search after 3+ characters typed", async () => {
+      const { RecipientSearch } = await import(
+        "@/components/features/p2p/RecipientSearch"
+      );
+      const { p2pService } = await import("@/services/p2p.service");
+      const user = userEvent.setup();
+
+      render(<RecipientSearch onSelect={vi.fn()} />);
+
+      const input = screen.getByPlaceholderText(/search by email or phone/i);
+      await user.type(input, "john");
+
+      await waitFor(
+        () => {
+          expect(p2pService.searchRecipients).toHaveBeenCalledWith("john");
+        },
+        { timeout: 1000 }
+      );
     });
 
-    it.skip("should display search results", async () => {
-      // TODO: Implement after RecipientSearch component is created
-      // Should show recipient name and email in dropdown
+    it("should display search results", async () => {
+      const { RecipientSearch } = await import(
+        "@/components/features/p2p/RecipientSearch"
+      );
+      const user = userEvent.setup();
+
+      render(<RecipientSearch onSelect={vi.fn()} />);
+
+      const input = screen.getByPlaceholderText(/search by email or phone/i);
+      await user.type(input, "john");
+
+      await waitFor(
+        () => {
+          expect(screen.getByText("John Doe")).toBeInTheDocument();
+        },
+        { timeout: 1000 }
+      );
+      expect(screen.getByText("john@test.com")).toBeInTheDocument();
     });
 
-    it.skip("should call onSelect when recipient clicked", async () => {
-      // TODO: Implement after RecipientSearch component is created
-      // const onSelect = vi.fn();
-      // render(<RecipientSearch onSelect={onSelect} />);
-      // await user.type(screen.getByRole("textbox"), "john");
-      // await waitFor(() => {
-      //   expect(screen.getByText("John Doe")).toBeInTheDocument();
-      // });
-      // await user.click(screen.getByText("John Doe"));
-      // expect(onSelect).toHaveBeenCalledWith(
-      //   expect.objectContaining({ firstName: "John", lastName: "Doe" })
-      // );
+    it("should call onSelect when recipient with linked bank is clicked", async () => {
+      const { RecipientSearch } = await import(
+        "@/components/features/p2p/RecipientSearch"
+      );
+      const user = userEvent.setup();
+      const onSelect = vi.fn();
+
+      render(<RecipientSearch onSelect={onSelect} />);
+
+      const input = screen.getByPlaceholderText(/search by email or phone/i);
+      await user.type(input, "john");
+
+      await waitFor(() => {
+        expect(screen.getByText("John Doe")).toBeInTheDocument();
+      });
+
+      // Click on John Doe (has linked bank)
+      await user.click(screen.getByText("John Doe"));
+
+      expect(onSelect).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: "1",
+          firstName: "John",
+          lastName: "Doe",
+          hasLinkedBank: true,
+        })
+      );
     });
 
-    it.skip("should show 'no bank linked' warning for recipients without banks", async () => {
-      // TODO: Implement after RecipientSearch component is created
-      // Recipients without hasLinkedBank should show a warning
+    it("should show 'no bank linked' warning for recipients without banks", async () => {
+      const { RecipientSearch } = await import(
+        "@/components/features/p2p/RecipientSearch"
+      );
+      const user = userEvent.setup();
+
+      render(<RecipientSearch onSelect={vi.fn()} />);
+
+      const input = screen.getByPlaceholderText(/search by email or phone/i);
+      await user.type(input, "jane");
+
+      await waitFor(() => {
+        expect(screen.getByText("Jane Smith")).toBeInTheDocument();
+      });
+
+      expect(screen.getByText("No linked bank")).toBeInTheDocument();
     });
 
-    it.skip("should clear search on recipient selection", async () => {
-      // TODO: Implement after RecipientSearch component is created
+    it("should not call onSelect for recipients without linked bank", async () => {
+      const { RecipientSearch } = await import(
+        "@/components/features/p2p/RecipientSearch"
+      );
+      const user = userEvent.setup();
+      const onSelect = vi.fn();
+
+      render(<RecipientSearch onSelect={onSelect} />);
+
+      const input = screen.getByPlaceholderText(/search by email or phone/i);
+      await user.type(input, "jane");
+
+      await waitFor(() => {
+        expect(screen.getByText("Jane Smith")).toBeInTheDocument();
+      });
+
+      // Click on Jane Smith (no linked bank)
+      await user.click(screen.getByText("Jane Smith"));
+
+      expect(onSelect).not.toHaveBeenCalled();
     });
   });
 
   describe("NotificationBell", () => {
-    it.skip("should render bell icon button", async () => {
-      // TODO: Implement after NotificationBell component is created
-      // const { NotificationBell } = await import(
-      //   "@/components/layout/NotificationBell"
-      // );
-      // render(<NotificationBell />);
-      // expect(screen.getByRole("button")).toBeInTheDocument();
+    beforeEach(() => {
+      vi.clearAllMocks();
+      // Reset store state before each test
+      useNotificationStore.setState({
+        notifications: [],
+        unreadCount: 0,
+        total: 0,
+        hasMore: false,
+        isLoading: false,
+        error: null,
+      });
     });
 
-    it.skip("should show unread count badge when count > 0", async () => {
-      // TODO: Implement after NotificationBell component is created
-      // Badge should show "3" based on mock
+    it("should render bell icon button", async () => {
+      const { NotificationBell } = await import(
+        "@/components/layout/NotificationBell"
+      );
+      render(<NotificationBell />);
+
+      expect(screen.getByRole("button")).toBeInTheDocument();
     });
 
-    it.skip("should hide badge when count is 0", async () => {
-      // TODO: Implement after NotificationBell component is created
+    it("should show unread count badge when count > 0", async () => {
+      // Set unread count in store
+      useNotificationStore.setState({ unreadCount: 3 });
+
+      const { NotificationBell } = await import(
+        "@/components/layout/NotificationBell"
+      );
+      render(<NotificationBell />);
+
+      expect(screen.getByText("3")).toBeInTheDocument();
     });
 
-    it.skip("should open dropdown on click", async () => {
-      // TODO: Implement after NotificationBell component is created
+    it("should show 9+ when count exceeds 9", async () => {
+      useNotificationStore.setState({ unreadCount: 15 });
+
+      const { NotificationBell } = await import(
+        "@/components/layout/NotificationBell"
+      );
+      render(<NotificationBell />);
+
+      expect(screen.getByText("9+")).toBeInTheDocument();
     });
 
-    it.skip("should display notifications in dropdown", async () => {
-      // TODO: Implement after NotificationBell component is created
+    it("should hide badge when count is 0", async () => {
+      useNotificationStore.setState({ unreadCount: 0 });
+
+      const { NotificationBell } = await import(
+        "@/components/layout/NotificationBell"
+      );
+      render(<NotificationBell />);
+
+      // Badge should not exist
+      expect(screen.queryByText("0")).not.toBeInTheDocument();
     });
 
-    it.skip("should mark notification as read on click", async () => {
-      // TODO: Implement after NotificationBell component is created
+    it("should open dropdown on click", async () => {
+      const { NotificationBell } = await import(
+        "@/components/layout/NotificationBell"
+      );
+      const user = userEvent.setup();
+
+      render(<NotificationBell />);
+
+      const button = screen.getByRole("button");
+      await user.click(button);
+
+      await waitFor(() => {
+        expect(screen.getByText("Notifications")).toBeInTheDocument();
+      });
     });
 
-    it.skip("should have 'Mark all as read' button", async () => {
-      // TODO: Implement after NotificationBell component is created
+    it("should display notifications in dropdown", async () => {
+      // Note: The NotificationBell uses fetchNotifications when dropdown opens,
+      // which uses the mocked notificationService. We test from that mock data,
+      // not the one we set via setState.
+
+      const { NotificationBell } = await import(
+        "@/components/layout/NotificationBell"
+      );
+      const user = userEvent.setup();
+
+      render(<NotificationBell />);
+
+      await user.click(screen.getByRole("button"));
+
+      await waitFor(() => {
+        expect(screen.getByText("Money Received")).toBeInTheDocument();
+        expect(
+          screen.getByText("You received $50 from John")
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("should show 'Mark all read' button when there are unread notifications", async () => {
+      useNotificationStore.setState({ unreadCount: 2 });
+
+      const { NotificationBell } = await import(
+        "@/components/layout/NotificationBell"
+      );
+      const user = userEvent.setup();
+
+      render(<NotificationBell />);
+
+      await user.click(screen.getByRole("button"));
+
+      await waitFor(() => {
+        expect(screen.getByText("Mark all read")).toBeInTheDocument();
+      });
     });
   });
 
   describe("Notification Store", () => {
-    it.skip("should initialize with empty state", () => {
-      // TODO: Implement after notification.store.ts is created
-      // import { useNotificationStore } from "@/stores/notification.store";
-      // useNotificationStore.setState({
-      //   notifications: [],
-      //   unreadCount: 0,
-      //   isLoading: false,
-      //   error: null,
-      // });
-      // const state = useNotificationStore.getState();
-      // expect(state.notifications).toEqual([]);
-      // expect(state.unreadCount).toBe(0);
+    beforeEach(() => {
+      vi.clearAllMocks();
+      useNotificationStore.setState({
+        notifications: [],
+        unreadCount: 0,
+        total: 0,
+        hasMore: false,
+        isLoading: false,
+        error: null,
+      });
     });
 
-    it.skip("should fetch notifications", async () => {
-      // TODO: Implement after notification.store.ts is created
+    it("should initialize with empty state", () => {
+      const state = useNotificationStore.getState();
+
+      expect(state.notifications).toEqual([]);
+      expect(state.unreadCount).toBe(0);
+      expect(state.isLoading).toBe(false);
+      expect(state.error).toBeNull();
     });
 
-    it.skip("should fetch unread count", async () => {
-      // TODO: Implement after notification.store.ts is created
-      // await useNotificationStore.getState().fetchUnreadCount();
-      // const state = useNotificationStore.getState();
-      // expect(state.unreadCount).toBe(3);
+    it("should fetch notifications", async () => {
+      const { notificationService } = await import(
+        "@/services/notification.service"
+      );
+
+      await useNotificationStore.getState().fetchNotifications();
+
+      const state = useNotificationStore.getState();
+      expect(state.notifications.length).toBe(2);
+      expect(state.total).toBe(2);
+      expect(notificationService.getNotifications).toHaveBeenCalled();
     });
 
-    it.skip("should mark notification as read", async () => {
-      // TODO: Implement after notification.store.ts is created
+    it("should fetch unread count", async () => {
+      const { notificationService } = await import(
+        "@/services/notification.service"
+      );
+
+      await useNotificationStore.getState().fetchUnreadCount();
+
+      const state = useNotificationStore.getState();
+      expect(state.unreadCount).toBe(3);
+      expect(notificationService.getUnreadCount).toHaveBeenCalled();
     });
 
-    it.skip("should mark all notifications as read", async () => {
-      // TODO: Implement after notification.store.ts is created
+    it("should mark notification as read with optimistic update", async () => {
+      const { notificationService } = await import(
+        "@/services/notification.service"
+      );
+
+      // Setup initial state with an unread notification
+      useNotificationStore.setState({
+        notifications: [
+          {
+            id: "n1",
+            type: "P2P_RECEIVED",
+            title: "Test",
+            message: "Test message",
+            isRead: false,
+            readAt: null,
+            createdAt: new Date().toISOString(),
+            relatedTransactionId: null,
+          },
+        ],
+        unreadCount: 1,
+      });
+
+      await useNotificationStore.getState().markAsRead("n1");
+
+      const state = useNotificationStore.getState();
+      expect(state.notifications[0].isRead).toBe(true);
+      expect(state.unreadCount).toBe(0);
+      expect(notificationService.markAsRead).toHaveBeenCalledWith("n1");
     });
 
-    it.skip("should add new notification to list", () => {
-      // TODO: Implement after notification.store.ts is created
-      // For real-time updates
+    it("should mark all notifications as read", async () => {
+      const { notificationService } = await import(
+        "@/services/notification.service"
+      );
+
+      // Setup initial state
+      useNotificationStore.setState({
+        notifications: [
+          {
+            id: "n1",
+            type: "P2P_RECEIVED",
+            title: "Test 1",
+            message: "Test",
+            isRead: false,
+            readAt: null,
+            createdAt: new Date().toISOString(),
+            relatedTransactionId: null,
+          },
+          {
+            id: "n2",
+            type: "P2P_SENT",
+            title: "Test 2",
+            message: "Test",
+            isRead: false,
+            readAt: null,
+            createdAt: new Date().toISOString(),
+            relatedTransactionId: null,
+          },
+        ],
+        unreadCount: 2,
+      });
+
+      await useNotificationStore.getState().markAllAsRead();
+
+      const state = useNotificationStore.getState();
+      expect(state.notifications.every((n) => n.isRead)).toBe(true);
+      expect(state.unreadCount).toBe(0);
+      expect(notificationService.markAllAsRead).toHaveBeenCalled();
+    });
+
+    it("should clear error", () => {
+      useNotificationStore.setState({ error: "Some error" });
+
+      useNotificationStore.getState().clearError();
+
+      expect(useNotificationStore.getState().error).toBeNull();
+    });
+
+    it("should reset to initial state", () => {
+      useNotificationStore.setState({
+        notifications: [
+          {
+            id: "n1",
+            type: "P2P_RECEIVED",
+            title: "Test",
+            message: "Test",
+            isRead: true,
+            readAt: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            relatedTransactionId: null,
+          },
+        ],
+        unreadCount: 5,
+        error: "Some error",
+      });
+
+      useNotificationStore.getState().reset();
+
+      const state = useNotificationStore.getState();
+      expect(state.notifications).toEqual([]);
+      expect(state.unreadCount).toBe(0);
+      expect(state.error).toBeNull();
     });
   });
 
   describe("P2P Transfer Form", () => {
+    // These tests are for the transfer form integration
+    // They will be enabled when the P2PTransferForm component is fully integrated
+
     it.skip("should render transfer type selector", async () => {
-      // TODO: Implement after P2P form is integrated
-      // Should have options for "Internal Transfer" and "Send to User"
+      // TODO: Implement when P2P transfer form is integrated into transfers page
     });
 
     it.skip("should show RecipientSearch when 'Send to User' selected", async () => {
-      // TODO: Implement after P2P form is integrated
+      // TODO: Implement when P2P transfer form is integrated
     });
 
     it.skip("should validate amount against limits", async () => {
-      // TODO: Implement after P2P form is integrated
-      // Should show error for amounts > $2,000
+      // TODO: Implement when P2P transfer form is integrated
     });
 
     it.skip("should show confirmation modal before sending", async () => {
-      // TODO: Implement after P2P form is integrated
-    });
-
-    it.skip("should display success message after transfer", async () => {
-      // TODO: Implement after P2P form is integrated
-    });
-
-    it.skip("should display error message on failure", async () => {
-      // TODO: Implement after P2P form is integrated
+      // TODO: Implement when P2P transfer form is integrated
     });
   });
 });
