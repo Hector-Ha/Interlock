@@ -49,7 +49,7 @@ export function TotalBalanceCard({
 
   return (
     <Card
-      className={`flex flex-col gap-6 p-8 rounded-2xl shadow-xl border-gray-100 ${className}`}
+      className={`flex flex-col gap-4 md:gap-6 p-6 md:p-8 rounded-2xl shadow-xl border-gray-100 ${className}`}
     >
       <div className="flex flex-col gap-2">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
