@@ -16,6 +16,9 @@ import { TransferFiltersModal } from "@/components/features/transfers/TransferFi
 import { TransferDetailModal } from "@/components/features/transfers/TransferDetailModal";
 import { Spinner } from "@/components/ui/Spinner";
 import { useToast } from "@/stores/ui.store";
+import { useTransferPolling } from "@/hooks/useTransferPolling";
+import { useRefresh } from "@/hooks/useRefresh";
+import { RefreshButton } from "@/components/shared/RefreshButton";
 
 export default function TransfersPage() {
   const [transfers, setTransfers] = useState<Transfer[]>([]);
@@ -58,6 +61,18 @@ export default function TransfersPage() {
     loadTransfers();
   }, []);
 
+  const { isRefreshing, refresh } = useRefresh(async () => {
+    // Reload transfers, resetting to the first page
+    await loadTransfers(filters, 0);
+  });
+
+  useTransferPolling(transfers, {
+    enabled: true,
+    onStatusChange: (transferId, newStatus) => {
+      loadTransfers();
+    },
+  });
+
   const handleApplyFilters = (newFilters: TransferFilters) => {
     setFilters(newFilters);
     loadTransfers(newFilters, 0); // Reset offset
@@ -92,6 +107,7 @@ export default function TransfersPage() {
           <p className="text-slate-500">View and manage your money transfers</p>
         </div>
         <div className="flex gap-2">
+          <RefreshButton onClick={refresh} isRefreshing={isRefreshing} />
           <Button variant="outline" onClick={() => setShowFilters(true)}>
             <Filter className="h-4 w-4 mr-2" />
             Filter
