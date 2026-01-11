@@ -7,7 +7,7 @@ import {
 } from "react-plaid-link";
 import { plaidService } from "@/services/plaid.service";
 import { useBankStore } from "@/stores/bank.store";
-import { useToast } from "@/stores/ui.store";
+import { apiCall } from "@/lib/api-handler";
 
 interface UsePlaidLinkOptions {
   onSuccess?: () => void;
@@ -19,7 +19,6 @@ export function usePlaidLink(options?: UsePlaidLinkOptions) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { fetchBanks } = useBankStore();
-  const toast = useToast();
 
   // Fetch link token on mount
   useEffect(() => {
@@ -41,27 +40,27 @@ export function usePlaidLink(options?: UsePlaidLinkOptions) {
       setError(null);
 
       try {
-        await plaidService.exchangeToken({
-          publicToken,
-          metadata: {
-            institution: metadata.institution,
-            accounts: metadata.accounts,
-          },
-        });
+        await apiCall(
+          plaidService.exchangeToken({
+            publicToken,
+            metadata: {
+              institution: metadata.institution,
+              accounts: metadata.accounts,
+            },
+          }),
+          { successMessage: "Bank connected successfully!" }
+        );
 
         // Refresh banks list
         await fetchBanks();
-
-        toast.success("Bank connected successfully!");
         options?.onSuccess?.();
       } catch (err: any) {
         setError(err.message || "Failed to connect bank");
-        toast.error("Failed to connect bank. Please try again.");
       } finally {
         setIsLoading(false);
       }
     },
-    [fetchBanks, options, toast]
+    [fetchBanks, options]
   );
 
   const handleExit = useCallback(

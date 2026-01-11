@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/stores/auth.store";
 import { useToast } from "@/stores/ui.store";
+import { toast } from "@/stores/toast.store";
+import { apiCall } from "@/lib/api-handler";
 import { Button, Input, Card, Alert } from "@/components/ui";
 
 const passwordSchema = z
@@ -30,7 +32,6 @@ const passwordSchema = z
 type PasswordFormData = z.infer<typeof passwordSchema>;
 
 export function SecuritySettings() {
-  const toast = useToast();
   const router = useRouter();
   const { signOut } = useAuthStore();
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -48,19 +49,22 @@ export function SecuritySettings() {
   const onSubmitPassword = async (data: PasswordFormData) => {
     setIsChangingPassword(true);
     try {
-      await authService.changePassword({
-        currentPassword: data.currentPassword,
-        newPassword: data.newPassword,
-      });
-      toast.success("Password changed successfully. Please sign in again.");
+      await apiCall(
+        authService.changePassword({
+          currentPassword: data.currentPassword,
+          newPassword: data.newPassword,
+        }),
+        {
+          successMessage:
+            "Password changed successfully. Please sign in again.",
+        }
+      );
       reset();
       // Sign out and redirect to sign-in
       await signOut();
       router.push("/sign-in");
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Failed to change password";
-      toast.error(message);
+    } catch {
+      // Error handled by apiCall
     } finally {
       setIsChangingPassword(false);
     }
@@ -69,12 +73,10 @@ export function SecuritySettings() {
   const handleLogoutAll = async () => {
     setIsLoggingOutAll(true);
     try {
-      const result = await authService.logoutAll();
+      const result = await apiCall(authService.logoutAll());
       toast.success(`Logged out of ${result.sessionsInvalidated} devices`);
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Failed to logout all devices";
-      toast.error(message);
+    } catch {
+      // Error handled by apiCall
     } finally {
       setIsLoggingOutAll(false);
     }

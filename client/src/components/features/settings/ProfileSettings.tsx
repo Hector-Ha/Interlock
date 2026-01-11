@@ -7,7 +7,7 @@ import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { useAuthStore } from "@/stores/auth.store";
 import { authService } from "@/services/auth.service";
-import { useToast } from "@/stores/ui.store";
+import { apiCall } from "@/lib/api-handler";
 import { Button, Input, Card } from "@/components/ui";
 
 const profileSchema = z.object({
@@ -19,7 +19,7 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 
 export function ProfileSettings() {
   const { user, setUser } = useAuthStore();
-  const toast = useToast();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -37,13 +37,13 @@ export function ProfileSettings() {
   const onSubmit = async (data: ProfileFormData) => {
     setIsSubmitting(true);
     try {
-      const { user: updatedUser } = await authService.updateProfile(data);
+      const { user: updatedUser } = await apiCall(
+        authService.updateProfile(data),
+        { successMessage: "Profile updated successfully" }
+      );
       setUser(updatedUser);
-      toast.success("Profile updated successfully");
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Failed to update profile";
-      toast.error(message);
+    } catch {
+      // Error handled by apiCall
     } finally {
       setIsSubmitting(false);
     }
