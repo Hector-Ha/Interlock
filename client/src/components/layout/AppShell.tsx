@@ -8,6 +8,7 @@ import { Header } from "./Header";
 import { MobileSidebar } from "./MobileSidebar";
 import { ToastContainer } from "./ToastContainer";
 import { Spinner } from "@/components/ui";
+import { SkipLink } from "@/components/a11y";
 
 interface AppShellProps {
   children: ReactNode;
@@ -35,6 +36,9 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <div className="flex h-screen bg-background">
+      {/* Skip Link for Keyboard Users */}
+      <SkipLink />
+
       {/* Desktop Sidebar */}
       <Sidebar className="hidden md:flex" />
 
@@ -47,7 +51,10 @@ export function AppShell({ children }: AppShellProps) {
         <Header />
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
+        <main
+          id="main-content"
+          className="flex-1 overflow-auto p-4 md:p-6 lg:p-8"
+        >
           <div className="mx-auto max-w-7xl">{children}</div>
         </main>
       </div>
