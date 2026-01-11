@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Bell, CheckCheck } from "lucide-react";
 import { useNotificationStore } from "@/stores/notification.store";
+import { useNotificationPolling } from "@/hooks/useNotificationPolling";
 import { cn, formatRelativeTime } from "@/lib/utils";
 
 // Bell icon with notification dropdown showing recent notifications.
@@ -10,21 +11,15 @@ export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const {
-    notifications,
-    unreadCount,
-    fetchNotifications,
-    fetchUnreadCount,
-    markAsRead,
-    markAllAsRead,
-  } = useNotificationStore();
+  const { notifications, fetchNotifications, markAsRead, markAllAsRead } =
+    useNotificationStore();
 
-  // Fetch unread count on mount and poll every 30 seconds
-  useEffect(() => {
-    fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 30000);
-    return () => clearInterval(interval);
-  }, [fetchUnreadCount]);
+  // Use polling hook for unread count with visibility-aware polling
+  const { unreadCount } = useNotificationPolling({
+    enabled: true,
+    interval: 30000,
+    showToastOnNew: true,
+  });
 
   // Fetch notifications when dropdown opens
   useEffect(() => {

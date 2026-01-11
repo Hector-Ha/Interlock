@@ -2,9 +2,11 @@
 
 import React from "react";
 import HeaderBox from "@/components/shared/HeaderBox";
+import { RefreshButton } from "@/components/shared/RefreshButton";
 import { useAuthStore } from "@/stores/auth.store";
 import { useBankStore } from "@/stores/bank.store";
 import { useDashboard } from "@/hooks/useDashboard";
+import { useRefresh } from "@/hooks/useRefresh";
 import { BanksList } from "@/components/features/dashboard/BanksList";
 import { RecentTransactions } from "@/components/features/dashboard/RecentTransactions";
 import { QuickActions } from "@/components/features/dashboard/QuickActions";
@@ -22,7 +24,10 @@ const DashboardPage = () => {
     recentTransactions,
     accounts,
     greeting,
+    refresh: refreshDashboard,
   } = useDashboard();
+
+  const { isRefreshing, refresh } = useRefresh(refreshDashboard);
 
   if (isLoading) {
     return (
@@ -52,12 +57,15 @@ const DashboardPage = () => {
       <div className="max-w-7xl mx-auto px-6 sm:px-8 py-12 space-y-12">
         <header className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
           <div className="w-full md:max-w-xl">
-            <HeaderBox
-              type="greeting"
-              title={greeting}
-              user={user?.firstName || "Guest"}
-              subtext="Access and manage your account and transactions efficiently."
-            />
+            <div className="flex items-start justify-between gap-4">
+              <HeaderBox
+                type="greeting"
+                title={greeting}
+                user={user?.firstName || "Guest"}
+                subtext="Access and manage your account and transactions efficiently."
+              />
+              <RefreshButton isRefreshing={isRefreshing} onClick={refresh} />
+            </div>
           </div>
 
           <div className="w-full md:max-w-[400px]">

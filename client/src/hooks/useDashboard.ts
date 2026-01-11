@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useBankStore } from "@/stores/bank.store";
 import { bankService } from "@/services/bank.service";
 import { transferService } from "@/services/transfer.service";
@@ -13,6 +13,7 @@ interface UseDashboardResult {
   pendingTransfers: Transfer[];
   accounts: Account[];
   greeting: string;
+  refresh: () => Promise<void>;
 }
 
 export const useDashboard = (): UseDashboardResult => {
@@ -35,82 +36,69 @@ export const useDashboard = (): UseDashboardResult => {
     return "Good Evening";
   };
 
-  useEffect(() => {
-    let isMounted = true;
+  const loadDashboardData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-    const loadDashboardData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+      await fetchBanks();
 
-        await fetchBanks();
+      // Obtaining the list directly is safer in this specific async flow to avoid race conditions with store updates.
+      const banksResponse = await bankService.getBanks();
 
-        // Obtaining the list directly is safer in this specific async flow to avoid race conditions with store updates.
-        const banksResponse = await bankService.getBanks();
+      const currentBanks = banksResponse.banks;
 
-        const currentBanks = banksResponse.banks;
+      let transactions: Transaction[] = [];
+      let calculatedBalance = 0;
+      let allAccounts: Account[] = [];
 
-        let transactions: Transaction[] = [];
-        let calculatedBalance = 0;
-        let allAccounts: Account[] = [];
-
-        if (currentBanks.length > 0) {
-          // Fetch recent transactions from the first bank as a primary source
-          const primaryBankId = currentBanks[0].id;
-          if (primaryBankId) {
-            const txResponse = await bankService.getTransactions(
-              primaryBankId,
-              { limit: 5 }
-            );
-            transactions = txResponse.transactions;
-          }
-
-          // Fetch accounts for each bank to calculate total balance and collect accounts
-          const accountsPromises = currentBanks.map((bank) =>
-            bankService.getAccounts(bank.id)
-          );
-          const accountsResponses = await Promise.all(accountsPromises);
-
-          accountsResponses.forEach((response) => {
-            response.accounts.forEach((account) => {
-              allAccounts.push(account);
-              calculatedBalance +=
-                account.balance.available ?? account.balance.current ?? 0;
-            });
+      if (currentBanks.length > 0) {
+        // Fetch recent transactions from the first bank as a primary source
+        const primaryBankId = currentBanks[0].id;
+        if (primaryBankId) {
+          const txResponse = await bankService.getTransactions(primaryBankId, {
+            limit: 5,
           });
+          transactions = txResponse.transactions;
         }
 
-        // Fetch pending transfers
-        const transfersPromise = transferService.getTransfers({
-          status: "PENDING",
-          limit: 5,
+        // Fetch accounts for each bank to calculate total balance and collect accounts
+        const accountsPromises = currentBanks.map((bank) =>
+          bankService.getAccounts(bank.id)
+        );
+        const accountsResponses = await Promise.all(accountsPromises);
+
+        accountsResponses.forEach((response) => {
+          response.accounts.forEach((account) => {
+            allAccounts.push(account);
+            calculatedBalance +=
+              account.balance.available ?? account.balance.current ?? 0;
+          });
         });
-        const transfersRes = await transfersPromise;
-
-        if (isMounted) {
-          setRecentTransactions(transactions);
-          setPendingTransfers(transfersRes.transfers || []);
-          setTotalBalance(calculatedBalance);
-          setAccounts(allAccounts);
-        }
-      } catch (err: any) {
-        if (isMounted) {
-          console.error("Dashboard data load error:", err);
-          setError(err.message || "Failed to load dashboard data");
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
       }
-    };
 
-    loadDashboardData();
+      // Fetch pending transfers
+      const transfersPromise = transferService.getTransfers({
+        status: "PENDING",
+        limit: 5,
+      });
+      const transfersRes = await transfersPromise;
 
-    return () => {
-      isMounted = false;
-    };
+      setRecentTransactions(transactions);
+      setPendingTransfers(transfersRes.transfers || []);
+      setTotalBalance(calculatedBalance);
+      setAccounts(allAccounts);
+    } catch (err: any) {
+      console.error("Dashboard data load error:", err);
+      setError(err.message || "Failed to load dashboard data");
+    } finally {
+      setIsLoading(false);
+    }
   }, [fetchBanks]);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
 
   return {
     isLoading,
@@ -120,5 +108,6 @@ export const useDashboard = (): UseDashboardResult => {
     pendingTransfers,
     accounts,
     greeting: getGreeting(),
+    refresh: loadDashboardData,
   };
 };
