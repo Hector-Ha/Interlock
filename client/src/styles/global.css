@@ -196,3 +196,65 @@
   font-weight: 100 900;
   font-display: swap;
 }
+
+/* Accessibility Styles */
+
+/* Focus visible styles */
+*:focus-visible {
+  outline: 2px solid var(--color-brand-main);
+  outline-offset: 2px;
+}
+
+/* Button focus */
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--color-brand-main);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(120, 57, 238, 0.2);
+}
+
+/* Input focus */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: var(--color-brand-main);
+  box-shadow: 0 0 0 3px rgba(120, 57, 238, 0.15);
+}
+
+/* Link focus */
+a:focus-visible {
+  outline: 2px solid var(--color-brand-main);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  :root {
+    --color-brand-main: #0000ff;
+    --color-success-main: #008000;
+    --color-error-main: #ff0000;
+  }
+
+  button,
+  a {
+    border: 2px solid currentColor !important;
+  }
+
+  *:focus-visible {
+    outline-width: 3px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
