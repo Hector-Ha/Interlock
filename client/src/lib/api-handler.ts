@@ -1,4 +1,4 @@
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 import { toast } from "@/stores/toast.store";
 
 // Matches client/src/services/api-client.ts ApiError interface
@@ -55,7 +55,7 @@ const errorMessages: Record<string, string> = {
 };
 
 export function getErrorMessage(error: unknown): string {
-  // Check for our custom ApiError structure (from api-client reject)
+  // Check for our custom ApiError structure
   if (isApiError(error)) {
     if (error.code && errorMessages[error.code]) {
       return errorMessages[error.code];
@@ -63,9 +63,19 @@ export function getErrorMessage(error: unknown): string {
     return error.message || errorMessages.INTERNAL_ERROR;
   }
 
-  // Fallback for raw AxiosErrors (should be rare if using api-client)
-  if (error instanceof AxiosError) {
-    const data = error.response?.data as AxiosErrorResponse | undefined;
+  // Fallback for raw AxiosErrors (should be rare)
+  const isAxiosErr =
+    axios.isAxiosError(error) ||
+    (error instanceof Error && error.name === "AxiosError");
+
+  if (isAxiosErr) {
+    const axiosError = error as AxiosError<AxiosErrorResponse>;
+    // Check error code for network/timeout errors FIRST
+    // For network errors, there's no response, so we check the error code
+    if (axiosError.code === "ERR_NETWORK") return errorMessages.NETWORK_ERROR;
+    if (axiosError.code === "ECONNABORTED") return errorMessages.TIMEOUT_ERROR;
+
+    const data = axiosError.response?.data;
 
     if (data?.code && errorMessages[data.code]) {
       return errorMessages[data.code];
@@ -75,11 +85,8 @@ export function getErrorMessage(error: unknown): string {
       return data.message;
     }
 
-    if (error.code === "ERR_NETWORK") return errorMessages.NETWORK_ERROR;
-    if (error.code === "ECONNABORTED") return errorMessages.TIMEOUT_ERROR;
-
     // Status code fallbacks
-    switch (error.response?.status) {
+    switch (axiosError.response?.status) {
       case 400:
         return "Invalid request. Please check your input.";
       case 401:

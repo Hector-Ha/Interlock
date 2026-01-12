@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useNotificationStore } from "@/stores/notification.store";
+import { useBankStore } from "@/stores/bank.store";
 
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
@@ -74,16 +75,25 @@ vi.mock("@/services/notification.service", () => ({
 }));
 
 // Mock bank store
+const mockBankStore = {
+  banks: [
+    {
+      id: "bank-1",
+      institutionName: "Test Bank",
+      dwollaFundingUrl: "https://dwolla.com/fs/123",
+    },
+  ],
+  isLoading: false,
+};
+
+const useBankStoreMock = vi.fn(() => mockBankStore);
+(useBankStoreMock as any).setState = vi.fn((newState) => {
+  Object.assign(mockBankStore, newState);
+});
+(useBankStoreMock as any).getState = vi.fn(() => mockBankStore);
+
 vi.mock("@/stores/bank.store", () => ({
-  useBankStore: vi.fn(() => ({
-    banks: [
-      {
-        id: "bank-1",
-        institutionName: "Test Bank",
-        dwollaFundingUrl: "https://dwolla.com/fs/123",
-      },
-    ],
-  })),
+  useBankStore: useBankStoreMock,
 }));
 
 describe("Phase 4.5: P2P Frontend Components", () => {
@@ -480,23 +490,151 @@ describe("Phase 4.5: P2P Frontend Components", () => {
   });
 
   describe("P2P Transfer Form", () => {
-    // These tests are for the transfer form integration
-    // They will be enabled when the P2PTransferForm component is fully integrated
-
-    it.skip("should render transfer type selector", async () => {
-      // TODO: Implement when P2P transfer form is integrated into transfers page
+    beforeEach(() => {
+      vi.clearAllMocks();
+      useBankStore.setState({
+        banks: [
+          {
+            id: "bank-1",
+            institutionName: "Test Bank",
+            dwollaFundingUrl: "https://dwolla.com/fs/123",
+            isDwollaLinked: true,
+            status: "ACTIVE",
+            institutionId: "ins_1",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          } as any,
+        ],
+        isLoading: false,
+      });
     });
 
-    it.skip("should show RecipientSearch when 'Send to User' selected", async () => {
-      // TODO: Implement when P2P transfer form is integrated
+    it("should render transfer form elements", async () => {
+      const { P2PTransferForm } = await import(
+        "@/components/features/transfers/P2PTransferForm"
+      );
+      render(<P2PTransferForm />);
+
+      expect(screen.getByText(/Send Money/i)).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText(/search by email/i)
+      ).toBeInTheDocument();
+      expect(screen.getByText(/From Account/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Amount/i)).toBeInTheDocument();
     });
 
-    it.skip("should validate amount against limits", async () => {
-      // TODO: Implement when P2P transfer form is integrated
+    it("should show RecipientSearch and allow selection", async () => {
+      const { P2PTransferForm } = await import(
+        "@/components/features/transfers/P2PTransferForm"
+      );
+      const user = userEvent.setup();
+      render(<P2PTransferForm />);
+
+      // Initial state has search input
+      const searchInput = screen.getByPlaceholderText(/search by email/i);
+      await user.type(searchInput, "john");
+
+      await waitFor(() => {
+        expect(screen.getByText("John Doe")).toBeInTheDocument();
+      });
+
+      // Select recipient
+      await user.click(screen.getByText("John Doe"));
+
+      // Search input should be replaced by selected user display
+      expect(
+        screen.queryByPlaceholderText(/search by email/i)
+      ).not.toBeInTheDocument();
+      expect(screen.getByText("John Doe")).toBeInTheDocument();
+      expect(screen.getByText("john@test.com")).toBeInTheDocument();
     });
 
-    it.skip("should show confirmation modal before sending", async () => {
-      // TODO: Implement when P2P transfer form is integrated
+    it("should validate amount against limits", async () => {
+      const { P2PTransferForm } = await import(
+        "@/components/features/transfers/P2PTransferForm"
+      );
+      const user = userEvent.setup();
+      render(<P2PTransferForm />);
+
+      // Select recipient first (needed to enable submit)
+      const searchInput = screen.getByPlaceholderText(/search by email/i);
+      await user.type(searchInput, "john");
+      await waitFor(() => screen.getByText("John Doe"));
+      await user.click(screen.getByText("John Doe"));
+
+      // Select bank
+      const amountInput = screen.getByLabelText(/Amount/i);
+
+      // Test > 2000
+      await user.type(amountInput, "2500");
+      await user.tab(); // trigger validation
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Maximum transfer is \$2,000.00/i)
+        ).toBeInTheDocument();
+      });
+
+      // Clear and test valid
+      await user.clear(amountInput);
+      await user.type(amountInput, "100");
+
+      await waitFor(() => {
+        expect(screen.queryByText(/Maximum transfer/i)).not.toBeInTheDocument();
+      });
+    });
+
+    it("should show confirmation modal and submit", async () => {
+      const { P2PTransferForm } = await import(
+        "@/components/features/transfers/P2PTransferForm"
+      );
+      const { p2pService } = await import("@/services/p2p.service");
+      const user = userEvent.setup();
+      render(<P2PTransferForm />);
+
+      // Select Recipient
+      const searchInput = screen.getByPlaceholderText(/search by email/i);
+      await user.type(searchInput, "john");
+      await waitFor(() => screen.getByText("John Doe"));
+      await user.click(screen.getByText("John Doe"));
+
+      // Select Bank
+      const bankTrigger = screen.getByRole("combobox");
+      await user.click(bankTrigger); // Open dropdown
+      const bankOption = await screen.findByText("Test Bank");
+      await user.click(bankOption); // Select bank
+
+      // Enter Amount
+      const amountInput = screen.getByLabelText(/Amount/i);
+      await user.type(amountInput, "50");
+
+      // Click Continue
+      const continueBtn = screen.getByRole("button", { name: /Continue/i });
+      expect(continueBtn).toBeEnabled();
+      await user.click(continueBtn);
+
+      // Verify Confirmation Modal
+      expect(screen.getByText(/Confirm Transfer/i)).toBeInTheDocument();
+      expect(screen.getByText(/\$50.00/i)).toBeInTheDocument();
+      expect(screen.getByText(/To/i)).toBeInTheDocument();
+      expect(screen.getAllByText("John Doe").length).toBeGreaterThan(0);
+
+      // Confirm
+      const confirmBtn = screen.getByRole("button", {
+        name: /Confirm & Send/i,
+      });
+      await user.click(confirmBtn);
+
+      // Verify Service Call
+      await waitFor(() => {
+        expect(p2pService.createTransfer).toHaveBeenCalledWith(
+          expect.objectContaining({
+            recipientId: "1",
+            senderBankId: "bank-1",
+            amount: 50,
+          })
+        );
+      });
     });
   });
 });
