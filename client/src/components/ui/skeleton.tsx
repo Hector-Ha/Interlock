@@ -44,14 +44,19 @@ function TextSkeleton({ lines = 3 }: { lines?: number }) {
   );
 }
 
-function AvatarSkeleton({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
+function AvatarSkeleton({
+  size = "md",
+  ...props
+}: { size?: "sm" | "md" | "lg" } & React.HTMLAttributes<HTMLDivElement>) {
   const sizeClasses = {
     sm: "h-8 w-8",
     md: "h-10 w-10",
     lg: "h-12 w-12",
   };
 
-  return <Skeleton variant="circular" className={sizeClasses[size]} />;
+  return (
+    <Skeleton variant="circular" className={sizeClasses[size]} {...props} />
+  );
 }
 
 export { Skeleton, TextSkeleton, AvatarSkeleton };
