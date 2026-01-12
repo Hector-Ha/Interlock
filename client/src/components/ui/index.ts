@@ -45,3 +45,4 @@ export {
   SheetDescription,
 } from "./Sheet";
 export { ToastContainer } from "./Toast";
+export { ResponsiveTable } from "./ResponsiveTable";
