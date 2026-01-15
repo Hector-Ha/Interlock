@@ -8,7 +8,7 @@ import rateLimit from "express-rate-limit";
  */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: config.env === "test" ? 1000 : 5, // 5 attempts per window (1000 for tests)
+  max: config.env === "test" || config.env === "development" ? 1000 : 5, // 5 attempts per window (1000 for tests/dev)
   message: {
     message:
       "Too many authentication attempts. Please try again in 15 minutes.",

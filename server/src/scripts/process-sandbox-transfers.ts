@@ -29,16 +29,31 @@ async function main() {
         status: "PENDING",
         dwollaTransferId: { not: null },
       },
+      include: {
+        bank: { include: { user: true } },
+        sender: true,
+        recipient: true,
+      },
     });
 
     console.log(
-      `Found ${pendingTransactions.length} pending transactions to check.`
+      `Found ${pendingTransactions.length} pending transactions to check.`,
     );
 
     let updatedCount = 0;
 
     for (const tx of pendingTransactions) {
       if (!tx.dwollaTransferId) continue;
+
+      // Identify who this transaction belongs to
+      let ownerName = "Unknown";
+      if (tx.bank?.user) {
+        ownerName = `${tx.bank.user.firstName} ${tx.bank.user.lastName}`;
+      }
+
+      console.log(`\n🔎 Checking Tx ${tx.id} for ${ownerName}`);
+      console.log(`   Amount: ${tx.amount} | Type: ${tx.type}`);
+      console.log(`   Transfer ID: ${tx.dwollaTransferId}`);
 
       try {
         // Strip _CREDIT suffix if present to get base transfer ID
@@ -70,40 +85,41 @@ async function main() {
             break;
         }
 
-        if (newStatus) {
+        if (newStatus && newStatus !== tx.status) {
           await prisma.transaction.update({
             where: { id: tx.id },
             data: { status: newStatus as any },
           });
           console.log(
-            `✅ Updated Tx ${tx.id} (${tx.amount} USD, ${
-              isCredit ? "CREDIT" : "DEBIT"
-            }): ${dwollaStatus} -> ${newStatus}`
+            `   ✅ Updated Status: ${tx.status} -> ${newStatus} (Dwolla: ${dwollaStatus})`,
           );
           updatedCount++;
+        } else {
+          console.log(
+            `   (No status change. Current: ${tx.status}, Dwolla: ${dwollaStatus})`,
+          );
         }
       } catch (err: any) {
-        console.error(
-          `⚠️ Failed to check transfer ${tx.dwollaTransferId}:`,
-          err.message
-        );
+        console.error(`   ⚠️ Failed to check transfer:`, err.message);
       }
     }
 
     console.log(`\n🎉 Sync Complete. Updated ${updatedCount} transactions.`);
     console.log(
-      "All pending sandbox transfers should now be 'processed' and reflected in your database."
+      "All pending sandbox transfers should now be 'processed' and reflected in your database.",
     );
     console.log(
-      "You may need to run this twice if moving funds between two banks (once for debit, once for credit)."
+      "You may need to run this twice if moving funds between two banks (once for debit, once for credit).",
     );
   } catch (error: any) {
     console.error(
       "❌ Error simulating processing:",
-      error.body || error.message
+      error.body || error.message,
     );
     process.exit(1);
   }
 }
 
-main();
+main()
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());

@@ -1,28 +1,42 @@
 import { prisma } from "../db";
 
-async function verify() {
-  const email = "test@interlock.com";
+async function checkUserLock(email: string) {
+  console.log(`\n🔍 Checking lock status for: ${email}`);
 
-  // Check user
   const user = await prisma.user.findUnique({ where: { email } });
 
   if (!user) {
-    console.log("User not found");
+    console.log(`❌ User not found`);
     return;
   }
 
-  console.log("User found:", user.id);
+  console.log(`   ID: ${user.id}`);
+  console.log(`   Failed Attempts: ${user.failedLoginAttempts}`);
 
-  // Check account lock
   if (user.lockedUntil) {
-    console.log("Account is LOCKED until:", user.lockedUntil);
-  } else {
-    console.log("Account is NOT locked");
-  }
+    console.log(`   🔒 STATUS: LOCKED until ${user.lockedUntil.toISOString()}`);
 
-  console.log("Failed attempts:", user.failedLoginAttempts);
+    // Check if lock is still active
+    if (new Date() < user.lockedUntil) {
+      console.log(`      (Account is currently locked)`);
+    } else {
+      console.log(`      (Lock has expired, account should be accessible)`);
+    }
+  } else {
+    console.log(`   ✅ STATUS: ACTIVE (Not Locked)`);
+  }
 }
 
-verify()
+async function main() {
+  const targetEmails = ["test@interlock.com", "recipient@interlock.com"];
+
+  console.log("========================================");
+  for (const email of targetEmails) {
+    await checkUserLock(email);
+  }
+  console.log("\n========================================");
+}
+
+main()
   .catch(console.error)
   .finally(() => prisma.$disconnect());
