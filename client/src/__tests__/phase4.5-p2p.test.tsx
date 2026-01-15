@@ -75,22 +75,27 @@ vi.mock("@/services/notification.service", () => ({
 }));
 
 // Mock bank store
-const mockBankStore = {
-  banks: [
-    {
-      id: "bank-1",
-      institutionName: "Test Bank",
-      dwollaFundingUrl: "https://dwolla.com/fs/123",
-    },
-  ],
-  isLoading: false,
-};
+const { useBankStoreMock } = vi.hoisted(() => {
+  const mockBankStore = {
+    banks: [
+      {
+        id: "bank-1",
+        institutionName: "Test Bank",
+        dwollaFundingUrl: "https://dwolla.com/fs/123",
+      },
+    ],
+    isLoading: false,
+    fetchBanks: vi.fn(),
+  };
 
-const useBankStoreMock = vi.fn(() => mockBankStore);
-(useBankStoreMock as any).setState = vi.fn((newState) => {
-  Object.assign(mockBankStore, newState);
+  const useBankStoreMock = vi.fn(() => mockBankStore);
+  (useBankStoreMock as any).setState = vi.fn((newState) => {
+    Object.assign(mockBankStore, newState);
+  });
+  (useBankStoreMock as any).getState = vi.fn(() => mockBankStore);
+
+  return { useBankStoreMock };
 });
-(useBankStoreMock as any).getState = vi.fn(() => mockBankStore);
 
 vi.mock("@/stores/bank.store", () => ({
   useBankStore: useBankStoreMock,
@@ -103,20 +108,18 @@ describe("Phase 4.5: P2P Frontend Components", () => {
     });
 
     it("should render search input", async () => {
-      const { RecipientSearch } = await import(
-        "@/components/features/p2p/RecipientSearch"
-      );
+      const { RecipientSearch } =
+        await import("@/components/features/p2p/RecipientSearch");
       render(<RecipientSearch onSelect={vi.fn()} />);
 
       expect(
-        screen.getByPlaceholderText(/search by email or phone/i)
+        screen.getByPlaceholderText(/search by email or phone/i),
       ).toBeInTheDocument();
     });
 
     it("should search after 3+ characters typed", async () => {
-      const { RecipientSearch } = await import(
-        "@/components/features/p2p/RecipientSearch"
-      );
+      const { RecipientSearch } =
+        await import("@/components/features/p2p/RecipientSearch");
       const { p2pService } = await import("@/services/p2p.service");
       const user = userEvent.setup();
 
@@ -129,14 +132,13 @@ describe("Phase 4.5: P2P Frontend Components", () => {
         () => {
           expect(p2pService.searchRecipients).toHaveBeenCalledWith("john");
         },
-        { timeout: 1000 }
+        { timeout: 1000 },
       );
     });
 
     it("should display search results", async () => {
-      const { RecipientSearch } = await import(
-        "@/components/features/p2p/RecipientSearch"
-      );
+      const { RecipientSearch } =
+        await import("@/components/features/p2p/RecipientSearch");
       const user = userEvent.setup();
 
       render(<RecipientSearch onSelect={vi.fn()} />);
@@ -148,15 +150,14 @@ describe("Phase 4.5: P2P Frontend Components", () => {
         () => {
           expect(screen.getByText("John Doe")).toBeInTheDocument();
         },
-        { timeout: 1000 }
+        { timeout: 1000 },
       );
       expect(screen.getByText("john@test.com")).toBeInTheDocument();
     });
 
     it("should call onSelect when recipient with linked bank is clicked", async () => {
-      const { RecipientSearch } = await import(
-        "@/components/features/p2p/RecipientSearch"
-      );
+      const { RecipientSearch } =
+        await import("@/components/features/p2p/RecipientSearch");
       const user = userEvent.setup();
       const onSelect = vi.fn();
 
@@ -178,14 +179,13 @@ describe("Phase 4.5: P2P Frontend Components", () => {
           firstName: "John",
           lastName: "Doe",
           hasLinkedBank: true,
-        })
+        }),
       );
     });
 
     it("should show 'no bank linked' warning for recipients without banks", async () => {
-      const { RecipientSearch } = await import(
-        "@/components/features/p2p/RecipientSearch"
-      );
+      const { RecipientSearch } =
+        await import("@/components/features/p2p/RecipientSearch");
       const user = userEvent.setup();
 
       render(<RecipientSearch onSelect={vi.fn()} />);
@@ -201,9 +201,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
     });
 
     it("should not call onSelect for recipients without linked bank", async () => {
-      const { RecipientSearch } = await import(
-        "@/components/features/p2p/RecipientSearch"
-      );
+      const { RecipientSearch } =
+        await import("@/components/features/p2p/RecipientSearch");
       const user = userEvent.setup();
       const onSelect = vi.fn();
 
@@ -238,9 +237,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
     });
 
     it("should render bell icon button", async () => {
-      const { NotificationBell } = await import(
-        "@/components/layout/NotificationBell"
-      );
+      const { NotificationBell } =
+        await import("@/components/layout/NotificationBell");
       render(<NotificationBell />);
 
       expect(screen.getByRole("button")).toBeInTheDocument();
@@ -250,9 +248,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
       // Set unread count in store
       useNotificationStore.setState({ unreadCount: 3 });
 
-      const { NotificationBell } = await import(
-        "@/components/layout/NotificationBell"
-      );
+      const { NotificationBell } =
+        await import("@/components/layout/NotificationBell");
       render(<NotificationBell />);
 
       expect(screen.getByText("3")).toBeInTheDocument();
@@ -261,9 +258,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
     it("should show 9+ when count exceeds 9", async () => {
       useNotificationStore.setState({ unreadCount: 15 });
 
-      const { NotificationBell } = await import(
-        "@/components/layout/NotificationBell"
-      );
+      const { NotificationBell } =
+        await import("@/components/layout/NotificationBell");
       render(<NotificationBell />);
 
       expect(screen.getByText("9+")).toBeInTheDocument();
@@ -272,9 +268,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
     it("should hide badge when count is 0", async () => {
       useNotificationStore.setState({ unreadCount: 0 });
 
-      const { NotificationBell } = await import(
-        "@/components/layout/NotificationBell"
-      );
+      const { NotificationBell } =
+        await import("@/components/layout/NotificationBell");
       render(<NotificationBell />);
 
       // Badge should not exist
@@ -282,9 +277,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
     });
 
     it("should open dropdown on click", async () => {
-      const { NotificationBell } = await import(
-        "@/components/layout/NotificationBell"
-      );
+      const { NotificationBell } =
+        await import("@/components/layout/NotificationBell");
       const user = userEvent.setup();
 
       render(<NotificationBell />);
@@ -302,9 +296,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
       // which uses the mocked notificationService. We test from that mock data,
       // not the one we set via setState.
 
-      const { NotificationBell } = await import(
-        "@/components/layout/NotificationBell"
-      );
+      const { NotificationBell } =
+        await import("@/components/layout/NotificationBell");
       const user = userEvent.setup();
 
       render(<NotificationBell />);
@@ -314,7 +307,7 @@ describe("Phase 4.5: P2P Frontend Components", () => {
       await waitFor(() => {
         expect(screen.getByText("Money Received")).toBeInTheDocument();
         expect(
-          screen.getByText("You received $50 from John")
+          screen.getByText("You received $50 from John"),
         ).toBeInTheDocument();
       });
     });
@@ -322,9 +315,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
     it("should show 'Mark all read' button when there are unread notifications", async () => {
       useNotificationStore.setState({ unreadCount: 2 });
 
-      const { NotificationBell } = await import(
-        "@/components/layout/NotificationBell"
-      );
+      const { NotificationBell } =
+        await import("@/components/layout/NotificationBell");
       const user = userEvent.setup();
 
       render(<NotificationBell />);
@@ -360,9 +352,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
     });
 
     it("should fetch notifications", async () => {
-      const { notificationService } = await import(
-        "@/services/notification.service"
-      );
+      const { notificationService } =
+        await import("@/services/notification.service");
 
       await useNotificationStore.getState().fetchNotifications();
 
@@ -373,9 +364,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
     });
 
     it("should fetch unread count", async () => {
-      const { notificationService } = await import(
-        "@/services/notification.service"
-      );
+      const { notificationService } =
+        await import("@/services/notification.service");
 
       await useNotificationStore.getState().fetchUnreadCount();
 
@@ -385,9 +375,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
     });
 
     it("should mark notification as read with optimistic update", async () => {
-      const { notificationService } = await import(
-        "@/services/notification.service"
-      );
+      const { notificationService } =
+        await import("@/services/notification.service");
 
       // Setup initial state with an unread notification
       useNotificationStore.setState({
@@ -415,9 +404,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
     });
 
     it("should mark all notifications as read", async () => {
-      const { notificationService } = await import(
-        "@/services/notification.service"
-      );
+      const { notificationService } =
+        await import("@/services/notification.service");
 
       // Setup initial state
       useNotificationStore.setState({
@@ -510,23 +498,21 @@ describe("Phase 4.5: P2P Frontend Components", () => {
     });
 
     it("should render transfer form elements", async () => {
-      const { P2PTransferForm } = await import(
-        "@/components/features/transfers/P2PTransferForm"
-      );
+      const { P2PTransferForm } =
+        await import("@/components/features/transfers/P2PTransferForm");
       render(<P2PTransferForm />);
 
       expect(screen.getByText(/Send Money/i)).toBeInTheDocument();
       expect(
-        screen.getByPlaceholderText(/search by email/i)
+        screen.getByPlaceholderText(/search by email/i),
       ).toBeInTheDocument();
       expect(screen.getByText(/From Account/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/Amount/i)).toBeInTheDocument();
     });
 
     it("should show RecipientSearch and allow selection", async () => {
-      const { P2PTransferForm } = await import(
-        "@/components/features/transfers/P2PTransferForm"
-      );
+      const { P2PTransferForm } =
+        await import("@/components/features/transfers/P2PTransferForm");
       const user = userEvent.setup();
       render(<P2PTransferForm />);
 
@@ -543,16 +529,15 @@ describe("Phase 4.5: P2P Frontend Components", () => {
 
       // Search input should be replaced by selected user display
       expect(
-        screen.queryByPlaceholderText(/search by email/i)
+        screen.queryByPlaceholderText(/search by email/i),
       ).not.toBeInTheDocument();
       expect(screen.getByText("John Doe")).toBeInTheDocument();
       expect(screen.getByText("john@test.com")).toBeInTheDocument();
     });
 
     it("should validate amount against limits", async () => {
-      const { P2PTransferForm } = await import(
-        "@/components/features/transfers/P2PTransferForm"
-      );
+      const { P2PTransferForm } =
+        await import("@/components/features/transfers/P2PTransferForm");
       const user = userEvent.setup();
       render(<P2PTransferForm />);
 
@@ -571,7 +556,7 @@ describe("Phase 4.5: P2P Frontend Components", () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText(/Maximum transfer is \$2,000.00/i)
+          screen.getByText(/Maximum transfer is \$2,000.00/i),
         ).toBeInTheDocument();
       });
 
@@ -585,9 +570,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
     });
 
     it("should show confirmation modal and submit", async () => {
-      const { P2PTransferForm } = await import(
-        "@/components/features/transfers/P2PTransferForm"
-      );
+      const { P2PTransferForm } =
+        await import("@/components/features/transfers/P2PTransferForm");
       const { p2pService } = await import("@/services/p2p.service");
       const user = userEvent.setup();
       render(<P2PTransferForm />);
@@ -632,7 +616,7 @@ describe("Phase 4.5: P2P Frontend Components", () => {
             recipientId: "1",
             senderBankId: "bank-1",
             amount: 50,
-          })
+          }),
         );
       });
     });

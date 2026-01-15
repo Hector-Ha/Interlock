@@ -6,7 +6,7 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
+model User {W
   id                String   @id @default(uuid())
   email             String   @unique
   passwordHash      String
@@ -96,6 +96,8 @@ model Transaction {
   @@index([status])
   @@index([senderId])
   @@index([recipientId])
+  @@index([senderId, createdAt])
+  @@index([recipientId, createdAt])
 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt

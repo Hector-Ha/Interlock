@@ -2,7 +2,35 @@ import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Enable static exports for CDN deployment
+  output: "standalone",
+
+  // Image optimization
+  images: {
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [640, 750, 828, 1080, 1200],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+  },
+
+  // Enable React strict mode for better development experience
+  reactStrictMode: true,
+
+  // Compiler options for production
+  compiler: {
+    // Remove console.log in production
+    removeConsole: process.env.NODE_ENV === "production",
+  },
+
+  // Experimental features
+  experimental: {
+    // Optimize package imports
+    optimizePackageImports: ["lucide-react", "chart.js"],
+  },
 };
 
 export default withSentryConfig(nextConfig, {

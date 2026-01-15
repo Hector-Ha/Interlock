@@ -14,7 +14,7 @@ const verifySignature = (req: WebhookRequest): boolean => {
 
   if (!signature || !secret || !req.rawBody) {
     logger.warn(
-      "Webhook verification failed: Missing signature, secret, or body"
+      "Webhook verification failed: Missing signature, secret, or body",
     );
     return false;
   }
@@ -24,7 +24,7 @@ const verifySignature = (req: WebhookRequest): boolean => {
 
   return crypto.timingSafeEqual(
     Buffer.from(signature as string),
-    Buffer.from(hash)
+    Buffer.from(hash),
   );
 };
 
@@ -91,26 +91,42 @@ export const handleDwollaWebhook = async (req: Request, res: Response) => {
 
 const updateTransactionStatus = async (
   transferId: string,
-  status: "SUCCESS" | "FAILED" | "RETURNED"
+  status: "SUCCESS" | "FAILED" | "RETURNED",
 ): Promise<void> => {
   try {
-    const transaction = await prisma.transaction.findFirst({
-      where: { dwollaTransferId: transferId },
+    // Find all transactions matching either the exact ID or the _CREDIT suffix variant
+    // P2P transfers create two transactions: sender (exact ID) and recipient (ID_CREDIT)
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        OR: [
+          { dwollaTransferId: transferId },
+          { dwollaTransferId: `${transferId}_CREDIT` },
+        ],
+      },
     });
 
-    if (!transaction) {
-      logger.warn({ transferId }, "Transaction not found for Dwolla transfer");
+    if (transactions.length === 0) {
+      logger.warn({ transferId }, "No transactions found for Dwolla transfer");
       return;
     }
 
-    await prisma.transaction.update({
-      where: { id: transaction.id },
-      data: { status },
+    // Update all matching transactions atomically
+    const updateResult = await prisma.transaction.updateMany({
+      where: {
+        OR: [
+          { dwollaTransferId: transferId },
+          { dwollaTransferId: `${transferId}_CREDIT` },
+        ],
+      },
+      data: {
+        status,
+        pending: false, // Transfer completed - no longer pending
+      },
     });
 
     logger.info(
-      { transactionId: transaction.id, transferId, status },
-      "Updated transaction status"
+      { transferId, status, updatedCount: updateResult.count },
+      "Updated transaction status(es)",
     );
   } catch (error) {
     logger.error({ err: error, transferId }, "Failed to update transaction");

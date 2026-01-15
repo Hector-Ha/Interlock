@@ -1,0 +1,62 @@
+# syntax=docker/dockerfile:1
+
+# ============================================
+# Interlock Server - Production Dockerfile
+# Multi-stage build for optimal image size
+# ============================================
+
+FROM oven/bun:1 AS base
+WORKDIR /app
+
+# ============================================
+# Stage 1: Install dependencies
+# ============================================
+FROM base AS deps
+COPY package.json bun.lockb ./
+RUN bun install --frozen-lockfile --production
+
+# ============================================
+# Stage 2: Generate Prisma client
+# ============================================
+FROM base AS prisma
+COPY --from=deps /app/node_modules ./node_modules
+COPY prisma ./prisma
+RUN bunx prisma generate
+
+# ============================================
+# Stage 3: Build application
+# ============================================
+FROM base AS builder
+COPY --from=prisma /app/node_modules ./node_modules
+COPY . .
+RUN bun run build
+
+# ============================================
+# Stage 4: Production runner
+# ============================================
+FROM base AS runner
+ENV NODE_ENV=production
+
+# Create non-root user for security
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 interlock
+
+# Copy built application
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/package.json ./
+
+# Set ownership
+USER interlock
+
+# Expose port
+EXPOSE 8080
+ENV PORT=8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8080/api/v1/health || exit 1
+
+# Start server
+CMD ["bun", "run", "start"]

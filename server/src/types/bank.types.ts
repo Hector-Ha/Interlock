@@ -1,4 +1,4 @@
-import type { TxStatus } from "@prisma/client";
+import type { TxStatus } from "../generated/client";
 import type { Account } from "./account.types";
 
 export interface TransactionSummary {

@@ -12,5 +12,7 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    // Ensure css is processed if needed, though jsdom handles some
+    css: true,
   },
 });

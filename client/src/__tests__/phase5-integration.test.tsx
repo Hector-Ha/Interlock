@@ -40,15 +40,15 @@ describe("Phase 5: Integration & Polish", () => {
       render(
         <ErrorBoundary>
           <ThrowingComponent />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText("Something went wrong")).toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: /try again/i })
+        screen.getByRole("button", { name: /try again/i }),
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: /go to dashboard/i })
+        screen.getByRole("button", { name: /go to dashboard/i }),
       ).toBeInTheDocument();
 
       consoleSpy.mockRestore();
@@ -58,7 +58,7 @@ describe("Phase 5: Integration & Polish", () => {
       render(
         <ErrorBoundary>
           <WorkingComponent />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText("Working component")).toBeInTheDocument();
@@ -78,7 +78,7 @@ describe("Phase 5: Integration & Polish", () => {
       const { rerender } = render(
         <ErrorBoundary>
           <ConditionalThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText("Something went wrong")).toBeInTheDocument();
@@ -146,10 +146,10 @@ describe("Phase 5: Integration & Polish", () => {
       await waitFor(
         () => {
           expect(
-            screen.queryByText("Dismissible Toast")
+            screen.queryByText("Dismissible Toast"),
           ).not.toBeInTheDocument();
         },
-        { timeout: 1000 }
+        { timeout: 1000 },
       );
     });
 
@@ -185,7 +185,7 @@ describe("Phase 5: Integration & Polish", () => {
 
       // Fast-forward time and flush all pending timers
       await act(async () => {
-        vi.advanceTimersByTime(1100);
+        await vi.advanceTimersByTimeAsync(1100);
       });
 
       // Give React time to process the state update
@@ -236,7 +236,7 @@ describe("Phase 5: Integration & Polish", () => {
       expect(container.firstChild).toBeInTheDocument();
       // Should have multiple skeleton elements
       expect(
-        container.querySelectorAll(".animate-pulse").length
+        container.querySelectorAll(".animate-pulse").length,
       ).toBeGreaterThan(0);
     });
   });
@@ -263,6 +263,7 @@ describe("Phase 5: Integration & Polish", () => {
     it("should handle network errors", () => {
       // Create error that mimics Axios network error
       const error = new AxiosError("Network Error");
+      // @ts-ignore
       error.code = "ERR_NETWORK";
       error.name = "AxiosError";
 
@@ -273,6 +274,7 @@ describe("Phase 5: Integration & Polish", () => {
     it("should handle timeout errors", () => {
       // Create error that mimics Axios timeout error
       const error = new AxiosError("Timeout");
+      // @ts-ignore
       error.code = "ECONNABORTED";
       error.name = "AxiosError";
 
@@ -303,7 +305,7 @@ describe("Phase 5: Integration & Polish", () => {
         expect.objectContaining({
           type: "error",
           title: "Error",
-        })
+        }),
       );
     });
   });

@@ -1,5 +1,5 @@
 import { prisma } from "@/db";
-import type { Notification, NotificationType } from "@prisma/client";
+import type { Notification, NotificationType } from "../generated/client";
 
 // Types
 interface CreateNotificationData {
@@ -32,7 +32,7 @@ export const notificationService = {
   //Get
   async getByUserId(
     userId: string,
-    options: GetNotificationsOptions = {}
+    options: GetNotificationsOptions = {},
   ): Promise<NotificationListResult> {
     const { limit = 20, offset = 0, unreadOnly = false } = options;
 

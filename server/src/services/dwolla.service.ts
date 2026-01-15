@@ -2,7 +2,7 @@ import { Client } from "dwolla-v2";
 import { config } from "@/config";
 import { prisma } from "@/db";
 import { decrypt } from "@/utils/encryption";
-import type { User } from "@prisma/client";
+import type { User } from "../generated/client";
 
 const dwolla = new Client({
   environment: config.dwolla.env as "sandbox" | "production",
@@ -13,7 +13,7 @@ const dwolla = new Client({
 export const dwollaClient = dwolla;
 
 export const ensureCustomer = async (
-  user: User
+  user: User,
 ): Promise<{ customerId: string; customerUrl: string }> => {
   if (user.dwollaCustomerId && user.dwollaCustomerUrl) {
     return {
@@ -39,11 +39,11 @@ export const ensureCustomer = async (
       err.body._embedded &&
       err.body._embedded.errors &&
       err.body._embedded.errors.some(
-        (e: any) => e.code === "Duplicate" && e.path === "/email"
+        (e: any) => e.code === "Duplicate" && e.path === "/email",
       )
     ) {
       const duplicateError = err.body._embedded.errors.find(
-        (e: any) => e.code === "Duplicate" && e.path === "/email"
+        (e: any) => e.code === "Duplicate" && e.path === "/email",
       );
       customerUrl = duplicateError._links.about.href;
     } else {
@@ -67,7 +67,7 @@ export const ensureCustomer = async (
 export const addFundingSource = async (
   dwollaCustomerUrl: string,
   processorToken: string,
-  accountName: string
+  accountName: string,
 ): Promise<string> => {
   let fundingSourceUrl: string;
 
@@ -77,7 +77,7 @@ export const addFundingSource = async (
       {
         plaidToken: processorToken,
         name: accountName,
-      }
+      },
     );
     fundingSourceUrl = fundingSourceResponse.headers.get("location") as string;
   } catch (err: any) {
@@ -95,7 +95,7 @@ export const createTransfer = async (
   sourceFundingUrl: string,
   destinationFundingUrl: string,
   amount: number,
-  currency: string = "USD"
+  currency: string = "USD",
 ): Promise<{ transferUrl: string; transferId: string }> => {
   const transferResponse = await dwolla.post("transfers", {
     _links: {
@@ -147,7 +147,7 @@ export const createP2PTransfer = async (
   senderFundingSourceUrl: string,
   recipientFundingSourceUrl: string,
   amount: number,
-  metadata?: { note?: string }
+  metadata?: { note?: string },
 ): Promise<string> => {
   const requestBody: Record<string, unknown> = {
     _links: {

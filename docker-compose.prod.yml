@@ -1,0 +1,77 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER:-interlock}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-interlock}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-interlock}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - interlock-network
+    restart: unless-stopped
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.prod
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - DATABASE_URL=postgresql://${DB_USER:-interlock}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-interlock}
+      - JWT_SECRET=${JWT_SECRET}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - PLAID_CLIENT_ID=${PLAID_CLIENT_ID}
+      - PLAID_SECRET=${PLAID_SECRET}
+      - PLAID_ENV=${PLAID_ENV:-production}
+      - DWOLLA_KEY=${DWOLLA_KEY}
+      - DWOLLA_SECRET=${DWOLLA_SECRET}
+      - DWOLLA_ENV=${DWOLLA_ENV:-production}
+      - DWOLLA_WEBHOOK_SECRET=${DWOLLA_WEBHOOK_SECRET}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - CLIENT_URL=http://client:3000
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - interlock-network
+    restart: unless-stopped
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.prod
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://server:8080
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
+    networks:
+      - interlock-network
+    restart: unless-stopped
+
+networks:
+  interlock-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

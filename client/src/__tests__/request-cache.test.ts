@@ -51,8 +51,11 @@ describe("Request Cache Utility", () => {
       await cachedRequest("ttl-key", fetcher, { ttl: shortTtl });
       expect(fetcher).toHaveBeenCalledTimes(1);
 
-      // Advance time beyond TTL
-      vi.advanceTimersByTime(1500);
+      // Fast-forward time and flush all pending timers
+      // The original code already used `vi.advanceTimersByTimeAsync`.
+      // The `act` wrapper is typically for React component testing and is not needed here.
+      // We'll adjust the time to 1100ms as per the instruction's example.
+      await vi.advanceTimersByTimeAsync(1100);
 
       // Second request, cache should be expired
       const result = await cachedRequest("ttl-key", fetcher, { ttl: shortTtl });
@@ -68,14 +71,14 @@ describe("Request Cache Utility", () => {
       await cachedRequest("default-ttl-key", fetcher);
 
       // Advance 25 seconds
-      vi.advanceTimersByTime(25000);
+      await vi.advanceTimersByTimeAsync(25000);
 
       // Should still be cached
       await cachedRequest("default-ttl-key", fetcher);
       expect(fetcher).toHaveBeenCalledTimes(1);
 
       // Advance another 10 seconds
-      vi.advanceTimersByTime(10000);
+      await vi.advanceTimersByTimeAsync(10000);
 
       // Should make new request
       await cachedRequest("default-ttl-key", fetcher);

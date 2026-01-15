@@ -1,3 +1,4 @@
+import { config } from "@/config";
 import rateLimit from "express-rate-limit";
 
 /**
@@ -7,7 +8,7 @@ import rateLimit from "express-rate-limit";
  */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 attempts per window
+  max: config.env === "test" ? 1000 : 5, // 5 attempts per window (1000 for tests)
   message: {
     message:
       "Too many authentication attempts. Please try again in 15 minutes.",

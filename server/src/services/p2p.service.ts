@@ -3,7 +3,7 @@ import { createP2PTransfer as dwollaP2PTransfer } from "./dwolla.service";
 import { notificationService } from "./notification.service";
 import { emailService } from "./email.service";
 import { logger } from "@/middleware/logger";
-import type { Transaction } from "@prisma/client";
+import type { Transaction } from "../generated/client";
 
 // Transfer limits in cents for precision
 const P2P_LIMITS = {
@@ -46,7 +46,7 @@ export const p2pService = {
   // Excludes the current user and returns whether they can receive transfers.
   async searchRecipients(
     query: string,
-    currentUserId: string
+    currentUserId: string,
   ): Promise<RecipientSearchResult[]> {
     if (query.length < 3) {
       return [];
@@ -90,7 +90,7 @@ export const p2pService = {
   // Validates that a transfer doesn't exceed P2P limits.
   async validateLimits(
     senderId: string,
-    amount: number
+    amount: number,
   ): Promise<TransferLimitValidation> {
     const amountCents = Math.round(amount * 100);
 
@@ -104,9 +104,9 @@ export const p2pService = {
       };
     }
 
-    // Check daily limit
+    // Check daily limit - using UTC for consistent cross-timezone calculations
     const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
+    todayStart.setUTCHours(0, 0, 0, 0);
 
     const dailyTotal = await prisma.transaction.aggregate({
       where: {
@@ -129,9 +129,11 @@ export const p2pService = {
       };
     }
 
-    // Check weekly limit
+    // Check weekly limit - using UTC for consistent cross-timezone calculations
     const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - 7);
+    const currentDate = weekStart.getUTCDate();
+    weekStart.setUTCDate(currentDate - 7);
+    weekStart.setUTCHours(0, 0, 0, 0);
 
     const weeklyTotal = await prisma.transaction.aggregate({
       where: {
@@ -160,7 +162,7 @@ export const p2pService = {
   // Creates a P2P transfer between two users.
   // Handles Dwolla transfer, creates local transactions, and sends notifications.
   async createTransfer(
-    options: CreateP2PTransferOptions
+    options: CreateP2PTransferOptions,
   ): Promise<P2PTransferResult> {
     const { senderId, recipientId, senderBankId, amount, note } = options;
 
@@ -219,13 +221,19 @@ export const p2pService = {
     const senderName = `${sender.firstName} ${sender.lastName}`;
     const recipientName = `${recipient.firstName} ${recipient.lastName}`;
 
-    // Create Dwolla transfer
-    const transferUrl = await dwollaP2PTransfer(
-      senderBank.dwollaFundingUrl,
-      recipientBank.dwollaFundingUrl,
-      amount,
-      { note }
-    );
+    // Create Dwolla transfer - this moves real money
+    let transferUrl: string;
+    try {
+      transferUrl = await dwollaP2PTransfer(
+        senderBank.dwollaFundingUrl,
+        recipientBank.dwollaFundingUrl,
+        amount,
+        { note },
+      );
+    } catch (dwollaError) {
+      // Dwolla API call failed - no money moved, safe to propagate
+      throw dwollaError;
+    }
 
     // Extract Transfer ID from URL
     const transferId = transferUrl.split("/").pop();
@@ -234,8 +242,11 @@ export const p2pService = {
     }
 
     // Create transactions for both sender and recipient
-    const [senderTransaction, recipientTransaction] = await prisma.$transaction(
-      [
+    // CRITICAL: Dwolla transfer already succeeded at this point - money is moving
+    let senderTransaction: Transaction;
+    let recipientTransaction: Transaction;
+    try {
+      [senderTransaction, recipientTransaction] = await prisma.$transaction([
         prisma.transaction.create({
           data: {
             bankId: senderBank.id,
@@ -270,8 +281,29 @@ export const p2pService = {
             note,
           },
         }),
-      ]
-    );
+      ]);
+    } catch (dbError) {
+      // CRITICAL: Dwolla transfer succeeded but DB write failed - orphaned transfer
+      // Log high-priority error for manual reconciliation since ACH cannot be canceled
+      logger.fatal(
+        {
+          dwollaTransferId: transferId,
+          transferUrl,
+          senderId,
+          recipientId,
+          amount,
+          senderBankId,
+          recipientBankId: recipientBank.id,
+          err: dbError,
+        },
+        "RECONCILIATION_NEEDED: Dwolla P2P transfer succeeded but database write failed",
+      );
+
+      throw new Error(
+        "Transfer initiated but failed to record. Please contact support with reference: " +
+          transferId,
+      );
+    }
 
     // Create in-app notifications
     Promise.all([
@@ -299,13 +331,13 @@ export const p2pService = {
         emailService.sendP2PReceivedNotification(
           recipient.email,
           senderName,
-          amount
+          amount,
         ),
       sender.email &&
         emailService.sendP2PSentConfirmation(
           sender.email,
           recipientName,
-          amount
+          amount,
         ),
     ]).catch((error) => {
       logger.error({ err: error }, "Failed to send P2P email notifications");

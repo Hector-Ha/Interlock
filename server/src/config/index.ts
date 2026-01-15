@@ -32,6 +32,10 @@ const envSchema = z.object({
   // SendGrid
   SENDGRID_API_KEY: z.string().optional(),
   SENDGRID_SENDER_EMAIL: z.string().optional(),
+
+  // Monitoring
+  SENTRY_DSN: z.string().optional(),
+  ENABLE_LOGS: z.string().optional(),
 });
 
 // Validate environment variables
@@ -62,8 +66,51 @@ export const config = {
     sendgridApiKey: env.SENDGRID_API_KEY,
     senderEmail: env.SENDGRID_SENDER_EMAIL,
   },
+  monitoring: {
+    sentryDsn: env.SENTRY_DSN,
+    enableLogs: env.ENABLE_LOGS === "true",
+  },
 };
 
 export function validateEnv(): void {
   console.log("✅ Environment variables validated.");
+}
+
+/**
+ * Validates production-specific security requirements.
+ * Throws an error if any critical security check fails.
+ * Should be called at server startup in production environments.
+ */
+export function validateProductionEnv(): void {
+  if (config.env !== "production") return;
+
+  const checks = [
+    {
+      key: "JWT_SECRET",
+      test: config.jwtSecret.length >= 32 && config.jwtSecret !== "supersecret",
+      message:
+        "JWT_SECRET must be at least 32 characters and not a default value",
+    },
+    {
+      key: "ENCRYPTION_KEY",
+      test: config.encryptionKey.length === 32,
+      message: "ENCRYPTION_KEY must be exactly 32 characters",
+    },
+    {
+      key: "DATABASE_URL",
+      test: !config.databaseUrl.includes("localhost"),
+      message: "DATABASE_URL should not point to localhost in production",
+    },
+  ];
+
+  const failures = checks.filter((c) => !c.test);
+  if (failures.length > 0) {
+    throw new Error(
+      `Production environment validation failed:\n${failures
+        .map((f) => `  - ${f.key}: ${f.message}`)
+        .join("\n")}`,
+    );
+  }
+
+  console.log("✅ Production environment validated.");
 }
