@@ -10,37 +10,82 @@ async function verifySelfTransfers() {
   // or simply derived from having 'destinationBankId' without a recipientId change.
   // We'll check for type 'INTERNAL' first as defined in the enum.
 
-  const selfTransfers = await prisma.transaction.findMany({
+  // Fetch INTERNAL, DEBIT, and CREDIT to find linked transfers
+  const rawTransfers = await prisma.transaction.findMany({
     where: {
-      type: "INTERNAL",
+      type: { in: ["INTERNAL", "DEBIT", "CREDIT"] },
     },
     include: {
-      // Wait, Transaction relates to 'bank'. Bank relates to 'user'.
-      // Relation is: Transaction -> Bank -> User.
       bank: {
-        include: { user: { select: { email: true } } },
+        include: { user: { select: { id: true, email: true } } },
       },
     },
     orderBy: { createdAt: "desc" },
-    take: 5,
+    take: 50, // Grab enough to find pairs
   });
+
+  // Group by base Dwolla ID (remove _CREDIT suffix)
+  const transferGroups = new Map<string, typeof rawTransfers>();
+
+  for (const tx of rawTransfers) {
+    if (!tx.dwollaTransferId) continue;
+    const baseId = tx.dwollaTransferId.replace("_CREDIT", "");
+
+    if (!transferGroups.has(baseId)) {
+      transferGroups.set(baseId, []);
+    }
+    transferGroups.get(baseId)?.push(tx);
+  }
+
+  // Filter for valid self-transfers:
+  // 1. Explicit INTERNAL type
+  // 2. Groups with > 1 transaction where ALL belong to the same user
+  const selfTransfers: Array<{
+    id: string;
+    txs: typeof rawTransfers;
+    userEmail: string;
+    totalAmount: string;
+  }> = [];
+
+  for (const [id, txs] of transferGroups.entries()) {
+    // Check if explicitly internal
+    const isExplicitInternal = txs.some((t) => t.type === "INTERNAL");
+
+    // Check if implicit self-transfer (all banks belong to same user)
+    const distinctUsers = new Set(txs.map((t) => t.bank.user.email));
+    const isSameUser = distinctUsers.size === 1;
+
+    if (isExplicitInternal || (txs.length > 1 && isSameUser)) {
+      selfTransfers.push({
+        id,
+        txs: txs.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()),
+        userEmail: txs[0].bank.user.email,
+        totalAmount: txs[0].amount.toString(), // Roughly taking the first one
+      });
+    }
+  }
 
   if (selfTransfers.length === 0) {
     console.log("❌ No Self-transfers found.");
-
-    // Fallback: Check for transactions mimicking internal transfer behavior just in case
-    // For now, adhere strictly to schema enum `INTERNAL`.
     return;
   }
 
-  console.log(`✅ Found ${selfTransfers.length} recent Self-transfers:\n`);
+  console.log(
+    `✅ Found ${selfTransfers.length} recent Self-transfers (Grouped):\n`,
+  );
 
-  selfTransfers.forEach((tx) => {
-    const statusIcon =
-      tx.status === "SUCCESS" ? "✅" : tx.status === "PENDING" ? "⏳" : "❌";
-    console.log(`${statusIcon} [${tx.status}] ${tx.amount} USD`);
-    console.log(`   User: ${tx.bank.user.email}`);
-    console.log(`   Date: ${tx.createdAt.toISOString()}`);
+  selfTransfers.forEach((group) => {
+    console.log(`🔄 Transfer Group: ${group.id}`);
+    console.log(`   User: ${group.userEmail}`);
+    console.log(`   Amount: $${group.totalAmount} USD`);
+
+    group.txs.forEach((tx) => {
+      const statusIcon =
+        tx.status === "SUCCESS" ? "✅" : tx.status === "PENDING" ? "⏳" : "❌";
+      console.log(
+        `   -> ${statusIcon} [${tx.type}] ${tx.amount} USD (${tx.bankId})`,
+      );
+    });
     console.log("------------------------------------------------");
   });
 }

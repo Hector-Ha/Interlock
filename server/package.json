@@ -7,6 +7,7 @@
     "start": "bun src/index.ts",
     "prisma:generate": "prisma generate",
     "prisma:studio": "prisma studio",
+    "typecheck": "tsc --noEmit",
     "test": "vitest"
   },
   "devDependencies": {
@@ -42,6 +43,7 @@
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
+    "lru-cache": "^11.2.4",
     "nodemailer": "^7.0.12",
     "pg": "^8.16.3",
     "pino": "^10.1.0",

@@ -17,10 +17,10 @@ import type { BankDetails, BankListItem } from "@/types/bank.types";
 
 export const bankService = {
   async linkBankWithDwolla(userId: string, bankId: string, accountId: string) {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    const bank = await prisma.bank.findFirst({
-      where: { id: bankId, userId },
-    });
+    const [user, bank] = await Promise.all([
+      prisma.user.findUnique({ where: { id: userId } }),
+      prisma.bank.findFirst({ where: { id: bankId, userId } }),
+    ]);
 
     if (!user || !bank) {
       throw new Error("User or bank not found");
@@ -41,7 +41,7 @@ export const bankService = {
     const fundingSourceUrl = await addFundingSource(
       customerUrl,
       processorToken,
-      bank.institutionName
+      bank.institutionName,
     );
 
     await prisma.bank.update({
@@ -76,7 +76,7 @@ export const bankService = {
 
   async getBankById(
     bankId: string,
-    userId: string
+    userId: string,
   ): Promise<BankDetails | null> {
     const bank = await prisma.bank.findFirst({
       where: { id: bankId, userId },
@@ -147,12 +147,12 @@ export const bankService = {
         });
         logger.info(
           { bankId },
-          "Successfully removed funding source from Dwolla"
+          "Successfully removed funding source from Dwolla",
         );
       } catch (error) {
         logger.warn(
           { err: error, bankId },
-          "Failed to remove funding source from Dwolla"
+          "Failed to remove funding source from Dwolla",
         );
       }
     }
@@ -169,14 +169,12 @@ export const bankService = {
     userId: string,
     sourceBankId: string,
     destinationBankId: string,
-    amount: number
+    amount: number,
   ) {
-    const sourceBank = await prisma.bank.findFirst({
-      where: { id: sourceBankId, userId },
-    });
-    const destBank = await prisma.bank.findFirst({
-      where: { id: destinationBankId, userId },
-    });
+    const [sourceBank, destBank] = await Promise.all([
+      prisma.bank.findFirst({ where: { id: sourceBankId, userId } }),
+      prisma.bank.findFirst({ where: { id: destinationBankId, userId } }),
+    ]);
 
     if (!sourceBank || !destBank) {
       throw new Error("Source or destination bank not found");
@@ -184,8 +182,12 @@ export const bankService = {
 
     if (!sourceBank.dwollaFundingUrl || !destBank.dwollaFundingUrl) {
       throw new Error(
-        "Both banks must be linked with Dwolla before initiating transfer"
+        "Both banks must be linked with Dwolla before initiating transfer",
       );
+    }
+
+    if (sourceBank.dwollaFundingUrl === destBank.dwollaFundingUrl) {
+      throw new Error("Cannot transfer between the same linked account");
     }
 
     // 1. Verify Balance with Plaid
@@ -201,7 +203,7 @@ export const bankService = {
       if (sourceAccount && sourceAccount.balance.available !== null) {
         if (sourceAccount.balance.available < amount) {
           throw new Error(
-            `Insufficient funds. Available balance: $${sourceAccount.balance.available}`
+            `Insufficient funds. Available balance: $${sourceAccount.balance.available}`,
           );
         }
       }
@@ -214,14 +216,14 @@ export const bankService = {
       // or simplistic handling: just warn
       logger.warn(
         { err: error },
-        "Failed to verify balance with Plaid before transfer"
+        "Failed to verify balance with Plaid before transfer",
       );
     }
 
     const { transferUrl, transferId } = await createTransfer(
       sourceBank.dwollaFundingUrl,
       destBank.dwollaFundingUrl,
-      amount
+      amount,
     );
 
     const [debitTx, creditTx] = await prisma.$transaction([
@@ -261,7 +263,7 @@ export const bankService = {
 
 export async function getEffectiveAccounts(
   bankId: string,
-  accessToken: string
+  accessToken: string,
 ) {
   const accounts = await getAccountsWithBalances(accessToken);
 
@@ -274,13 +276,16 @@ export async function getEffectiveAccounts(
       },
     });
 
-    const debits = pendingTransactions
-      .filter((tx) => tx.type === "DEBIT")
-      .reduce((sum, tx) => sum + Number(tx.amount), 0);
-
-    const credits = pendingTransactions
-      .filter((tx) => tx.type === "CREDIT")
-      .reduce((sum, tx) => sum + Number(tx.amount), 0);
+    let debits = 0;
+    let credits = 0;
+    for (const tx of pendingTransactions) {
+      const amount = Number(tx.amount);
+      if (tx.type === "DEBIT") {
+        debits += amount;
+      } else if (tx.type === "CREDIT") {
+        credits += amount;
+      }
+    }
 
     // Find checking account or first account
     const checkingAccount =

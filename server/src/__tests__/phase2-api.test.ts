@@ -31,7 +31,7 @@ vi.mock("@/services/dwolla.service", () => ({
   addFundingSource: vi
     .fn()
     .mockResolvedValue(
-      "https://api-sandbox.dwolla.com/funding-sources/test-source-id"
+      "https://api-sandbox.dwolla.com/funding-sources/test-source-id",
     ),
   createTransfer: vi.fn().mockResolvedValue({
     transferUrl: "https://api-sandbox.dwolla.com/transfers/test-transfer-id",
@@ -112,11 +112,19 @@ describe("Phase 2: API Tests", () => {
     testDestBankId = destBank.id;
 
     // Manually link banks to Dwolla in DB to bypass link-dwolla flow
-    await prisma.bank.updateMany({
-      where: { userId: testUserId },
+    await prisma.bank.update({
+      where: { id: testBankId },
       data: {
         dwollaFundingUrl:
-          "https://api-sandbox.dwolla.com/funding-sources/test-source-id",
+          "https://api-sandbox.dwolla.com/funding-sources/test-source-id-1",
+      },
+    });
+
+    await prisma.bank.update({
+      where: { id: testDestBankId },
+      data: {
+        dwollaFundingUrl:
+          "https://api-sandbox.dwolla.com/funding-sources/test-source-id-2",
       },
     });
   });
@@ -145,7 +153,7 @@ describe("Phase 2: API Tests", () => {
 
       if (response.status === 404) {
         console.warn(
-          "Skipping PATCH /auth/profile test as endpoint is missing"
+          "Skipping PATCH /auth/profile test as endpoint is missing",
         );
       } else {
         expect(response.status).toBe(200);
@@ -164,7 +172,7 @@ describe("Phase 2: API Tests", () => {
 
       if (response.status === 404) {
         console.warn(
-          "Skipping POST /auth/change-password test as endpoint is missing"
+          "Skipping POST /auth/change-password test as endpoint is missing",
         );
       } else {
         expect(response.status).toBe(401);

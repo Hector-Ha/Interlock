@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { z } from "zod";
 import { AuthRequest } from "@/middleware/auth";
+import { logger } from "@/middleware/logger";
 import { p2pService } from "@/services/p2p.service";
 import {
   recipientSearchSchema,
@@ -23,7 +24,7 @@ export const searchRecipients = async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    console.error("Search Recipients Error:", error);
+    logger.error({ err: error }, "Search Recipients Error");
     res.status(500).json({
       message: "Failed to search recipients",
       code: "SEARCH_ERROR",
@@ -66,7 +67,7 @@ export const createP2PTransfer = async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    console.error("Create P2P Transfer Error:", error);
+    logger.error({ err: error }, "Create P2P Transfer Error");
     res.status(500).json({
       message: "Failed to create transfer",
       code: "TRANSFER_ERROR",

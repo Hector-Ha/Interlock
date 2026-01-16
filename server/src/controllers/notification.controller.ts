@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { z } from "zod";
 import { AuthRequest } from "@/middleware/auth";
+import { logger } from "@/middleware/logger";
 import { notificationService } from "@/services/notification.service";
 
 // Query schema for listing notifications
@@ -29,7 +30,7 @@ export const getNotifications = async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    console.error("Get Notifications Error:", error);
+    logger.error({ err: error }, "Get Notifications Error");
     res.status(500).json({
       message: "Failed to get notifications",
       code: "NOTIFICATION_ERROR",
@@ -43,7 +44,7 @@ export const getUnreadCount = async (req: AuthRequest, res: Response) => {
     const count = await notificationService.getUnreadCount(req.user.userId);
     res.json({ count });
   } catch (error) {
-    console.error("Get Unread Count Error:", error);
+    logger.error({ err: error }, "Get Unread Count Error");
     res.status(500).json({
       message: "Failed to get unread count",
       code: "NOTIFICATION_ERROR",
@@ -58,7 +59,7 @@ export const markAsRead = async (req: AuthRequest, res: Response) => {
     await notificationService.markAsRead(id, req.user.userId);
     res.json({ message: "Notification marked as read" });
   } catch (error) {
-    console.error("Mark As Read Error:", error);
+    logger.error({ err: error }, "Mark As Read Error");
     res.status(500).json({
       message: "Failed to mark notification as read",
       code: "NOTIFICATION_ERROR",
@@ -72,7 +73,7 @@ export const markAllAsRead = async (req: AuthRequest, res: Response) => {
     await notificationService.markAllAsRead(req.user.userId);
     res.json({ message: "All notifications marked as read" });
   } catch (error) {
-    console.error("Mark All As Read Error:", error);
+    logger.error({ err: error }, "Mark All As Read Error");
     res.status(500).json({
       message: "Failed to mark notifications as read",
       code: "NOTIFICATION_ERROR",

@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { LRUCache } from "lru-cache";
 import { config } from "@/config";
 
 const ALGORITHM = "aes-256-gcm";
@@ -11,8 +12,19 @@ const ITERATIONS = 100000;
 // ENCRYPTION_KEY is required and validated at startup via Zod schema
 const MASTER_KEY = config.encryptionKey;
 
+const keyCache = new LRUCache<string, Buffer>({
+  max: 100,
+  ttl: 5 * 60 * 1000,
+});
+
 function getKey(salt: Buffer): Buffer {
-  return crypto.pbkdf2Sync(MASTER_KEY, salt, ITERATIONS, KEY_LENGTH, "sha512");
+  const cacheKey = salt.toString("hex");
+  let key = keyCache.get(cacheKey);
+  if (!key) {
+    key = crypto.pbkdf2Sync(MASTER_KEY, salt, ITERATIONS, KEY_LENGTH, "sha512");
+    keyCache.set(cacheKey, key);
+  }
+  return key;
 }
 
 export const encrypt = (text: string): string => {

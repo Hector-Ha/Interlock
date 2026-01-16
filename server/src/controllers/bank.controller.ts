@@ -104,20 +104,24 @@ export const disconnectBank = async (req: AuthRequest, res: Response) => {
 
     await bankService.disconnectBank(bankId, userId);
 
-    // Log the action
-    await prisma.auditLog.create({
-      data: {
-        userId,
-        action: "BANK_DISCONNECT",
-        resource: "Bank",
-        details: { bankId },
-        ipAddress: req.ip,
-      },
-    });
-
     res.json({
       message: "Bank disconnected successfully",
     });
+
+    // Non-blocking audit log - don't delay response
+    prisma.auditLog
+      .create({
+        data: {
+          userId,
+          action: "BANK_DISCONNECT",
+          resource: "Bank",
+          details: { bankId },
+          ipAddress: req.ip,
+        },
+      })
+      .catch((err) =>
+        logger.error({ err, userId, bankId }, "Failed to create audit log")
+      );
   } catch (error) {
     if (error instanceof z.ZodError) {
       res.status(400).json({

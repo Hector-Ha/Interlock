@@ -94,18 +94,22 @@ export const cancelTransfer = async (req: AuthRequest, res: Response) => {
 
     await transferService.cancelTransfer(transferId, userId);
 
-    // Log the action
-    await prisma.auditLog.create({
-      data: {
-        userId,
-        action: "TRANSFER_CANCEL",
-        resource: "Transaction",
-        details: { transferId },
-        ipAddress: req.ip,
-      },
-    });
-
     res.json({ message: "Transfer cancelled successfully" });
+
+    // Non-blocking audit log - don't delay response
+    prisma.auditLog
+      .create({
+        data: {
+          userId,
+          action: "TRANSFER_CANCEL",
+          resource: "Transaction",
+          details: { transferId },
+          ipAddress: req.ip,
+        },
+      })
+      .catch((err) =>
+        logger.error({ err, userId, transferId }, "Failed to create audit log")
+      );
   } catch (error) {
     if (error instanceof z.ZodError) {
       res.status(400).json({

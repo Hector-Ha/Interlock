@@ -162,7 +162,12 @@ async function seedUser(userData: (typeof USERS_TO_SEED)[0]) {
         });
         const accessToken = decrypt(bank!.plaidAccessToken);
         const accounts = await getAccounts(accessToken);
-        const selectedAccount = accounts[0]; // Just pick the first eligible one
+
+        // Select account based on institution to ensure unique funding sources
+        // First Platypus -> Checking (Index 0)
+        // Third Platypus -> Savings (Index 1)
+        const accountIndex = institution.name.includes("Third") ? 1 : 0;
+        const selectedAccount = accounts[accountIndex] || accounts[0];
 
         if (selectedAccount) {
           // D. Processor Token (Plaid -> Dwolla)

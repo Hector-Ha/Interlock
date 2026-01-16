@@ -126,21 +126,25 @@ export const syncTransactions = async (req: AuthRequest, res: Response) => {
 
     const result = await transactionService.syncTransactions(bankId);
 
-    // Log sync action
-    await prisma.auditLog.create({
-      data: {
-        userId,
-        action: "TRANSACTION_SYNC",
-        resource: "Bank",
-        details: { bankId, ...result },
-        ipAddress: req.ip,
-      },
-    });
-
     res.json({
       message: "Transactions synced successfully",
       result,
     });
+
+    // Non-blocking audit log - don't delay response
+    prisma.auditLog
+      .create({
+        data: {
+          userId,
+          action: "TRANSACTION_SYNC",
+          resource: "Bank",
+          details: { bankId, ...result },
+          ipAddress: req.ip,
+        },
+      })
+      .catch((err) =>
+        logger.error({ err, userId, bankId }, "Failed to create audit log")
+      );
   } catch (error) {
     if (error instanceof z.ZodError) {
       res.status(400).json({

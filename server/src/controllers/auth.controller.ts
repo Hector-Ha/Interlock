@@ -234,20 +234,25 @@ export const logoutAll = async (req: AuthRequest, res: Response) => {
 
     res.clearCookie("token");
 
-    await prisma.auditLog.create({
-      data: {
-        userId,
-        action: "LOGOUT_ALL",
-        resource: "Session",
-        details: { sessionsInvalidated: count },
-        ipAddress: req.ip,
-      },
-    });
-
     res.json({
       message: "All sessions invalidated",
       sessionsInvalidated: count,
     });
+
+    // Non-blocking audit log - don't delay response
+    prisma.auditLog
+      .create({
+        data: {
+          userId,
+          action: "LOGOUT_ALL",
+          resource: "Session",
+          details: { sessionsInvalidated: count },
+          ipAddress: req.ip,
+        },
+      })
+      .catch((err) =>
+        logger.error({ err, userId }, "Failed to create audit log")
+      );
   } catch (error) {
     logger.error({ err: error }, "Logout All Error");
     res.status(500).json({
@@ -270,19 +275,23 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
     // Clear current session cookie (all sessions are invalidated by service)
     res.clearCookie("token");
 
-    // Log the action
-    await prisma.auditLog.create({
-      data: {
-        userId,
-        action: "PASSWORD_CHANGE",
-        resource: "User",
-        ipAddress: req.ip,
-      },
-    });
-
     res.json({
       message: "Password changed successfully. Please sign in again.",
     });
+
+    // Non-blocking audit log - don't delay response
+    prisma.auditLog
+      .create({
+        data: {
+          userId,
+          action: "PASSWORD_CHANGE",
+          resource: "User",
+          ipAddress: req.ip,
+        },
+      })
+      .catch((err) =>
+        logger.error({ err, userId }, "Failed to create audit log")
+      );
   } catch (error) {
     if (error instanceof z.ZodError) {
       res.status(400).json({
