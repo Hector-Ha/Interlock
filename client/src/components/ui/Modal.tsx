@@ -60,12 +60,12 @@ function ModalContent({
       <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
         <Dialog.Content
           className={cn(
-            "pointer-events-auto w-full p-6 bg-background rounded-2xl shadow-xl",
+            "pointer-events-auto w-full p-6 bg-background rounded-2xl shadow-xl overscroll-contain",
             "data-[state=open]:animate-in data-[state=closed]:animate-out",
             "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
             "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
             sizeClasses[size],
-            className
+            className,
           )}
         >
           {children}
@@ -138,7 +138,7 @@ function ModalFooter({
     <div
       className={cn(
         "flex items-center justify-end gap-3 mt-6 pt-4 border-t border-border",
-        className
+        className,
       )}
     >
       {children}

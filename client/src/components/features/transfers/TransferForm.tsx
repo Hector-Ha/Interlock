@@ -2,7 +2,7 @@
 
 import * as Sentry from "@sentry/nextjs";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -24,7 +24,7 @@ const transferSchema = z.object({
       const num = parseFloat(val);
       return !isNaN(num) && num > 0;
     },
-    { message: "Amount must be greater than $0.00" }
+    { message: "Amount must be greater than $0.00" },
   ),
 });
 
@@ -58,23 +58,32 @@ export function TransferForm() {
     fetchBanks();
   }, [fetchBanks]);
 
-  // Assuming we can only transfer between banks that are dwolla-linked
-  const validBanks = banks.filter(
-    (b) => b.isDwollaLinked && b.status === "ACTIVE"
+  // Memoized: only recompute when banks change
+  const validBanks = useMemo(
+    () => banks.filter((b) => b.isDwollaLinked && b.status === "ACTIVE"),
+    [banks],
   );
 
-  const sourceOptions = validBanks.map((bank) => ({
-    value: bank.id,
-    label: bank.institutionName,
-    description: "Available for transfer",
-  }));
+  const sourceOptions = useMemo(
+    () =>
+      validBanks.map((bank) => ({
+        value: bank.id,
+        label: bank.institutionName,
+        description: "Available for transfer",
+      })),
+    [validBanks],
+  );
 
-  const destinationOptions = validBanks
-    .filter((b) => b.id !== sourceBankId)
-    .map((bank) => ({
-      value: bank.id,
-      label: bank.institutionName,
-    }));
+  const destinationOptions = useMemo(
+    () =>
+      validBanks
+        .filter((b) => b.id !== sourceBankId)
+        .map((bank) => ({
+          value: bank.id,
+          label: bank.institutionName,
+        })),
+    [validBanks, sourceBankId],
+  );
 
   const onSubmit = async (data: TransferFormData) => {
     setIsSubmitting(true);
@@ -195,7 +204,7 @@ export function TransferForm() {
             disabled={isSubmitting}
           >
             {isSubmitting && <Loader2 className="h-5 w-5 mr-2 animate-spin" />}
-            {isSubmitting ? "Processing..." : "Transfer Funds"}
+            {isSubmitting ? "Processing…" : "Transfer Funds"}
           </Button>
         </div>
       </form>

@@ -75,14 +75,14 @@ export function Select({
             error
               ? "border-red-500 focus:ring-red-500"
               : "border-slate-200 focus:border-slate-400",
-            isOpen && "border-slate-400 ring-2 ring-slate-400 ring-offset-2"
+            isOpen && "border-slate-400 ring-2 ring-slate-400 ring-offset-2",
           )}
           disabled={disabled}
         >
           <span
             className={cn(
               "flex items-center gap-2 truncate",
-              !selectedOption && "text-slate-500"
+              !selectedOption && "text-slate-500",
             )}
           >
             {selectedOption?.icon && (
@@ -93,7 +93,7 @@ export function Select({
           <ChevronDown
             className={cn(
               "h-4 w-4 opacity-50 transition-transform duration-200",
-              isOpen && "rotate-180"
+              isOpen && "rotate-180",
             )}
           />
         </button>
@@ -106,15 +106,19 @@ export function Select({
               </div>
             ) : (
               options.map((option) => (
-                <div
+                <button
                   key={option.value}
+                  type="button"
                   onClick={() => handleSelect(option)}
+                  disabled={option.disabled}
+                  role="option"
+                  aria-selected={option.value === value}
                   className={cn(
-                    "relative flex w-full cursor-pointer select-none items-center rounded-lg py-2.5 pl-2 pr-8 text-sm outline-none transition-colors",
+                    "relative flex w-full cursor-pointer select-none items-center rounded-lg py-2.5 pl-2 pr-8 text-sm outline-none transition-colors text-left",
                     option.disabled
-                      ? "pointer-events-none opacity-50"
-                      : "hover:bg-slate-100",
-                    option.value === value && "bg-slate-50 font-medium"
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-slate-100 focus-visible:bg-slate-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                    option.value === value && "bg-slate-50 font-medium",
                   )}
                 >
                   <div className="flex items-center gap-3">
@@ -134,10 +138,13 @@ export function Select({
                   </div>
                   {option.value === value && (
                     <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
-                      <Check className="h-4 w-4 text-emerald-600" />
+                      <Check
+                        className="h-4 w-4 text-emerald-600"
+                        aria-hidden="true"
+                      />
                     </span>
                   )}
-                </div>
+                </button>
               ))
             )}
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -34,12 +34,25 @@ export function ProfileSettings() {
     },
   });
 
+  // Warn about unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
+
   const onSubmit = async (data: ProfileFormData) => {
     setIsSubmitting(true);
     try {
       const { user: updatedUser } = await apiCall(
         authService.updateProfile(data),
-        { successMessage: "Profile updated successfully" }
+        { successMessage: "Profile updated successfully" },
       );
       setUser(updatedUser);
     } catch {
@@ -59,11 +72,13 @@ export function ProfileSettings() {
         <div className="grid gap-4 md:grid-cols-2">
           <Input
             label="First Name"
+            autoComplete="given-name"
             error={errors.firstName?.message}
             {...register("firstName")}
           />
           <Input
             label="Last Name"
+            autoComplete="family-name"
             error={errors.lastName?.message}
             {...register("lastName")}
           />

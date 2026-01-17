@@ -99,7 +99,8 @@ export function TransactionList({ transactions }: TransactionListProps) {
                 <TableCell
                   className={cn(
                     "font-semibold",
-                    isDebit ? "text-error-main" : "text-success-main"
+                    isDebit ? "text-error-main" : "text-success-main",
+                    "tabular-nums",
                   )}
                 >
                   {amount}
@@ -108,7 +109,7 @@ export function TransactionList({ transactions }: TransactionListProps) {
                   <div
                     className={cn(
                       "w-fit px-2.5 py-1 rounded-full text-xs font-semibold",
-                      statusConfig.className
+                      statusConfig.className,
                     )}
                   >
                     {statusConfig.label}

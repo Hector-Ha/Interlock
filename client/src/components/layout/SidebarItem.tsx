@@ -34,14 +34,15 @@ export const SidebarItem = ({ link, sidebarCollapsed }: SidebarItemProps) => {
         !isActive &&
           "text-gray-600 hover:bg-brand-surface hover:text-brand-main hover:border-brand-main", // Hover = Secondary Style
         isActive && "border-transparent", // Active = Default Style
-        sidebarCollapsed && "justify-center px-2"
+        sidebarCollapsed && "justify-center px-2",
       )}
       title={sidebarCollapsed ? link.name : undefined}
     >
       <Icon
+        aria-hidden="true"
         className={cn(
           "size-6 flex-shrink-0 transition-colors",
-          isActive ? "text-white" : "text-gray-500 group-hover:text-brand-main"
+          isActive ? "text-white" : "text-gray-500 group-hover:text-brand-main",
         )}
       />
       <AnimatePresence>

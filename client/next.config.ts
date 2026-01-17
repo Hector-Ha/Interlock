@@ -28,8 +28,14 @@ const nextConfig: NextConfig = {
 
   // Experimental features
   experimental: {
-    // Optimize package imports
-    optimizePackageImports: ["lucide-react", "chart.js"],
+    // Optimize package imports for better dev/build performance
+    optimizePackageImports: [
+      "lucide-react",
+      "chart.js",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-slot",
+      "framer-motion",
+    ],
   },
 };
 

@@ -95,7 +95,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
                 <span
                   className={`font-semibold ${
                     isDebit ? "text-error-main" : "text-success-main"
-                  }`}
+                  } tabular-nums`}
                 >
                   {amount}
                 </span>
@@ -147,7 +147,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
                       isDebit
                         ? "text-error-main font-semibold"
                         : "text-success-main font-semibold"
-                    }`}
+                    } tabular-nums`}
                   >
                     {amount}
                   </TableCell>

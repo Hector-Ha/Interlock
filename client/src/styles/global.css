@@ -2,7 +2,8 @@
 @plugin "tailwindcss-animate";
 
 @theme {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif,
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
   --radius: 0.5rem;
@@ -176,6 +177,11 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
+  }
+
+  button,
+  a {
+    touch-action: manipulation;
   }
 
   /* Global default border color fix for Tailwind v4 */

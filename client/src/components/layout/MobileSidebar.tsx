@@ -75,14 +75,15 @@ export function MobileSidebar({ open }: MobileSidebarProps) {
                         "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
                         isActive
                           ? "bg-brand-50 text-brand-700"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
                       )}
                       onClick={() => setSidebarOpen(false)}
                     >
                       <Icon
+                        aria-hidden="true"
                         className={cn(
                           "h-5 w-5",
-                          isActive ? "text-brand-600" : "text-gray-500"
+                          isActive ? "text-brand-600" : "text-gray-500",
                         )}
                       />
                       {link.name}

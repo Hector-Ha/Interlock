@@ -12,7 +12,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import { authService } from "@/services/auth.service";
 import { Alert, AlertDescription } from "@/components/ui/Alert";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 const STEPS = [
   { id: 1, name: "Account", fields: ["email", "password", "confirmPassword"] },
@@ -27,6 +27,7 @@ const STEPS = [
 
 export function SignUpForm() {
   const router = useRouter();
+  const shouldReduceMotion = useReducedMotion();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -118,7 +119,11 @@ export function SignUpForm() {
                   : "bg-muted text-muted-foreground"
               }`}
             >
-              {step > s.id ? <Check className="w-4 h-4" /> : s.id}
+              {step > s.id ? (
+                <Check className="w-4 h-4" aria-hidden="true" />
+              ) : (
+                s.id
+              )}
             </div>
             <span className="text-[10px] text-muted-foreground hidden sm:block">
               {s.name}
@@ -133,9 +138,9 @@ export function SignUpForm() {
             {step === 1 && (
               <motion.div
                 key="step1"
-                initial={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0, x: shouldReduceMotion ? 0 : 10 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
+                exit={{ opacity: 0, x: shouldReduceMotion ? 0 : -10 }}
                 className="grid gap-4"
               >
                 <div className="space-y-4">
@@ -180,9 +185,9 @@ export function SignUpForm() {
             {step === 2 && (
               <motion.div
                 key="step2"
-                initial={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0, x: shouldReduceMotion ? 0 : 10 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
+                exit={{ opacity: 0, x: shouldReduceMotion ? 0 : -10 }}
                 className="grid gap-4"
               >
                 <div className="grid grid-cols-2 gap-4">
@@ -190,6 +195,7 @@ export function SignUpForm() {
                     id="firstName"
                     placeholder="John"
                     label="First Name"
+                    autoComplete="given-name"
                     disabled={isLoading}
                     error={errors.firstName?.message}
                     {...register("firstName")}
@@ -198,6 +204,7 @@ export function SignUpForm() {
                     id="lastName"
                     placeholder="Doe"
                     label="Last Name"
+                    autoComplete="family-name"
                     disabled={isLoading}
                     error={errors.lastName?.message}
                     {...register("lastName")}
@@ -207,6 +214,7 @@ export function SignUpForm() {
                   id="dateOfBirth"
                   type="date"
                   label="Date of Birth"
+                  autoComplete="bday"
                   disabled={isLoading}
                   error={errors.dateOfBirth?.message}
                   {...register("dateOfBirth")}
@@ -217,15 +225,16 @@ export function SignUpForm() {
             {step === 3 && (
               <motion.div
                 key="step3"
-                initial={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0, x: shouldReduceMotion ? 0 : 10 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
+                exit={{ opacity: 0, x: shouldReduceMotion ? 0 : -10 }}
                 className="grid gap-4"
               >
                 <Input
                   id="address"
                   placeholder="123 Main St"
                   label="Address"
+                  autoComplete="street-address"
                   disabled={isLoading}
                   error={errors.address?.message}
                   {...register("address")}
@@ -235,6 +244,7 @@ export function SignUpForm() {
                     id="city"
                     placeholder="New York"
                     label="City"
+                    autoComplete="address-level2"
                     disabled={isLoading}
                     error={errors.city?.message}
                     {...register("city")}
@@ -243,6 +253,7 @@ export function SignUpForm() {
                     id="state"
                     placeholder="NY"
                     label="State"
+                    autoComplete="address-level1"
                     maxLength={2}
                     disabled={isLoading}
                     error={errors.state?.message}
@@ -253,6 +264,7 @@ export function SignUpForm() {
                   id="postalCode"
                   placeholder="10001"
                   label="Postal Code"
+                  autoComplete="postal-code"
                   disabled={isLoading}
                   error={errors.postalCode?.message}
                   {...register("postalCode")}
@@ -263,15 +275,16 @@ export function SignUpForm() {
             {step === 4 && (
               <motion.div
                 key="step4"
-                initial={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0, x: shouldReduceMotion ? 0 : 10 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
+                exit={{ opacity: 0, x: shouldReduceMotion ? 0 : -10 }}
                 className="grid gap-4"
               >
                 <Input
                   id="ssn"
                   placeholder="Last 4 digits"
                   label="SSN (Last 4 digits)"
+                  autoComplete="off"
                   maxLength={4}
                   numericOnly
                   disabled={isLoading}
@@ -297,7 +310,7 @@ export function SignUpForm() {
                 disabled={isLoading}
                 className="w-full"
               >
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" /> Back
               </Button>
             ) : (
               <div className="w-full" /> /* Spacer */
@@ -310,11 +323,16 @@ export function SignUpForm() {
                 disabled={isLoading}
                 className="w-full"
               >
-                Next <ArrowRight className="ml-2 h-4 w-4" />
+                Next <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
               </Button>
             ) : (
               <Button disabled={isLoading} type="submit" className="w-full">
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading && (
+                  <Loader2
+                    className="mr-2 h-4 w-4 animate-spin"
+                    aria-hidden="true"
+                  />
+                )}
                 Sign Up
               </Button>
             )}

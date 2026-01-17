@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -31,10 +31,13 @@ const p2pSchema = z.object({
       const num = parseFloat(val);
       return !isNaN(num) && num > 0;
     }, "Amount must be greater than $0.00")
-    .refine((val) => {
-      const num = parseFloat(val);
-      return num <= P2P_LIMITS.PER_TRANSACTION;
-    }, `Maximum transfer is ${formatCurrency(P2P_LIMITS.PER_TRANSACTION)}`),
+    .refine(
+      (val) => {
+        const num = parseFloat(val);
+        return num <= P2P_LIMITS.PER_TRANSACTION;
+      },
+      `Maximum transfer is ${formatCurrency(P2P_LIMITS.PER_TRANSACTION)}`,
+    ),
   note: z.string().max(200, "Note cannot exceed 200 characters").optional(),
 });
 
@@ -55,7 +58,7 @@ export function P2PTransferForm({
   const { banks, fetchBanks, isLoading: isBankLoading } = useBankStore();
 
   const [selectedRecipient, setSelectedRecipient] = useState<Recipient | null>(
-    null
+    null,
   );
   const [selectedBankId, setSelectedBankId] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,15 +70,20 @@ export function P2PTransferForm({
     fetchBanks();
   }, [fetchBanks]);
 
-  // Filter banks that are Dwolla-linked and active
-  const linkedBanks = banks.filter(
-    (b) => b.isDwollaLinked && b.status === "ACTIVE"
+  // Memoized: only recompute when banks change
+  const linkedBanks = useMemo(
+    () => banks.filter((b) => b.isDwollaLinked && b.status === "ACTIVE"),
+    [banks],
   );
 
-  const bankOptions = linkedBanks.map((bank) => ({
-    value: bank.id,
-    label: bank.institutionName,
-  }));
+  const bankOptions = useMemo(
+    () =>
+      linkedBanks.map((bank) => ({
+        value: bank.id,
+        label: bank.institutionName,
+      })),
+    [linkedBanks],
+  );
 
   const {
     register,
@@ -127,7 +135,7 @@ export function P2PTransferForm({
       toast.success(
         `Successfully sent ${formatCurrency(parsedAmount)} to ${
           selectedRecipient.firstName
-        }!`
+        }!`,
       );
 
       // Reset form
@@ -303,10 +311,14 @@ export function P2PTransferForm({
                 </h3>
                 <button
                   onClick={handleCancelConfirm}
-                  className="p-1 hover:bg-surface-alt rounded-lg transition-colors"
+                  className="p-1 hover:bg-surface-alt rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   disabled={isSubmitting}
+                  aria-label="Close confirmation dialog"
                 >
-                  <X className="h-5 w-5 text-content-secondary" />
+                  <X
+                    className="h-5 w-5 text-content-secondary"
+                    aria-hidden="true"
+                  />
                 </button>
               </div>
 
@@ -353,8 +365,11 @@ export function P2PTransferForm({
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending...
+                      <Loader2
+                        className="mr-2 h-4 w-4 animate-spin"
+                        aria-hidden="true"
+                      />
+                      Sending…
                     </>
                   ) : (
                     "Confirm & Send"

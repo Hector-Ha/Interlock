@@ -48,7 +48,7 @@ export function RecipientSearch({ onSelect, className }: RecipientSearchProps) {
         setResults([]);
       }
     },
-    [onSelect]
+    [onSelect],
   );
 
   return (
@@ -56,13 +56,16 @@ export function RecipientSearch({ onSelect, className }: RecipientSearchProps) {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-content-tertiary" />
         <Input
-          placeholder="Search by email or phone..."
+          placeholder="Search by email or phone…"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
             search(e.target.value);
           }}
           className="pl-10"
+          autoComplete="off"
+          spellCheck={false}
+          aria-label="Search for recipient by email or phone"
         />
         {isSearching && (
           <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-content-tertiary" />
@@ -79,33 +82,40 @@ export function RecipientSearch({ onSelect, className }: RecipientSearchProps) {
       {results.length > 0 && (
         <ul className="border border-border rounded-lg divide-y divide-border bg-card shadow-sm">
           {results.map((recipient) => (
-            <li
-              key={recipient.id}
-              onClick={() => handleSelect(recipient)}
-              className={cn(
-                "p-3 flex items-center gap-3 transition-colors",
-                recipient.hasLinkedBank
-                  ? "cursor-pointer hover:bg-surface-alt"
-                  : "opacity-50 cursor-not-allowed"
-              )}
-            >
-              <div className="h-10 w-10 rounded-full bg-brand-surface flex items-center justify-center flex-shrink-0">
-                <User className="h-5 w-5 text-brand-text" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-content-primary truncate">
-                  {recipient.firstName} {recipient.lastName}
-                </p>
-                <p className="text-sm text-content-secondary truncate">
-                  {recipient.email}
-                </p>
-              </div>
-              {!recipient.hasLinkedBank && (
-                <div className="flex items-center gap-1 text-warning-text text-sm flex-shrink-0">
-                  <AlertCircle className="h-4 w-4" />
-                  <span>No linked bank</span>
+            <li key={recipient.id}>
+              <button
+                type="button"
+                onClick={() => handleSelect(recipient)}
+                disabled={!recipient.hasLinkedBank}
+                className={cn(
+                  "w-full text-left p-3 flex items-center gap-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                  recipient.hasLinkedBank
+                    ? "cursor-pointer hover:bg-surface-alt"
+                    : "opacity-50 cursor-not-allowed",
+                )}
+                aria-label={`Select ${recipient.firstName} ${recipient.lastName}${!recipient.hasLinkedBank ? " (no linked bank)" : ""}`}
+              >
+                <div className="h-10 w-10 rounded-full bg-brand-surface flex items-center justify-center flex-shrink-0">
+                  <User
+                    className="h-5 w-5 text-brand-text"
+                    aria-hidden="true"
+                  />
                 </div>
-              )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-content-primary truncate">
+                    {recipient.firstName} {recipient.lastName}
+                  </p>
+                  <p className="text-sm text-content-secondary truncate">
+                    {recipient.email}
+                  </p>
+                </div>
+                {!recipient.hasLinkedBank && (
+                  <div className="flex items-center gap-1 text-warning-text text-sm flex-shrink-0">
+                    <AlertCircle className="h-4 w-4" aria-hidden="true" />
+                    <span>No linked bank</span>
+                  </div>
+                )}
+              </button>
             </li>
           ))}
         </ul>

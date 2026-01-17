@@ -54,12 +54,12 @@ export default function TransfersPage() {
         setIsLoading(false);
       }
     },
-    [filters, pagination.limit]
+    [filters, pagination.limit],
   );
 
   useEffect(() => {
     loadTransfers();
-  }, []);
+  }, [loadTransfers]);
 
   const { isRefreshing, refresh } = useRefresh(async () => {
     // Reload transfers, resetting to the first page
@@ -170,7 +170,7 @@ export default function TransfersPage() {
                 disabled={pagination.offset === 0}
                 onClick={() =>
                   handlePageChange(
-                    Math.max(0, pagination.offset - pagination.limit)
+                    Math.max(0, pagination.offset - pagination.limit),
                   )
                 }
               >

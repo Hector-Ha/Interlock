@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { CreditCard } from "lucide-react";
 import type { Bank } from "@/types/bank";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 
 interface BankCardProps {
   bank: Bank;
@@ -22,7 +22,7 @@ export function BankCard({ bank }: BankCardProps) {
               "text-xs font-medium px-2 py-1 rounded-full",
               bank.status === "ACTIVE"
                 ? "bg-emerald-100 text-emerald-700"
-                : "bg-slate-100 text-slate-700"
+                : "bg-slate-100 text-slate-700",
             )}
           >
             {bank.status === "ACTIVE" ? "Active" : "Inactive"}
@@ -33,7 +33,7 @@ export function BankCard({ bank }: BankCardProps) {
             {bank.institutionName}
           </h3>
           <p className="text-sm text-slate-500 mt-1">
-            Linked on {new Date(bank.createdAt).toLocaleDateString()}
+            Linked on {formatDate(bank.createdAt)}
           </p>
         </div>
       </div>

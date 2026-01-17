@@ -7,15 +7,15 @@ import dynamic from "next/dynamic";
  * These components are loaded on-demand to reduce initial bundle size.
  */
 
-// PlaidLinkButton - Loads Plaid SDK only when needed
-export const PlaidLinkButton = dynamic(
+// AddBankModal - Lazy loaded bank connection modal
+export const AddBankModal = dynamic(
   () =>
-    import("@/components/features/bank/PlaidLinkButton").then(
-      (mod) => mod.PlaidLinkButton,
+    import("@/components/features/banks/AddBankModal").then(
+      (mod) => mod.AddBankModal,
     ),
   {
     ssr: false,
-    loading: () => <div className="h-10 animate-pulse bg-gray-200 rounded" />,
+    loading: () => null,
   },
 );
 
@@ -46,7 +46,7 @@ export const RecipientSearch = dynamic(
 // P2PTransferForm - Full P2P transfer form
 export const P2PTransferForm = dynamic(
   () =>
-    import("@/components/features/p2p/P2PTransferForm").then(
+    import("@/components/features/transfers/P2PTransferForm").then(
       (mod) => mod.P2PTransferForm,
     ),
   {

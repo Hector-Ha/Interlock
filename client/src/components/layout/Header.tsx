@@ -38,8 +38,13 @@ export function Header() {
         </div>
 
         {/* Search (mobile) */}
-        <Button variant="secondary" size="icon" className="md:hidden">
-          <Search className="h-5 w-5" />
+        <Button
+          variant="secondary"
+          size="icon"
+          className="md:hidden"
+          aria-label="Search"
+        >
+          <Search className="h-5 w-5" aria-hidden="true" />
         </Button>
 
         {/* Notifications */}

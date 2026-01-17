@@ -23,8 +23,10 @@ const MobileNav = ({ user }: MobileNavProps) => {
   return (
     <section className="w-full max-w-[264px]">
       <Sheet>
-        <SheetTrigger>
-          <Menu className="cursor-pointer" width={30} height={30} />
+        <SheetTrigger asChild>
+          <button aria-label="Open navigation menu" className="cursor-pointer">
+            <Menu width={30} height={30} aria-hidden="true" />
+          </button>
         </SheetTrigger>
         <SheetContent side="right" className="border-none bg-white">
           <Link
@@ -55,7 +57,7 @@ const MobileNav = ({ user }: MobileNavProps) => {
                           "mobilenav-sheet_close w-full flex items-center gap-4 p-4 rounded-lg",
                           {
                             "bg-bank-gradient": isActive,
-                          }
+                          },
                         )}
                       >
                         <link.imgURL

@@ -89,35 +89,41 @@ export function NotificationBell() {
             ) : (
               <ul className="divide-y divide-border">
                 {notifications.slice(0, 10).map((notification) => (
-                  <li
-                    key={notification.id}
-                    onClick={() => handleNotificationClick(notification.id)}
-                    className={cn(
-                      "p-3 hover:bg-surface-alt cursor-pointer transition-colors",
-                      !notification.isRead && "bg-brand-surface"
-                    )}
-                  >
-                    <div className="flex items-start gap-2">
-                      <div className="flex-1">
-                        <p
-                          className={cn(
-                            "text-sm text-content-primary",
-                            !notification.isRead && "font-medium"
-                          )}
-                        >
-                          {notification.title}
-                        </p>
-                        <p className="text-sm text-content-secondary">
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-content-tertiary mt-1">
-                          {formatRelativeTime(notification.createdAt)}
-                        </p>
-                      </div>
-                      {!notification.isRead && (
-                        <div className="h-2 w-2 rounded-full bg-brand-main flex-shrink-0 mt-1.5" />
+                  <li key={notification.id}>
+                    <button
+                      type="button"
+                      onClick={() => handleNotificationClick(notification.id)}
+                      className={cn(
+                        "w-full text-left p-3 hover:bg-surface-alt cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                        !notification.isRead && "bg-brand-surface",
                       )}
-                    </div>
+                      aria-label={`${!notification.isRead ? "Unread: " : ""}${notification.title}`}
+                    >
+                      <div className="flex items-start gap-2">
+                        <div className="flex-1">
+                          <p
+                            className={cn(
+                              "text-sm text-content-primary",
+                              !notification.isRead && "font-medium",
+                            )}
+                          >
+                            {notification.title}
+                          </p>
+                          <p className="text-sm text-content-secondary">
+                            {notification.message}
+                          </p>
+                          <p className="text-xs text-content-tertiary mt-1">
+                            {formatRelativeTime(notification.createdAt)}
+                          </p>
+                        </div>
+                        {!notification.isRead && (
+                          <div
+                            className="h-2 w-2 rounded-full bg-brand-main flex-shrink-0 mt-1.5"
+                            aria-hidden="true"
+                          />
+                        )}
+                      </div>
+                    </button>
                   </li>
                 ))}
               </ul>
