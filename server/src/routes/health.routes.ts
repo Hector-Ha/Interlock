@@ -3,14 +3,9 @@ import { prisma } from "@/db";
 
 const router: RouterType = Router();
 
-/**
- * Health Check Endpoint
- * Returns health status with database connectivity check.
- * Mounted at root level for infrastructure probe discovery (AWS ALB, K8s).
- *
- * GET /health
- */
-router.get("/health", async (req, res) => {
+// Returns health status with database connectivity check.
+// Mounted at root level for infrastructure probe discovery
+router.get("/health", async (_req, res) => {
   const startTime = Date.now();
 
   try {
@@ -42,14 +37,8 @@ router.get("/health", async (req, res) => {
   }
 });
 
-/**
- * Readiness Check Endpoint
- * Used by orchestrators to determine if the service can accept traffic.
- * Mounted at root level for infrastructure probe discovery (AWS ALB, K8s).
- *
- * GET /ready
- */
-router.get("/ready", async (req, res) => {
+// Used by orchestrators to determine if the service can accept traffic.
+router.get("/ready", async (_req, res) => {
   try {
     // Verify database is ready
     await prisma.$queryRaw`SELECT 1`;
@@ -66,14 +55,8 @@ router.get("/ready", async (req, res) => {
   }
 });
 
-/**
- * Liveness Check Endpoint
- * Used by orchestrators to determine if the service is alive.
- * Mounted at root level for infrastructure probe discovery (AWS ALB, K8s).
- *
- * GET /live
- */
-router.get("/live", (req, res) => {
+// Used by orchestrators to determine if the service is alive.
+router.get("/live", (_req, res) => {
   res.json({
     alive: true,
     timestamp: new Date().toISOString(),

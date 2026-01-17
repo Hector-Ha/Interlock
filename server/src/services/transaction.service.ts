@@ -2,6 +2,7 @@ import { prisma } from "@/db";
 import { plaidClient } from "./plaid.service";
 import { decrypt } from "@/utils/encryption";
 import { logger } from "@/middleware/logger";
+import pLimit from "p-limit";
 import type {
   SyncResult,
   TransactionFilters,
@@ -27,6 +28,9 @@ export const syncTransactions = async (bankId: string): Promise<SyncResult> => {
   let modified = 0;
   let removed = 0;
 
+  /* concurrency limit for parallel processing */
+  const limit = pLimit(10);
+
   while (hasMore) {
     const response = await plaidClient.transactionsSync({
       access_token: accessToken,
@@ -36,64 +40,72 @@ export const syncTransactions = async (bankId: string): Promise<SyncResult> => {
 
     const { added: newTx, modified: modTx, removed: remTx } = response.data;
 
-    // Process added transactions
-    for (const tx of newTx) {
-      await prisma.transaction.upsert({
-        where: { plaidTransactionId: tx.transaction_id },
-        create: {
-          bankId,
-          plaidTransactionId: tx.transaction_id,
-          amount: Math.abs(tx.amount),
-          name: tx.name || "Unknown",
-          merchantName: tx.merchant_name,
-          date: new Date(tx.date),
-          channel: tx.payment_channel,
-          category: tx.personal_finance_category?.primary || null,
-          status: tx.pending ? "PENDING" : "SUCCESS",
-          pending: tx.pending,
-        },
-        update: {
-          amount: Math.abs(tx.amount),
-          name: tx.name || "Unknown",
-          merchantName: tx.merchant_name,
-          status: tx.pending ? "PENDING" : "SUCCESS",
-          pending: tx.pending,
-          category: tx.personal_finance_category?.primary || null,
-        },
-      });
-      added++;
-    }
+    await Promise.all([
+      // Process added transactions in parallel
+      ...newTx.map((tx) =>
+        limit(async () => {
+          await prisma.transaction.upsert({
+            where: { plaidTransactionId: tx.transaction_id },
+            create: {
+              bankId,
+              plaidTransactionId: tx.transaction_id,
+              amount: Math.abs(tx.amount),
+              name: tx.name || "Unknown",
+              merchantName: tx.merchant_name,
+              date: new Date(tx.date),
+              channel: tx.payment_channel,
+              category: tx.personal_finance_category?.primary || null,
+              status: tx.pending ? "PENDING" : "SUCCESS",
+              pending: tx.pending,
+            },
+            update: {
+              amount: Math.abs(tx.amount),
+              name: tx.name || "Unknown",
+              merchantName: tx.merchant_name,
+              status: tx.pending ? "PENDING" : "SUCCESS",
+              pending: tx.pending,
+              category: tx.personal_finance_category?.primary || null,
+            },
+          });
+          added++;
+        }),
+      ),
 
-    // Process modified transactions
-    for (const tx of modTx) {
-      const existing = await prisma.transaction.findFirst({
-        where: { plaidTransactionId: tx.transaction_id },
-      });
+      // Process modified transactions in parallel
+      ...modTx.map((tx) =>
+        limit(async () => {
+          const existing = await prisma.transaction.findFirst({
+            where: { plaidTransactionId: tx.transaction_id },
+          });
 
-      if (existing) {
-        await prisma.transaction.update({
-          where: { id: existing.id },
-          data: {
-            amount: Math.abs(tx.amount),
-            name: tx.name || "Unknown",
-            merchantName: tx.merchant_name,
-            status: tx.pending ? "PENDING" : "SUCCESS",
-            pending: tx.pending,
-          },
-        });
-        modified++;
-      }
-    }
+          if (existing) {
+            await prisma.transaction.update({
+              where: { id: existing.id },
+              data: {
+                amount: Math.abs(tx.amount),
+                name: tx.name || "Unknown",
+                merchantName: tx.merchant_name,
+                status: tx.pending ? "PENDING" : "SUCCESS",
+                pending: tx.pending,
+              },
+            });
+            modified++;
+          }
+        }),
+      ),
 
-    // Process removed transactions
-    for (const tx of remTx) {
-      if (tx.transaction_id) {
-        await prisma.transaction.deleteMany({
-          where: { plaidTransactionId: tx.transaction_id },
-        });
-        removed++;
-      }
-    }
+      // Process removed transactions in parallel
+      ...remTx.map((tx) =>
+        limit(async () => {
+          if (tx.transaction_id) {
+            await prisma.transaction.deleteMany({
+              where: { plaidTransactionId: tx.transaction_id },
+            });
+            removed++;
+          }
+        }),
+      ),
+    ]);
 
     hasMore = response.data.has_more;
     cursor = response.data.next_cursor;
@@ -107,7 +119,7 @@ export const syncTransactions = async (bankId: string): Promise<SyncResult> => {
 
   logger.info(
     { bankId, added, modified, removed },
-    "Transaction sync completed"
+    "Transaction sync completed",
   );
 
   return { added, modified, removed, hasMore: false };
@@ -119,7 +131,7 @@ export const syncTransactions = async (bankId: string): Promise<SyncResult> => {
 export const getTransactions = async (
   bankId: string,
   filters: TransactionFilters,
-  pagination: PaginationParams
+  pagination: PaginationParams,
 ) => {
   const where: Record<string, unknown> = { bankId };
 
@@ -192,7 +204,7 @@ export const getTransactions = async (
  */
 export const getTransactionById = async (
   transactionId: string,
-  userId: string
+  userId: string,
 ) => {
   const transaction = await prisma.transaction.findFirst({
     where: { id: transactionId },

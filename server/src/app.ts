@@ -76,6 +76,9 @@ app.use(cookieParser());
 // Health routes at root level for infrastructure probe discovery (AWS ALB, K8s)
 // Routes: GET /health, GET /ready, GET /live
 app.use("/", healthRoutes);
+
+// Metrics collection for all API routes
+app.use(metricsMiddleware);
 app.use("/api/v1", healthRoutes); // Also mount at /api/v1 for API tests
 
 // API routes with rate limiting
@@ -93,19 +96,7 @@ app.use("/api/v1", metricsRoutes);
 Sentry.setupExpressErrorHandler(app);
 
 // Global error handler
-app.use(
-  (
-    err: Error,
-    req: express.Request,
-    res: express.Response,
-    _next: express.NextFunction,
-  ) => {
-    logger.error({ err, url: req.url, method: req.method }, "Unhandled error");
-    res.status(500).json({
-      message: "Internal Server Error",
-      code: "INTERNAL_ERROR",
-    });
-  },
-);
+import { errorHandler } from "@/middleware/errorHandler";
+app.use(errorHandler);
 
 export default app;

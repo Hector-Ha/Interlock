@@ -265,41 +265,44 @@ export async function getEffectiveAccounts(
   bankId: string,
   accessToken: string,
 ) {
-  const accounts = await getAccountsWithBalances(accessToken);
+  const isSandbox = config.plaid.env === "sandbox";
 
-  if (config.plaid.env === "sandbox") {
-    const pendingTransactions = await prisma.transaction.findMany({
-      where: {
-        bankId,
-        dwollaTransferId: { not: null },
-        status: { in: ["PENDING", "SUCCESS"] },
-      },
-    });
+  const [accounts, pendingTransactions] = await Promise.all([
+    getAccountsWithBalances(accessToken),
+    isSandbox
+      ? prisma.transaction.findMany({
+          where: {
+            bankId,
+            dwollaTransferId: { not: null },
+            status: { in: ["PENDING", "SUCCESS"] },
+          },
+        })
+      : Promise.resolve([]),
+  ]);
 
-    let debits = 0;
-    let credits = 0;
-    for (const tx of pendingTransactions) {
-      const amount = Number(tx.amount);
-      if (tx.type === "DEBIT") {
-        debits += amount;
-      } else if (tx.type === "CREDIT") {
-        credits += amount;
-      }
+  let debits = 0;
+  let credits = 0;
+  for (const tx of pendingTransactions) {
+    const amount = Number(tx.amount);
+    if (tx.type === "DEBIT") {
+      debits += amount;
+    } else if (tx.type === "CREDIT") {
+      credits += amount;
     }
+  }
 
-    // Find checking account or first account
-    const checkingAccount =
-      accounts.find((a) => a.subtype === "checking") ||
-      accounts.find((a) => a.type === "depository") ||
-      accounts[0];
+  // Find checking account or first account
+  const checkingAccount =
+    accounts.find((a: any) => a.subtype === "checking") ||
+    accounts.find((a: any) => a.type === "depository") ||
+    accounts[0];
 
-    if (checkingAccount && checkingAccount.balance.available !== null) {
-      checkingAccount.balance.available =
-        checkingAccount.balance.available - debits + credits;
-      if (checkingAccount.balance.current !== null) {
-        checkingAccount.balance.current =
-          checkingAccount.balance.current - debits + credits;
-      }
+  if (checkingAccount && checkingAccount.balance.available !== null) {
+    checkingAccount.balance.available =
+      checkingAccount.balance.available - debits + credits;
+    if (checkingAccount.balance.current !== null) {
+      checkingAccount.balance.current =
+        checkingAccount.balance.current - debits + credits;
     }
   }
 

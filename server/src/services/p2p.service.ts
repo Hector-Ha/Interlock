@@ -104,19 +104,35 @@ export const p2pService = {
       };
     }
 
-    // Check daily limit - using UTC for consistent cross-timezone calculations
+    // Check daily & weekly limits in parallel
     const todayStart = new Date();
     todayStart.setUTCHours(0, 0, 0, 0);
 
-    const dailyTotal = await prisma.transaction.aggregate({
-      where: {
-        senderId,
-        type: "P2P_SENT",
-        createdAt: { gte: todayStart },
-        status: { not: "FAILED" },
-      },
-      _sum: { amount: true },
-    });
+    const weekStart = new Date();
+    const currentDate = weekStart.getUTCDate();
+    weekStart.setUTCDate(currentDate - 7);
+    weekStart.setUTCHours(0, 0, 0, 0);
+
+    const [dailyTotal, weeklyTotal] = await Promise.all([
+      prisma.transaction.aggregate({
+        where: {
+          senderId,
+          type: "P2P_SENT",
+          createdAt: { gte: todayStart },
+          status: { not: "FAILED" },
+        },
+        _sum: { amount: true },
+      }),
+      prisma.transaction.aggregate({
+        where: {
+          senderId,
+          type: "P2P_SENT",
+          createdAt: { gte: weekStart },
+          status: { not: "FAILED" },
+        },
+        _sum: { amount: true },
+      }),
+    ]);
 
     const dailySum = Number(dailyTotal._sum.amount || 0) * 100;
     if (dailySum + amountCents > P2P_LIMITS.DAILY) {
@@ -128,22 +144,6 @@ export const p2pService = {
         } reached. Remaining: $${remaining.toFixed(2)}`,
       };
     }
-
-    // Check weekly limit - using UTC for consistent cross-timezone calculations
-    const weekStart = new Date();
-    const currentDate = weekStart.getUTCDate();
-    weekStart.setUTCDate(currentDate - 7);
-    weekStart.setUTCHours(0, 0, 0, 0);
-
-    const weeklyTotal = await prisma.transaction.aggregate({
-      where: {
-        senderId,
-        type: "P2P_SENT",
-        createdAt: { gte: weekStart },
-        status: { not: "FAILED" },
-      },
-      _sum: { amount: true },
-    });
 
     const weeklySum = Number(weeklyTotal._sum.amount || 0) * 100;
     if (weeklySum + amountCents > P2P_LIMITS.WEEKLY) {

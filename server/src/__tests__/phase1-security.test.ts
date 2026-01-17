@@ -66,11 +66,13 @@ describe("Phase 1: Security Tests", () => {
       for (let i = 0; i < 6; i++) {
         await request(app)
           .post("/api/v1/auth/sign-in")
+          .set("x-test-force-limit", "true")
           .send({ email, password: "wrong" });
       }
 
       const response = await request(app)
         .post("/api/v1/auth/sign-in")
+        .set("x-test-force-limit", "true")
         .send({ email, password: "wrong" });
 
       expect(response.status).toBe(429);

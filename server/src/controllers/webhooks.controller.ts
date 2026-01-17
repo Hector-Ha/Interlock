@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { config } from "@/config";
 import { prisma } from "@/db";
 import { logger } from "@/middleware/logger";
+import { dwollaWebhookSchema } from "@/validators";
 
 interface WebhookRequest extends Request {
   rawBody?: Buffer;
@@ -35,11 +36,31 @@ export const handleDwollaWebhook = async (req: Request, res: Response) => {
       return;
     }
 
-    const event = req.body;
+    const validation = dwollaWebhookSchema.safeParse(req.body);
+
+    if (!validation.success) {
+      logger.warn(
+        { errors: validation.error.format() },
+        "Invalid webhook payload",
+      );
+      res.status(400).json({
+        message: "Invalid payload",
+        errors: validation.error.format(),
+      });
+      return;
+    }
+
+    const event = validation.data;
     const topic = event.topic;
     const resourceUrl = event._links.resource.href;
     const resourceId = resourceUrl.split("/").pop();
     const eventId = event.id;
+
+    if (!resourceId) {
+      logger.warn({ resourceUrl }, "Could not extract resource ID from URL");
+      res.status(400).json({ message: "Invalid resource URL" });
+      return;
+    }
 
     // Idempotency Check
     const existingEvent = await prisma.webhookEvent.findUnique({
@@ -52,13 +73,13 @@ export const handleDwollaWebhook = async (req: Request, res: Response) => {
       return;
     }
 
-    // We create it first to reserve the ID. If this fails (race condition), it returns 500 (or caught below).
+    // Create to reserve the ID. If this fails (race condition), it returns 500.
     await prisma.webhookEvent.create({
       data: {
         eventId,
         provider: "dwolla",
         eventType: topic,
-        payload: event as any, // Store raw payload
+        payload: req.body as any, // Store raw payload
       },
     });
 
@@ -120,7 +141,7 @@ const updateTransactionStatus = async (
       },
       data: {
         status,
-        pending: false, // Transfer completed - no longer pending
+        pending: false, // Transfer completed
       },
     });
 

@@ -72,10 +72,6 @@ export const config = {
   },
 };
 
-export function validateEnv(): void {
-  console.log("✅ Environment variables validated.");
-}
-
 /**
  * Validates production-specific security requirements.
  * Throws an error if any critical security check fails.

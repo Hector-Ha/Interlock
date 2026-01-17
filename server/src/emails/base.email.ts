@@ -182,12 +182,18 @@ export const renderEmailLayout = ({
           : ""
       }
       
+      ${
+        ctaLink
+          ? `
       <p style="font-size: 14px; margin-top: 32px; color: ${
         theme.colors.gray.main
       }; border-top: 1px solid ${theme.colors.gray.border}; padding-top: 24px;">
         If the button above doesn't work, copy and paste this link into your browser:<br>
         <a href="${ctaLink}" class="link" style="word-break: break-all;">${ctaLink}</a>
       </p>
+      `
+          : ""
+      }
     </div>
     <div class="footer">
       <p style="margin: 0;">${footerText}</p>
