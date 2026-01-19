@@ -1,11 +1,9 @@
 import "dotenv/config";
-import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, Prisma } from "./generated/client";
 
 const connectionString = process.env.DATABASE_URL;
-const pool = new Pool({ connectionString });
-const adapter = new PrismaPg(pool);
+const adapter = new PrismaPg({ connectionString });
 
 // Configure log levels based on environment
 const getLogConfig = (): Prisma.LogLevel[] => {

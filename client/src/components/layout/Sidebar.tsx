@@ -13,6 +13,7 @@ import { SidebarProps } from "@/types";
 import InterlockLogo from "@/assets/logos/Interlock.svg";
 
 import { Button, buttonVariants } from "@/components/ui/Button";
+import { ScrollArea } from "@/components/ui/ScrollArea";
 import { SettingsMenu } from "./SettingsMenu";
 import { SidebarItem } from "./SidebarItem";
 import { motion, AnimatePresence } from "framer-motion";
@@ -26,7 +27,7 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
       className={cn(
         "group/sidebar sticky left-0 top-0 z-40 flex h-screen flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out shadow-sm", // Reduced shadow to match Header
         sidebarCollapsed ? "w-[88px]" : "w-[280px]",
-        className
+        className,
       )}
     >
       {/* Floating Toggle Button*/}
@@ -39,7 +40,7 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
           <ChevronLeft
             className={cn(
               "h-4 w-4 text-white transition-transform duration-300",
-              sidebarCollapsed && "rotate-180"
+              sidebarCollapsed && "rotate-180",
             )}
           />
         </Button>
@@ -49,7 +50,7 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
       <div
         className={cn(
           "flex h-[64px] items-center border-b border-gray-200 transition-all duration-300",
-          sidebarCollapsed ? "justify-center px-0" : "px-6"
+          sidebarCollapsed ? "justify-center px-0" : "px-6",
         )}
       >
         <Link href="/" className="flex items-center gap-3">
@@ -77,7 +78,7 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 custom-scrollbar">
+      <ScrollArea className="flex-1 px-4 py-4">
         <nav className="flex flex-col gap-2">
           {sidebarLinks.map((link) => (
             <SidebarItem
@@ -87,7 +88,7 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
             />
           ))}
         </nav>
-      </div>
+      </ScrollArea>
 
       {/* Footer / User Profile */}
       <div className="border-t border-gray-100 p-4">
@@ -97,14 +98,14 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
               "flex items-center rounded-xl p-2 transition-all duration-300",
               !sidebarCollapsed
                 ? "justify-between gap-3 bg-gray-50/50 hover:bg-gray-50"
-                : "justify-center"
+                : "justify-center",
             )}
           >
             {/* Avatar & Text Container */}
             <div
               className={cn(
                 "flex items-center gap-3 overflow-hidden",
-                sidebarCollapsed ? "w-auto" : "flex-1"
+                sidebarCollapsed ? "w-auto" : "flex-1",
               )}
             >
               <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-700 font-bold shadow-sm border border-brand-200">

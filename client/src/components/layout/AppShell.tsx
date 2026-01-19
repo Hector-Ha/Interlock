@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { useAuthStore } from "@/stores/auth.store";
 import { useUIStore } from "@/stores/ui.store";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { MobileSidebar } from "./MobileSidebar";
+import { RightSideBar } from "./RightSideBar";
 import { ToastContainer } from "./ToastContainer";
-import { Spinner } from "@/components/ui";
+import { Spinner, ScrollArea } from "@/components/ui";
 import { SkipLink } from "@/components/a11y";
 
 interface AppShellProps {
@@ -17,6 +19,8 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   const { isLoading, isInitialized, initialize } = useAuthStore();
   const sidebarOpen = useUIStore((s) => s.sidebarOpen);
+  const pathname = usePathname();
+  const isDashboard = pathname === "/";
 
   useEffect(() => {
     initialize();
@@ -39,7 +43,7 @@ export function AppShell({ children }: AppShellProps) {
       {/* Skip Link for Keyboard Users */}
       <SkipLink />
 
-      {/* Desktop Sidebar */}
+      {/* Desktop Sidebar (left) */}
       <Sidebar className="hidden md:flex" />
 
       {/* Mobile Sidebar */}
@@ -50,14 +54,15 @@ export function AppShell({ children }: AppShellProps) {
         {/* Header */}
         <Header />
 
-        {/* Page Content */}
-        <main
-          id="main-content"
-          className="flex-1 overflow-auto p-4 md:p-6 lg:p-8"
-        >
-          <div className="mx-auto max-w-7xl">{children}</div>
-        </main>
+        <ScrollArea className="flex-1">
+          <main id="main-content" className="h-full p-4 md:p-6 lg:p-8">
+            <div className="mx-auto max-w-7xl">{children}</div>
+          </main>
+        </ScrollArea>
       </div>
+
+      {/* Right Sidebar - dashboard only (xl+) */}
+      {isDashboard && <RightSideBar className="hidden xl:flex" />}
 
       {/* Toast Notifications */}
       <ToastContainer />

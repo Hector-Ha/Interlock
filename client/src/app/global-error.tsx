@@ -1,12 +1,14 @@
 "use client";
 
 import * as Sentry from "@sentry/nextjs";
+import NextError from "next/error";
 import { useEffect } from "react";
 
 /**
  * Global Error Boundary for Next.js App Router
  * Catches unhandled errors and reports them to Sentry.
  */
+
 export default function GlobalError({
   error,
   reset,

@@ -13,7 +13,6 @@ import {
 import {
   updateProfileSchema,
   changePasswordSchema,
-  refreshTokenSchema,
 } from "@/validators/user.schema";
 import { logger } from "@/middleware/logger";
 import type { AuthRequest } from "@/types/auth.types";
@@ -38,6 +37,14 @@ export const signUp = async (req: Request, res: Response) => {
       maxAge: 15 * 60 * 1000, // 15 minutes to match token expiry
     });
 
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: config.env === "production",
+      sameSite: "strict",
+      path: "/api/v1/auth",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
     res.status(201).json({
       user: {
         id: user.id,
@@ -45,7 +52,6 @@ export const signUp = async (req: Request, res: Response) => {
         firstName: user.firstName,
         lastName: user.lastName,
       },
-      refreshToken,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -91,6 +97,14 @@ export const signIn = async (req: Request, res: Response) => {
       maxAge: 15 * 60 * 1000, // 15 minutes to match token expiry
     });
 
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: config.env === "production",
+      sameSite: "strict",
+      path: "/api/v1/auth",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
     res.json({
       user: {
         id: user.id,
@@ -98,7 +112,6 @@ export const signIn = async (req: Request, res: Response) => {
         firstName: user.firstName,
         lastName: user.lastName,
       },
-      refreshToken,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -164,21 +177,31 @@ export const getMe = async (req: AuthRequest, res: Response) => {
 
 export const signOut = (_req: Request, res: Response) => {
   res.clearCookie("token");
+  res.clearCookie("refreshToken", { path: "/api/v1/auth" });
   res.json({ message: "Signed out successfully" });
 };
 
 // Exchanges refresh token for new access token and rotated refresh token.
 export const refreshToken = async (req: Request, res: Response) => {
   try {
-    const { refreshToken } = refreshTokenSchema.parse(req.body);
+    const refreshTokenFromCookie = req.cookies?.refreshToken;
+
+    if (!refreshTokenFromCookie) {
+      res.status(401).json({
+        message: "No refresh token provided",
+        code: "NO_REFRESH_TOKEN",
+      });
+      return;
+    }
 
     const newRefreshToken = await authService.rotateRefreshToken(
-      refreshToken,
+      refreshTokenFromCookie,
       req.get("User-Agent"),
       req.ip
     );
 
     if (!newRefreshToken) {
+      res.clearCookie("refreshToken", { path: "/api/v1/auth" });
       res.status(401).json({
         message: "Invalid or expired refresh token",
         code: "INVALID_REFRESH_TOKEN",
@@ -190,6 +213,7 @@ export const refreshToken = async (req: Request, res: Response) => {
     const session = await authService.validateRefreshToken(newRefreshToken);
 
     if (!session) {
+      res.clearCookie("refreshToken", { path: "/api/v1/auth" });
       res.status(401).json({
         message: "Session not found",
         code: "SESSION_NOT_FOUND",
@@ -203,21 +227,28 @@ export const refreshToken = async (req: Request, res: Response) => {
       { expiresIn: "15m" } // Short-lived access token
     );
 
+    // Set new access token cookie
+    res.cookie("token", accessToken, {
+      httpOnly: true,
+      secure: config.env === "production",
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    // Set rotated refresh token cookie
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: config.env === "production",
+      sameSite: "strict",
+      path: "/api/v1/auth",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
     res.json({
-      accessToken,
-      refreshToken: newRefreshToken,
+      message: "Token refreshed successfully",
       expiresIn: 900,
     });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({
-        message: "Validation error",
-        code: "VALIDATION_ERROR",
-        errors: error.format(),
-      });
-      return;
-    }
-
     logger.error({ err: error }, "Refresh Token Error");
     res.status(500).json({
       message: "Failed to refresh token",
@@ -233,6 +264,7 @@ export const logoutAll = async (req: AuthRequest, res: Response) => {
     const count = await authService.invalidateAllSessions(userId);
 
     res.clearCookie("token");
+    res.clearCookie("refreshToken", { path: "/api/v1/auth" });
 
     res.json({
       message: "All sessions invalidated",
@@ -272,8 +304,9 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
 
     await authService.changePassword(userId, currentPassword, newPassword);
 
-    // Clear current session cookie (all sessions are invalidated by service)
+    // Clear current session cookies (all sessions are invalidated by service)
     res.clearCookie("token");
+    res.clearCookie("refreshToken", { path: "/api/v1/auth" });
 
     res.json({
       message: "Password changed successfully. Please sign in again.",

@@ -908,6 +908,7 @@ export default function PlaygroundPage() {
                         accountId: "1",
                       } as any,
                     ]}
+                    banks={[]}
                   />
                 </div>
                 {/* Skeleton */}
@@ -1015,7 +1016,7 @@ function ColorSwatch({
       <div
         className={cn(
           "h-20 w-full rounded-lg shadow-sm border border-border",
-          className
+          className,
         )}
         style={{ backgroundColor: variable }}
       />

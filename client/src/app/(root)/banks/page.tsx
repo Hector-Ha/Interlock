@@ -35,8 +35,8 @@ export default function BanksPage() {
         <EmptyBanks onAddBank={() => setShowAddModal(true)} />
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {banks.map((bank) => (
-            <BankCard key={bank.id} bank={bank} />
+          {banks.map((bank, index) => (
+            <BankCard key={bank.id} bank={bank} index={index} />
           ))}
         </div>
       )}

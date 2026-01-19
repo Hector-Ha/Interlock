@@ -1,9 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import CountUp from "react-countup";
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { Plus } from "lucide-react";
 import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { AddBankModal } from "@/components/features/banks/AddBankModal";
 import type { Account } from "@/types/bank";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -21,22 +25,25 @@ export function TotalBalanceCard({
   totalBanks,
   className,
 }: TotalBalanceCardProps) {
-  // Show actual data, or a 'No Data'ring if empty
+  const [isAddBankOpen, setIsAddBankOpen] = useState(false);
+
+  // Show actual data, or a 'No Data' ring if empty
   const hasAccounts = accounts.length > 0;
 
+  // Use brand colors from design system
   const chartData = hasAccounts
     ? {
         datasets: [
           {
             label: "Banks",
             data: accounts.map((a) => a.balance.current),
-            backgroundColor: ["#7839EE", "#5B21B6", "#A78BFA"],
+            backgroundColor: ["#7839ee", "#6d28d9", "#c4b5fd"], // brand-main, brand-hover, brand-disabled
           },
         ],
         labels: accounts.map((a) => a.name),
       }
     : {
-        // Empty state
+        // Empty state - gray-soft
         datasets: [
           {
             label: "No Connected Banks",
@@ -48,17 +55,29 @@ export function TotalBalanceCard({
       };
 
   return (
-    <Card
-      className={`flex flex-col gap-4 md:gap-6 p-6 md:p-8 rounded-2xl shadow-xl border-gray-100 ${className}`}
-    >
-      <div className="flex flex-col gap-2">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-          Total Current Balance
-        </h2>
-        <div className="flex-center gap-2">
-          <p className="text-4xl lg:text-5xl font-black text-gray-900 tracking-tight">
+    <div className={className}>
+      <Card className="flex items-center gap-4 p-4 sm:p-6 rounded-xl shadow-sm border border-gray-soft">
+        {/* Donut chart on LEFT */}
+        <div className="h-[72px] w-[72px] sm:h-[88px] sm:w-[88px] shrink-0 relative">
+          <Doughnut
+            data={chartData}
+            options={{
+              cutout: "70%",
+              plugins: { legend: { display: false } },
+              maintainAspectRatio: true,
+            }}
+          />
+        </div>
+
+        {/* Text content on RIGHT */}
+        <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+          <p className="text-sm font-semibold text-foreground">
+            {totalBanks} Bank Account{totalBanks !== 1 ? "s" : ""}
+          </p>
+          <p className="text-xs text-muted-foreground">Total Current Balance</p>
+          <p className="text-xl sm:text-2xl font-bold text-foreground tracking-tight mt-1">
             <CountUp
-              duration={2.5}
+              duration={2}
               decimals={2}
               decimal="."
               prefix="$"
@@ -66,40 +85,20 @@ export function TotalBalanceCard({
             />
           </p>
         </div>
-      </div>
 
-      <div className="flex items-center gap-8 mt-4">
-        <div className="h-[140px] w-[140px] relative">
-          <Doughnut
-            data={chartData}
-            options={{
-              cutout: "70%",
-              plugins: { legend: { display: false } },
-            }}
-          />
-        </div>
-        <div className="flex flex-col gap-4">
-          <p className="text-sm font-medium text-gray-600">
-            Total Banks Linked:{" "}
-            <span className="font-bold text-gray-900">{totalBanks}</span>
-          </p>
-          <div className="flex flex-col gap-2">
-            {/* Legend */}
-            {hasAccounts &&
-              accounts.slice(0, 3).map((account, i) => (
-                <div key={account.id} className="flex items-center gap-2">
-                  <span
-                    className="w-3 h-3 rounded-full"
-                    style={{
-                      backgroundColor: chartData.datasets[0].backgroundColor[i],
-                    }}
-                  ></span>
-                  <span className="text-xs text-gray-500">{account.name}</span>
-                </div>
-              ))}
-          </div>
-        </div>
-      </div>
-    </Card>
+        {/* Add bank button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="shrink-0 text-brand-main hover:text-brand-hover hover:bg-brand-surface"
+          onClick={() => setIsAddBankOpen(true)}
+        >
+          <Plus className="h-4 w-4" />
+          <span className="hidden sm:inline ml-1">Add bank</span>
+        </Button>
+      </Card>
+
+      <AddBankModal open={isAddBankOpen} onOpenChange={setIsAddBankOpen} />
+    </div>
   );
 }

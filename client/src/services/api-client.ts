@@ -57,14 +57,19 @@ function createApiClient(): AxiosInstance {
     async (error: AxiosError<ApiError>) => {
       const originalRequest = error.config as any;
 
-      if (error.response?.status === 401 && originalRequest) {
+      // Skip refresh logic for auth endpoints to prevent infinite loops
+      const isAuthEndpoint = originalRequest?.url?.startsWith("/auth/");
+
+      if (
+        error.response?.status === 401 &&
+        originalRequest &&
+        !isAuthEndpoint
+      ) {
         if (originalRequest._retry) {
-          // If already retried and still failed, don't retry again
           return Promise.reject(error);
         }
 
         if (isRefreshing) {
-          // If refreshing, queue the request
           return new Promise(function (resolve, reject) {
             failedQueue.push({ resolve, reject });
           })
@@ -85,8 +90,12 @@ function createApiClient(): AxiosInstance {
           return client.request(originalRequest);
         } catch (refreshError: any) {
           processQueue(refreshError, null);
-          // Explicitly sign out to clear stale auth state and prevent redirect loops
-          useAuthStore.getState().signOut();
+          // Clear local state only - don't call signOut API to prevent loops
+          useAuthStore.setState({
+            user: null,
+            isAuthenticated: false,
+            error: null,
+          });
 
           if (typeof window !== "undefined") {
             window.location.href = "/sign-in";

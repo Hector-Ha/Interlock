@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -7,11 +11,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card } from "@/components/ui/Card";
-import { formatCurrency } from "@/lib/utils";
-import type { Transaction } from "@/types/bank";
+import { Badge } from "@/components/ui/Badge";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
+import { formatDayTime, getCategoryBadgeVariant, cn } from "@/lib/utils";
+import type { Transaction, Bank } from "@/types/bank";
 
 interface RecentTransactionsProps {
   transactions: Transaction[];
+  banks: Bank[];
+  transactionsByBank?: Record<string, Transaction[]>;
 }
 
 // Helper function to get status badge styling
@@ -19,110 +28,140 @@ function getStatusBadge(status: Transaction["status"]) {
   switch (status) {
     case "SUCCESS":
       return {
-        className:
-          "bg-success-surface text-success-text border border-success-text",
+        dotClass: "bg-success-main",
+        textClass: "text-success-main",
         label: "Success",
       };
     case "PENDING":
       return {
-        className:
-          "bg-warning-surface text-warning-text border border-warning-text",
+        dotClass: "bg-warning-main",
+        textClass: "text-warning-main",
         label: "Pending",
       };
     case "PROCESSING":
       return {
-        className: "bg-brand-surface text-brand-text border border-brand-text",
+        dotClass: "bg-gray-main",
+        textClass: "text-gray-main",
         label: "Processing",
       };
     case "FAILED":
     case "DECLINED":
     case "RETURNED":
       return {
-        className: "bg-error-surface text-error-text border border-error-text",
-        label: status,
+        dotClass: "bg-error-main",
+        textClass: "text-error-main",
+        label: status.charAt(0) + status.slice(1).toLowerCase(),
       };
     case "CANCELLED":
     default:
       return {
-        className: "bg-gray-surface text-gray-text border border-gray-text",
+        dotClass: "bg-gray-main",
+        textClass: "text-gray-main",
         label: "Cancelled",
       };
   }
 }
 
-export function RecentTransactions({ transactions }: RecentTransactionsProps) {
-  if (transactions.length === 0) {
-    return (
-      <Card className="p-6 text-center text-slate-500">
-        No recent transactions.
-      </Card>
-    );
-  }
+// Get initials from name
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+export function RecentTransactions({
+  transactions,
+  banks,
+  transactionsByBank = {},
+}: RecentTransactionsProps) {
+  const [selectedBankId, setSelectedBankId] = useState<string>(
+    banks[0]?.id || "",
+  );
+
+  const selectedBank = banks.find((b) => b.id === selectedBankId);
+  const displayTransactions =
+    transactionsByBank[selectedBankId] || transactions;
 
   return (
-    <Card className="rounded-2xl shadow-lg border-gray-100 overflow-hidden">
-      <div className="p-4 sm:p-6 border-b border-gray-100">
-        <h2 className="text-lg font-semibold text-gray-900">
-          Recent Transactions
+    <Card className="rounded-xl shadow-sm border border-gray-soft overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-soft">
+        <h2 className="text-lg sm:text-xl font-semibold text-foreground">
+          Recent transactions
         </h2>
-        <p className="text-sm text-gray-500">
-          Your latest financial activities
-        </p>
+        <Link
+          href="/transfers"
+          className="inline-flex items-center justify-center px-3 h-9 rounded-md text-sm font-medium border border-input bg-background hover:bg-gray-surface hover:text-foreground transition-colors"
+        >
+          View all
+        </Link>
       </div>
 
-      {/* Mobile List View */}
-      <div className="block md:hidden divide-y divide-gray-100">
-        {transactions.map((tx) => {
-          const isDebit = tx.amount > 0;
-          const amount = isDebit
-            ? `-$${tx.amount.toFixed(2)}`
-            : `+$${Math.abs(tx.amount).toFixed(2)}`;
-          const statusConfig = getStatusBadge(tx.status);
+      {/* Bank Tabs */}
+      {banks.length > 0 && (
+        <div className="px-4 sm:px-6">
+          <Tabs
+            value={selectedBankId}
+            onValueChange={setSelectedBankId}
+            className="w-full"
+          >
+            <TabsList className="w-full overflow-x-auto flex-nowrap">
+              {banks.map((bank) => (
+                <TabsTrigger
+                  key={bank.id}
+                  value={bank.id}
+                  className="whitespace-nowrap text-sm"
+                >
+                  {bank.institutionName}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
+      )}
 
-          return (
-            <div
-              key={tx.id}
-              className="flex items-center justify-between px-4 py-3 gap-3"
-            >
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900 truncate">{tx.name}</p>
-                <p className="text-xs text-gray-500">
-                  {tx.category || "Uncategorized"} •{" "}
-                  {new Date(tx.date).toLocaleDateString()}
+      {/* Selected Bank Card */}
+      {selectedBank && (
+        <div className="p-4 sm:p-6 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10 bg-brand-main">
+                <AvatarFallback className="bg-brand-main text-white text-sm font-semibold">
+                  {getInitials(selectedBank.institutionName)}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-semibold text-foreground">
+                  {selectedBank.institutionName}
+                </p>
+                <p className="text-sm text-brand-main font-medium">
+                  {/* Balance would come from account data */}
+                  {selectedBank.accounts?.[0]?.balance?.current != null
+                    ? `$${selectedBank.accounts[0].balance.current.toFixed(2)}`
+                    : ""}
                 </p>
               </div>
-              <div className="flex flex-col items-end gap-1 shrink-0">
-                <span
-                  className={`font-semibold ${
-                    isDebit ? "text-error-main" : "text-success-main"
-                  } tabular-nums`}
-                >
-                  {amount}
-                </span>
-                <span
-                  className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${statusConfig.className}`}
-                >
-                  {statusConfig.label}
-                </span>
-              </div>
             </div>
-          );
-        })}
-      </div>
+            <span className="text-xs text-success-main font-medium">
+              {selectedBank.accounts?.[0]?.subtype || "checking"}
+            </span>
+          </div>
+        </div>
+      )}
 
-      {/* Desktop Table View */}
-      <div className="hidden md:block">
-        <Table>
-          <TableHeader className="bg-gray-50/50">
-            <TableRow>
-              <TableHead className="py-4 pl-6">Transaction</TableHead>
-              <TableHead className="py-4">Amount</TableHead>
-              <TableHead className="py-4">Status</TableHead>
-              <TableHead className="py-4 pr-6">Date</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {transactions.map((tx) => {
+      {/* Transaction Table */}
+      {displayTransactions.length === 0 ? (
+        <div className="p-6 text-center text-muted-foreground">
+          No recent transactions.
+        </div>
+      ) : (
+        <>
+          {/* Mobile List View */}
+          <div className="block md:hidden divide-y divide-gray-100">
+            {displayTransactions.map((tx) => {
               const isDebit = tx.amount > 0;
               const amount = isDebit
                 ? `-$${tx.amount.toFixed(2)}`
@@ -130,43 +169,141 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
               const statusConfig = getStatusBadge(tx.status);
 
               return (
-                <TableRow
+                <div
                   key={tx.id}
-                  className="hover:bg-gray-surface/50 transition-colors"
+                  className="flex items-center justify-between px-4 py-3 gap-3"
                 >
-                  <TableCell className="font-medium py-4 pl-6">
-                    <div className="flex flex-col">
-                      <span>{tx.name}</span>
-                      <span className="text-xs text-gray-main">
-                        {tx.category || "Uncategorized"}
-                      </span>
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <Avatar className="h-9 w-9 shrink-0">
+                      <AvatarFallback>{getInitials(tx.name)}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-foreground truncate text-sm">
+                        {tx.name}
+                      </p>
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={cn(
+                            "w-1.5 h-1.5 rounded-full",
+                            statusConfig.dotClass,
+                          )}
+                        />
+                        <span className={cn("text-xs", statusConfig.textClass)}>
+                          {statusConfig.label}
+                        </span>
+                      </div>
                     </div>
-                  </TableCell>
-                  <TableCell
-                    className={`py-4 ${
-                      isDebit
-                        ? "text-error-main font-semibold"
-                        : "text-success-main font-semibold"
-                    } tabular-nums`}
-                  >
-                    {amount}
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <div
-                      className={`w-fit px-2.5 py-1 rounded-full text-xs font-semibold ${statusConfig.className}`}
+                  </div>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span
+                      className={cn(
+                        "font-semibold text-sm tabular-nums",
+                        isDebit ? "text-error-main" : "text-success-main",
+                      )}
                     >
-                      {statusConfig.label}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-gray-main py-4 pr-6">
-                    {new Date(tx.date).toLocaleDateString()}
-                  </TableCell>
-                </TableRow>
+                      {amount}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {formatDayTime(tx.date)}
+                    </span>
+                  </div>
+                </div>
               );
             })}
-          </TableBody>
-        </Table>
-      </div>
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block">
+            <Table>
+              <TableHeader className="bg-muted/30">
+                <TableRow>
+                  <TableHead className="py-3 pl-6 text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                    Transaction
+                  </TableHead>
+                  <TableHead className="py-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                    Amount
+                  </TableHead>
+                  <TableHead className="py-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                    Status
+                  </TableHead>
+                  <TableHead className="py-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                    Date
+                  </TableHead>
+                  <TableHead className="py-3 pr-6 text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                    Category
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {displayTransactions.map((tx) => {
+                  const isDebit = tx.amount > 0;
+                  const amount = isDebit
+                    ? `-$${tx.amount.toFixed(2)}`
+                    : `+$${Math.abs(tx.amount).toFixed(2)}`;
+                  const statusConfig = getStatusBadge(tx.status);
+                  const category = Array.isArray(tx.category)
+                    ? tx.category[0]
+                    : tx.category || "Other";
+
+                  return (
+                    <TableRow
+                      key={tx.id}
+                      className="hover:bg-muted/30 transition-colors"
+                    >
+                      <TableCell className="py-4 pl-6">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-9 w-9">
+                            <AvatarFallback>
+                              {getInitials(tx.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="font-medium text-foreground">
+                            {tx.name}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell
+                        className={cn(
+                          "py-4 font-semibold tabular-nums",
+                          isDebit ? "text-error-main" : "text-success-main",
+                        )}
+                      >
+                        {amount}
+                      </TableCell>
+                      <TableCell className="py-4">
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className={cn(
+                              "w-1.5 h-1.5 rounded-full",
+                              statusConfig.dotClass,
+                            )}
+                          />
+                          <span
+                            className={cn("text-sm", statusConfig.textClass)}
+                          >
+                            {statusConfig.label}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-4 text-muted-foreground text-sm">
+                        {formatDayTime(tx.date)}
+                      </TableCell>
+                      <TableCell className="py-4 pr-6">
+                        <Badge
+                          variant={getCategoryBadgeVariant(category)}
+                          className="text-xs"
+                        >
+                          {category}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </>
+      )}
     </Card>
   );
 }

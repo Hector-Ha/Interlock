@@ -48,3 +48,6 @@ export { ToastContainer } from "./Toast";
 export { ResponsiveTable } from "./ResponsiveTable";
 export { Skeleton, TextSkeleton, AvatarSkeleton } from "./skeleton";
 export { OptimizedImage } from "./OptimizedImage";
+export { Tabs, TabsList, TabsTrigger, TabsContent } from "./Tabs";
+export { Avatar, AvatarImage, AvatarFallback } from "./Avatar";
+export { ScrollArea, ScrollBar } from "./ScrollArea";

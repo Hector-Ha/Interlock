@@ -30,7 +30,16 @@ const transferSchema = z.object({
 
 type TransferFormData = z.infer<typeof transferSchema>;
 
-export function TransferForm() {
+interface TransferFormProps {
+  onSuccess?: () => void;
+  className?: string;
+}
+
+export function TransferForm({
+  onSuccess,
+  className,
+  isEmbedded = false,
+}: TransferFormProps & { isEmbedded?: boolean }) {
   const router = useRouter();
   const toast = useToast();
 
@@ -97,7 +106,11 @@ export function TransferForm() {
       });
 
       toast.success("Transfer Initiated Successfully!");
-      router.back();
+      // Reset form
+      setValue("sourceBankId", "");
+      setValue("destinationBankId", "");
+      setValue("amount", "");
+      onSuccess?.();
     } catch (err: any) {
       Sentry.captureException(err);
       setError(err.message || "Failed to initiate transfer");
@@ -115,23 +128,32 @@ export function TransferForm() {
   }
 
   if (validBanks.length < 2) {
-    return (
-      <Card className="p-6">
-        <div className="flex flex-col items-center justify-center text-center space-y-4">
-          <AlertCircle className="h-12 w-12 text-yellow-500" />
-          <h3 className="text-lg font-semibold">Not Enough Accounts</h3>
-          <p className="text-slate-500 max-w-sm">
-            You need at least 2 connected banks to make a transfer. Please
-            connect another bank first.
-          </p>
-          <Button onClick={() => router.push("/banks")}>Connect Bank</Button>
-        </div>
-      </Card>
+    const content = (
+      <div className="flex flex-col items-center justify-center text-center space-y-4">
+        <AlertCircle className="h-12 w-12 text-yellow-500" />
+        <h3 className="text-lg font-semibold">Not Enough Accounts</h3>
+        <p className="text-slate-500 max-w-sm">
+          You need at least 2 connected banks to make a transfer. Please connect
+          another bank first.
+        </p>
+        <Button onClick={() => router.push("/banks")}>Connect Bank</Button>
+      </div>
+    );
+
+    return isEmbedded ? (
+      <div className={`p-6 ${className || ""}`}>{content}</div>
+    ) : (
+      <Card className="p-6">{content}</Card>
     );
   }
 
+  const Wrapper = isEmbedded ? "div" : Card;
+  const wrapperProps = isEmbedded
+    ? { className: className || "" }
+    : { className: `max-w-xl mx-auto p-6 ${className || ""}` };
+
   return (
-    <Card className="max-w-xl mx-auto p-6">
+    <Wrapper {...wrapperProps}>
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-slate-900">Transfer Funds</h2>
         <p className="text-slate-500">
@@ -208,6 +230,6 @@ export function TransferForm() {
           </Button>
         </div>
       </form>
-    </Card>
+    </Wrapper>
   );
 }
