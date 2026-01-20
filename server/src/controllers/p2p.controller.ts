@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { z } from "zod";
-import { AuthRequest } from "@/middleware/auth";
+import type { AuthRequest } from "@/types/auth.types";
 import { logger } from "@/middleware/logger";
 import { p2pService } from "@/services/p2p.service";
 import {

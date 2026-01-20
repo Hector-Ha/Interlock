@@ -41,16 +41,16 @@ export function MobileSidebar({ open }: MobileSidebarProps) {
     <Sheet open={open} onOpenChange={setSidebarOpen}>
       <SheetContent
         side="left"
-        className="w-[300px] sm:w-[400px] p-0 bg-white border-r border-gray-200"
+        className="w-[300px] sm:w-[400px] p-0 bg-card border-r border-border"
       >
-        <SheetHeader className="px-6 py-4 border-b border-gray-100 flex flex-row items-center justify-between space-y-0 text-left">
+        <SheetHeader className="px-6 py-4 border-b border-border flex flex-row items-center justify-between space-y-0 text-left">
           <Link
             href="/"
             onClick={() => setSidebarOpen(false)}
             className="flex items-center gap-3"
           >
             <Image src={InterlockLogo} alt="Interlock" width={32} height={32} />
-            <span className="font-google-sans text-xl font-bold text-gray-900">
+            <span className="font-google-sans text-xl font-bold text-foreground">
               Interlock
             </span>
           </Link>
@@ -72,10 +72,10 @@ export function MobileSidebar({ open }: MobileSidebarProps) {
                     <Link
                       href={link.route}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
+                        "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors",
                         isActive
-                          ? "bg-brand-50 text-brand-700"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                          ? "bg-brand-surface text-brand-main"
+                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                       )}
                       onClick={() => setSidebarOpen(false)}
                     >
@@ -83,7 +83,7 @@ export function MobileSidebar({ open }: MobileSidebarProps) {
                         aria-hidden="true"
                         className={cn(
                           "h-5 w-5",
-                          isActive ? "text-brand-600" : "text-gray-500",
+                          isActive ? "text-brand-main" : "text-muted-foreground",
                         )}
                       />
                       {link.name}
@@ -95,15 +95,15 @@ export function MobileSidebar({ open }: MobileSidebarProps) {
           </nav>
 
           {/* Footer */}
-          <div className="border-t border-gray-100 p-4 pb-8 space-y-4">
+          <div className="border-t border-border p-4 pb-8 space-y-4">
             {/* User Profile */}
             {user && (
               <div className="flex items-center gap-3 px-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-brand-700 font-bold border border-brand-200">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-brand-main to-brand-hover text-white font-bold shadow-sm">
                   {user.firstName?.[0]}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="truncate text-sm font-medium text-gray-900">
+                  <p className="truncate text-sm font-medium text-foreground">
                     {user.firstName} {user.lastName}
                   </p>
                   <p className="truncate text-xs text-muted-foreground">
@@ -115,7 +115,7 @@ export function MobileSidebar({ open }: MobileSidebarProps) {
 
             <Button
               variant="ghost"
-              className="w-full justify-start gap-3 text-gray-600 hover:text-red-600 hover:bg-red-50"
+              className="w-full justify-start gap-3 text-muted-foreground hover:text-error-main hover:bg-error-surface"
               onClick={handleSignOut}
             >
               <LogOut className="h-5 w-5" />

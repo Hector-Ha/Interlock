@@ -15,6 +15,7 @@
     "concurrently": "^8.2.2"
   },
   "dependencies": {
+    "@sentry/nextjs": "10",
     "lucide-react": "^0.562.0"
   }
 }

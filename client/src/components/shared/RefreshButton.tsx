@@ -23,10 +23,19 @@ export function RefreshButton({
       size="sm"
       onClick={onClick}
       disabled={isRefreshing}
-      className={clsx("gap-2", className)}
+      className={clsx(
+        "gap-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors",
+        isRefreshing && "text-brand-main",
+        className,
+      )}
       aria-label={isRefreshing ? "Refreshing..." : label}
     >
-      <RefreshCw className={clsx("h-4 w-4", isRefreshing && "animate-spin")} />
+      <RefreshCw
+        className={clsx(
+          "h-4 w-4 transition-transform",
+          isRefreshing && "animate-spin text-brand-main",
+        )}
+      />
       {isRefreshing ? "Refreshing..." : label}
     </Button>
   );

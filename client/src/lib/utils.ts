@@ -42,7 +42,7 @@ export function formatDate(date: Date | string) {
 export function getTransactionCategoryStyles(category: string | string[]) {
   const cat = Array.isArray(category) ? category[0] : category;
 
-  return "bg-slate-100 text-slate-700";
+  return "bg-muted text-muted-foreground";
 }
 
 // Format relative time
@@ -61,4 +61,46 @@ export function formatRelativeTime(date: Date | string): string {
   if (diffDay < 7) return `${diffDay} day${diffDay === 1 ? "" : "s"} ago`;
 
   return formatDate(d);
+}
+
+// Format date as "Wed 1:00pm" style
+export function formatDayTime(date: Date | string): string {
+  const d = new Date(date);
+  const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
+  const time = d
+    .toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    })
+    .toLowerCase();
+  return `${dayName} ${time}`;
+}
+
+// Get category badge variant based on category name
+export function getCategoryBadgeVariant(
+  category: string,
+): "success-soft" | "info-soft" | "warning-soft" | "error-soft" | "gray-soft" {
+  const cat = category.toLowerCase();
+  if (
+    cat.includes("deposit") ||
+    cat.includes("income") ||
+    cat.includes("salary")
+  ) {
+    return "success-soft";
+  }
+  if (cat.includes("subscription") || cat.includes("entertainment")) {
+    return "info-soft";
+  }
+  if (
+    cat.includes("food") ||
+    cat.includes("groceries") ||
+    cat.includes("dining")
+  ) {
+    return "warning-soft";
+  }
+  if (cat.includes("declined") || cat.includes("failed")) {
+    return "error-soft";
+  }
+  return "gray-soft";
 }

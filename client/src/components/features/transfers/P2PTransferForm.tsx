@@ -52,7 +52,8 @@ interface P2PTransferFormProps {
 export function P2PTransferForm({
   onSuccess,
   className,
-}: P2PTransferFormProps) {
+  isEmbedded = false,
+}: P2PTransferFormProps & { isEmbedded?: boolean }) {
   const router = useRouter();
   const toast = useToast();
   const { banks, fetchBanks, isLoading: isBankLoading } = useBankStore();
@@ -177,27 +178,38 @@ export function P2PTransferForm({
 
   // No linked banks warning
   if (linkedBanks.length === 0) {
-    return (
-      <Card className="p-6">
-        <div className="flex flex-col items-center justify-center text-center space-y-4">
-          <AlertCircle className="h-12 w-12 text-warning-main" />
-          <h3 className="text-lg font-semibold text-content-primary">
-            No Linked Banks
-          </h3>
-          <p className="text-content-secondary max-w-sm">
-            You need at least one bank account linked with Dwolla to send money.
-            Please link a bank first.
-          </p>
-          <Button onClick={() => router.push("/my-banks")}>Link a Bank</Button>
-        </div>
-      </Card>
+    const content = (
+      <div className="flex flex-col items-center justify-center text-center space-y-4">
+        <AlertCircle className="h-12 w-12 text-warning-main" />
+        <h3 className="text-lg font-semibold text-foreground">
+          No Linked Banks
+        </h3>
+        <p className="text-muted-foreground max-w-sm">
+          You need at least one bank account linked with Dwolla to send money.
+          Please link a bank first.
+        </p>
+        <Button
+          onClick={() => router.push("/banks")}
+          className="bg-brand-main hover:bg-brand-hover text-white"
+        >
+          Link a Bank
+        </Button>
+      </div>
+    );
+
+    return isEmbedded ? (
+      <div className={`p-6 ${className || ""}`}>{content}</div>
+    ) : (
+      <Card className="p-6">{content}</Card>
     );
   }
 
+  const Wrapper = isEmbedded ? "div" : Card;
+
   return (
     <>
-      <Card className={className}>
-        <div className="p-6">
+      <Wrapper className={className}>
+        <div className={isEmbedded ? "" : "p-6"}>
           <h2 className="text-xl font-semibold text-content-primary mb-1">
             Send Money
           </h2>
@@ -287,7 +299,7 @@ export function P2PTransferForm({
             <div className="pt-2">
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full bg-brand-main hover:bg-brand-hover text-white shadow-md hover:shadow-lg transition-all"
                 disabled={
                   !selectedRecipient || !selectedBankId || parsedAmount <= 0
                 }
@@ -298,7 +310,7 @@ export function P2PTransferForm({
             </div>
           </form>
         </div>
-      </Card>
+      </Wrapper>
 
       {/* Confirmation Modal */}
       {showConfirm && selectedRecipient && (
@@ -359,7 +371,7 @@ export function P2PTransferForm({
                   Cancel
                 </Button>
                 <Button
-                  className="flex-1"
+                  className="flex-1 bg-brand-main hover:bg-brand-hover text-white"
                   onClick={handleConfirm}
                   disabled={isSubmitting}
                 >

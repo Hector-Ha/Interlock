@@ -9,17 +9,19 @@ const TotalBalanceBox = ({
   totalCurrentBalance,
 }: TotalBalanceBoxProps) => {
   return (
-    <section className="total-balance-box">
-      <div className="total-balance-chart">
+    <section className="flex items-center gap-6 rounded-2xl border border-border/50 bg-card p-6 shadow-sm">
+      <div className="shrink-0">
         <DoughnutChart accounts={accounts} />
       </div>
 
-      <div className="total-balance-content">
-        <h2 className="header-2">Bank Accounts: {totalBanks}</h2>
-        <div className="total-balance-details">
-          <p className="total-balance-label">Total Current Balance</p>
-          <div className="total-balance-amount flex-center gap-2">
-            {<AnimatedBalanceCounter amount={totalCurrentBalance} />}
+      <div className="flex flex-col gap-2">
+        <h2 className="text-lg font-semibold text-foreground">
+          Bank Accounts: <span className="text-brand-main">{totalBanks}</span>
+        </h2>
+        <div className="space-y-1">
+          <p className="text-sm text-muted-foreground">Total Current Balance</p>
+          <div className="flex items-center gap-2">
+            <AnimatedBalanceCounter amount={totalCurrentBalance} />
           </div>
         </div>
       </div>

@@ -3,13 +3,8 @@ import { getMetrics } from "@/middleware/metrics";
 
 const router: RouterType = Router();
 
-/**
- * Metrics Endpoint
- * Returns application metrics for monitoring.
- *
- * GET /api/v1/metrics
- */
-router.get("/metrics", async (req, res) => {
+// Returns application metrics for monitoring.
+router.get("/metrics", async (_req, res) => {
   try {
     const metrics = await getMetrics();
     res.json(metrics);

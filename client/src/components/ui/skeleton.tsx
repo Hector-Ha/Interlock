@@ -19,7 +19,7 @@ function Skeleton({
   return (
     <div
       className={cn(
-        "bg-slate-200",
+        "bg-muted",
         animation === "pulse" && "animate-pulse",
         variant === "text" && "rounded h-4",
         variant === "circular" && "rounded-full",

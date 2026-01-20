@@ -69,32 +69,32 @@ export class ErrorBoundary extends Component<
 
       // Default error UI
       return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg">
+        <div className="flex min-h-screen items-center justify-center bg-background p-4">
+          <div className="w-full max-w-md rounded-2xl bg-card border border-border/50 p-8 shadow-xl">
             {/* Error Icon */}
             <div className="mb-6 flex justify-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-                <AlertTriangle className="h-8 w-8 text-red-600" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-error-surface">
+                <AlertTriangle className="h-8 w-8 text-error-main" />
               </div>
             </div>
 
             {/* Error Message */}
-            <h1 className="mb-2 text-center text-xl font-semibold text-gray-900">
+            <h1 className="mb-2 text-center text-xl font-semibold text-foreground">
               Something went wrong
             </h1>
 
-            <p className="mb-6 text-center text-gray-600">
+            <p className="mb-6 text-center text-muted-foreground">
               We encountered an unexpected error. Don&apos;t worry, your data is
               safe. Try refreshing the page or going back to the dashboard.
             </p>
 
             {/* Error Details (development only) */}
             {process.env.NODE_ENV === "development" && this.state.error && (
-              <div className="mb-6 rounded-lg bg-gray-100 p-4">
-                <p className="mb-2 text-sm font-medium text-gray-700">
+              <div className="mb-6 rounded-lg bg-muted p-4 border border-border/50">
+                <p className="mb-2 text-sm font-medium text-foreground">
                   Error Details:
                 </p>
-                <code className="block overflow-auto text-xs text-red-600">
+                <code className="block overflow-auto text-xs text-error-main">
                   {this.state.error.message}
                 </code>
               </div>

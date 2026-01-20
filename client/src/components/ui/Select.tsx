@@ -61,7 +61,7 @@ export function Select({
   return (
     <div className={cn("flex flex-col gap-1.5", className)} ref={containerRef}>
       {label && (
-        <label className="text-sm font-medium text-slate-700">{label}</label>
+        <label className="text-sm font-medium text-foreground">{label}</label>
       )}
 
       <div className="relative">
@@ -69,24 +69,24 @@ export function Select({
           type="button"
           onClick={() => !disabled && setIsOpen(!isOpen)}
           className={cn(
-            "flex h-12 w-full items-center justify-between rounded-xl border bg-white px-3 py-2 text-sm ring-offset-white transition-all",
-            "hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2",
+            "flex h-12 w-full items-center justify-between rounded-xl border bg-card px-3 py-2 text-sm ring-offset-white transition-all",
+            "hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
             disabled && "cursor-not-allowed opacity-50",
             error
               ? "border-red-500 focus:ring-red-500"
-              : "border-slate-200 focus:border-slate-400",
-            isOpen && "border-slate-400 ring-2 ring-slate-400 ring-offset-2",
+              : "border-border focus:border-border",
+            isOpen && "border-border ring-2 ring-ring ring-offset-2",
           )}
           disabled={disabled}
         >
           <span
             className={cn(
               "flex items-center gap-2 truncate",
-              !selectedOption && "text-slate-500",
+              !selectedOption && "text-muted-foreground",
             )}
           >
             {selectedOption?.icon && (
-              <span className="text-slate-500">{selectedOption.icon}</span>
+              <span className="text-muted-foreground">{selectedOption.icon}</span>
             )}
             {selectedOption ? selectedOption.label : placeholder}
           </span>
@@ -99,9 +99,9 @@ export function Select({
         </button>
 
         {isOpen && (
-          <div className="absolute z-50 mt-2 max-h-60 w-full overflow-auto rounded-xl border border-slate-200 bg-white p-1 shadow-lg animate-in fade-in-0 zoom-in-95">
+          <div className="absolute z-50 mt-2 max-h-60 w-full overflow-auto rounded-xl border border-border bg-card p-1 shadow-lg animate-in fade-in-0 zoom-in-95">
             {options.length === 0 ? (
-              <div className="p-2 text-center text-sm text-slate-500">
+              <div className="p-2 text-center text-sm text-muted-foreground">
                 No options available
               </div>
             ) : (
@@ -117,20 +117,20 @@ export function Select({
                     "relative flex w-full cursor-pointer select-none items-center rounded-lg py-2.5 pl-2 pr-8 text-sm outline-none transition-colors text-left",
                     option.disabled
                       ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-slate-100 focus-visible:bg-slate-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
-                    option.value === value && "bg-slate-50 font-medium",
+                      : "hover:bg-muted focus-visible:bg-muted focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                    option.value === value && "bg-muted/50 font-medium",
                   )}
                 >
                   <div className="flex items-center gap-3">
                     {option.icon && (
-                      <div className="flex bg-slate-100 h-8 w-8 items-center justify-center rounded-full text-slate-500">
+                      <div className="flex bg-muted h-8 w-8 items-center justify-center rounded-full text-muted-foreground">
                         {option.icon}
                       </div>
                     )}
                     <div className="flex flex-col items-start">
-                      <span className="text-slate-900">{option.label}</span>
+                      <span className="text-foreground">{option.label}</span>
                       {option.description && (
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs text-muted-foreground">
                           {option.description}
                         </span>
                       )}

@@ -64,14 +64,14 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
       <div className="flex-1 min-w-0">
         <p className={cn("text-sm font-medium", style.title)}>{toast.title}</p>
         {toast.message && (
-          <p className="mt-1 text-sm text-gray-600">{toast.message}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{toast.message}</p>
         )}
       </div>
 
       {toast.dismissible && (
         <button
           onClick={handleDismiss}
-          className="flex-shrink-0 rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+          className="flex-shrink-0 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           aria-label="Dismiss"
         >
           <X className="h-4 w-4" />

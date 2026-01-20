@@ -9,17 +9,17 @@ export function BankSettings() {
   const { banks, isLoading } = useBankStore();
 
   return (
-    <Card>
+    <Card className="border border-border/50">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-success-surface">
             <Building2 className="h-5 w-5 text-success-text" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-content-primary">
+            <h2 className="text-lg font-semibold text-foreground">
               Connected Banks
             </h2>
-            <p className="text-sm text-content-secondary">
+            <p className="text-sm text-muted-foreground">
               Manage your linked bank accounts
             </p>
           </div>
@@ -34,11 +34,11 @@ export function BankSettings() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-8">
-          <RefreshCw className="h-6 w-6 animate-spin text-content-tertiary" />
+          <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       ) : banks.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-content-secondary mb-4">No banks connected yet</p>
+          <p className="text-muted-foreground mb-4">No banks connected yet</p>
           <Link href="/banks">
             <Button>Connect a Bank</Button>
           </Link>
@@ -48,13 +48,13 @@ export function BankSettings() {
           {banks.slice(0, 3).map((bank) => (
             <div
               key={bank.id}
-              className="flex items-center justify-between p-4 rounded-xl bg-background-secondary"
+              className="flex items-center justify-between p-4 rounded-xl bg-muted border border-border/50"
             >
               <div>
-                <p className="font-medium text-content-primary">
+                <p className="font-medium text-foreground">
                   {bank.institutionName}
                 </p>
-                <p className="text-sm text-content-tertiary">
+                <p className="text-sm text-muted-foreground">
                   {bank.status === "ACTIVE"
                     ? "Connected"
                     : "Requires attention"}
@@ -66,7 +66,7 @@ export function BankSettings() {
             </div>
           ))}
           {banks.length > 3 && (
-            <p className="text-sm text-content-secondary text-center pt-2">
+            <p className="text-sm text-muted-foreground text-center pt-2">
               +{banks.length - 3} more banks
             </p>
           )}

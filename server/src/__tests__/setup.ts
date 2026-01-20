@@ -12,9 +12,7 @@ beforeAll(async () => {
   }
 });
 
-afterEach(async () => {
-  // TODO:Clean up test data after each test
-});
+// Cleanup is handled by individual tests or transaction rollback
 
 afterAll(async () => {
   await prisma.$disconnect();

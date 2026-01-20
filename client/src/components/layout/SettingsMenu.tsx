@@ -24,25 +24,25 @@ export function SettingsMenu({ onSignOut, className }: SettingsMenuProps) {
       <Popover
         placement="top start"
         offset={8}
-        className="w-56 overflow-auto rounded-xl bg-background p-1 shadow-lg ring-1 ring-border dark:ring-white/10 animate-in fade-in zoom-in-95 data-[exiting]:animate-out data-[exiting]:fade-out data-[exiting]:zoom-out-95"
+        className="w-56 overflow-hidden rounded-xl bg-card p-1.5 shadow-xl border border-border animate-in fade-in zoom-in-95 data-[exiting]:animate-out data-[exiting]:fade-out data-[exiting]:zoom-out-95"
       >
         <Menu className="outline-none">
           <MenuItem
-            className="group flex w-full items-center gap-2 rounded-lg py-1.5 px-3 outline-none data-[focused]:bg-muted cursor-default"
+            className="group flex w-full items-center gap-2.5 rounded-lg py-2 px-3 outline-none data-[focused]:bg-muted/50 cursor-default transition-colors"
             onAction={() => alert("Profile settings placeholder")}
           >
-            <User className="h-4 w-4 text-muted-foreground group-data-[focused]:text-foreground" />
+            <User className="h-4 w-4 text-muted-foreground group-data-[focused]:text-foreground transition-colors" />
             <span className="text-sm font-medium text-foreground">
               Profile
             </span>
           </MenuItem>
-          <div className="my-1 h-px bg-border" />
+          <div className="my-1.5 h-px bg-border" />
           <MenuItem
-            className="group flex w-full items-center gap-2 rounded-lg py-1.5 px-3 outline-none data-[focused]:bg-error-surface cursor-pointer"
+            className="group flex w-full items-center gap-2.5 rounded-lg py-2 px-3 outline-none data-[focused]:bg-error-surface cursor-pointer transition-colors"
             onAction={onSignOut}
           >
-            <LogOut className="h-4 w-4 text-muted-foreground group-data-[focused]:text-error-main" />
-            <span className="text-sm font-medium text-foreground group-data-[focused]:text-error-main">
+            <LogOut className="h-4 w-4 text-muted-foreground group-data-[focused]:text-error-main transition-colors" />
+            <span className="text-sm font-medium text-foreground group-data-[focused]:text-error-main transition-colors">
               Sign out
             </span>
           </MenuItem>

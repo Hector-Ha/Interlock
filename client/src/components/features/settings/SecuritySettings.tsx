@@ -85,16 +85,16 @@ export function SecuritySettings() {
   return (
     <div className="space-y-6">
       {/* Change Password */}
-      <Card>
+      <Card className="border border-border/50">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 rounded-lg bg-brand-surface">
-            <Shield className="h-5 w-5 text-brand-text" />
+            <Shield className="h-5 w-5 text-brand-main" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-content-primary">
+            <h2 className="text-lg font-semibold text-foreground">
               Change Password
             </h2>
-            <p className="text-sm text-content-secondary">
+            <p className="text-sm text-muted-foreground">
               Update your password regularly for better security
             </p>
           </div>
@@ -136,16 +136,16 @@ export function SecuritySettings() {
       </Card>
 
       {/* Active Sessions */}
-      <Card>
+      <Card className="border border-border/50">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 rounded-lg bg-warning-surface">
             <LogOut className="h-5 w-5 text-warning-text" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-content-primary">
+            <h2 className="text-lg font-semibold text-foreground">
               Active Sessions
             </h2>
-            <p className="text-sm text-content-secondary">
+            <p className="text-sm text-muted-foreground">
               Manage your active sessions across devices
             </p>
           </div>

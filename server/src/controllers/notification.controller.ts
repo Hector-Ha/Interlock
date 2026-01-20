@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { z } from "zod";
-import { AuthRequest } from "@/middleware/auth";
+import type { AuthRequest } from "@/types/auth.types";
 import { logger } from "@/middleware/logger";
 import { notificationService } from "@/services/notification.service";
 
@@ -17,7 +17,7 @@ export const getNotifications = async (req: AuthRequest, res: Response) => {
     const options = querySchema.parse(req.query);
     const result = await notificationService.getByUserId(
       req.user.userId,
-      options
+      options,
     );
 
     res.json(result);

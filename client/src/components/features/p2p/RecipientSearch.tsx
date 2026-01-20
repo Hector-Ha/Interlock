@@ -52,9 +52,9 @@ export function RecipientSearch({ onSelect, className }: RecipientSearchProps) {
   );
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn("space-y-3", className)}>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-content-tertiary" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search by email or phone…"
           value={query}
@@ -62,25 +62,25 @@ export function RecipientSearch({ onSelect, className }: RecipientSearchProps) {
             setQuery(e.target.value);
             search(e.target.value);
           }}
-          className="pl-10"
+          className="pl-10 bg-background border-border focus:border-brand-main focus:ring-brand-main/20"
           autoComplete="off"
           spellCheck={false}
           aria-label="Search for recipient by email or phone"
         />
         {isSearching && (
-          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-content-tertiary" />
+          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-brand-main" />
         )}
       </div>
 
       {error && (
-        <div className="text-sm text-error-text flex items-center gap-1">
+        <div className="text-sm text-error-main flex items-center gap-1.5 p-2 bg-error-surface rounded-lg">
           <AlertCircle className="h-4 w-4" />
           {error}
         </div>
       )}
 
       {results.length > 0 && (
-        <ul className="border border-border rounded-lg divide-y divide-border bg-card shadow-sm">
+        <ul className="border border-border rounded-xl divide-y divide-border bg-card shadow-lg overflow-hidden">
           {results.map((recipient) => (
             <li key={recipient.id}>
               <button
@@ -88,31 +88,28 @@ export function RecipientSearch({ onSelect, className }: RecipientSearchProps) {
                 onClick={() => handleSelect(recipient)}
                 disabled={!recipient.hasLinkedBank}
                 className={cn(
-                  "w-full text-left p-3 flex items-center gap-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                  "w-full text-left p-4 flex items-center gap-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-main",
                   recipient.hasLinkedBank
-                    ? "cursor-pointer hover:bg-surface-alt"
+                    ? "cursor-pointer hover:bg-muted/50"
                     : "opacity-50 cursor-not-allowed",
                 )}
                 aria-label={`Select ${recipient.firstName} ${recipient.lastName}${!recipient.hasLinkedBank ? " (no linked bank)" : ""}`}
               >
-                <div className="h-10 w-10 rounded-full bg-brand-surface flex items-center justify-center flex-shrink-0">
-                  <User
-                    className="h-5 w-5 text-brand-text"
-                    aria-hidden="true"
-                  />
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-brand-main to-brand-hover flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <User className="h-5 w-5 text-white" aria-hidden="true" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-content-primary truncate">
+                  <p className="font-medium text-foreground truncate">
                     {recipient.firstName} {recipient.lastName}
                   </p>
-                  <p className="text-sm text-content-secondary truncate">
+                  <p className="text-sm text-muted-foreground truncate">
                     {recipient.email}
                   </p>
                 </div>
                 {!recipient.hasLinkedBank && (
-                  <div className="flex items-center gap-1 text-warning-text text-sm flex-shrink-0">
-                    <AlertCircle className="h-4 w-4" aria-hidden="true" />
-                    <span>No linked bank</span>
+                  <div className="flex items-center gap-1.5 text-warning-main text-sm flex-shrink-0 bg-warning-surface px-2 py-1 rounded-full">
+                    <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span className="font-medium">No linked bank</span>
                   </div>
                 )}
               </button>
@@ -122,7 +119,7 @@ export function RecipientSearch({ onSelect, className }: RecipientSearchProps) {
       )}
 
       {query.length >= 3 && !isSearching && results.length === 0 && !error && (
-        <p className="text-sm text-content-secondary text-center py-4">
+        <p className="text-sm text-muted-foreground text-center py-6 bg-muted/30 rounded-lg">
           No users found matching &quot;{query}&quot;
         </p>
       )}

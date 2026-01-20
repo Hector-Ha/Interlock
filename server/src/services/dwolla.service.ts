@@ -4,10 +4,16 @@ import { prisma } from "@/db";
 import { decrypt } from "@/utils/encryption";
 import type { User } from "../generated/client";
 
+if (!config.dwolla.key || !config.dwolla.secret) {
+  throw new Error(
+    "Dwolla credentials not configured. Set DWOLLA_KEY and DWOLLA_SECRET environment variables.",
+  );
+}
+
 const dwolla = new Client({
   environment: config.dwolla.env as "sandbox" | "production",
-  key: config.dwolla.key!,
-  secret: config.dwolla.secret!,
+  key: config.dwolla.key,
+  secret: config.dwolla.secret,
 });
 
 export const dwollaClient = dwolla;

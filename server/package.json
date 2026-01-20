@@ -1,5 +1,5 @@
 {
-  "name": "express",
+  "name": "interlock-server",
   "module": "index.ts",
   "type": "module",
   "scripts": {
@@ -45,6 +45,7 @@
     "jsonwebtoken": "^9.0.3",
     "lru-cache": "^11.2.4",
     "nodemailer": "^7.0.12",
+    "p-limit": "^7.2.0",
     "pg": "^8.16.3",
     "pino": "^10.1.0",
     "pino-http": "^11.0.0",

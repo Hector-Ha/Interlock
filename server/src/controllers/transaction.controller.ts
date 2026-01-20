@@ -9,10 +9,7 @@ import {
 } from "@/validators/transaction.schema";
 import { logger } from "@/middleware/logger";
 
-/**
- * GET /api/v1/bank/:bankId/transactions
- * Lists transactions with filtering and pagination.
- */
+// Lists transactions with filtering and pagination.
 export const getTransactions = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user.userId;
@@ -45,7 +42,7 @@ export const getTransactions = async (req: AuthRequest, res: Response) => {
       {
         limit: query.limit,
         offset: query.offset,
-      }
+      },
     );
 
     res.json({
@@ -70,10 +67,7 @@ export const getTransactions = async (req: AuthRequest, res: Response) => {
   }
 };
 
-/**
- * GET /api/v1/transaction/:transactionId
- * Gets a single transaction by ID.
- */
+// Gets a single transaction by ID.
 export const getTransaction = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user.userId;
@@ -81,7 +75,7 @@ export const getTransaction = async (req: AuthRequest, res: Response) => {
 
     const transaction = await transactionService.getTransactionById(
       transactionId,
-      userId
+      userId,
     );
 
     if (!transaction) {
@@ -102,10 +96,7 @@ export const getTransaction = async (req: AuthRequest, res: Response) => {
   }
 };
 
-/**
- * POST /api/v1/bank/:bankId/sync
- * Triggers a transaction sync from Plaid.
- */
+// Triggers a transaction sync from Plaid.
 export const syncTransactions = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user.userId;
@@ -143,7 +134,7 @@ export const syncTransactions = async (req: AuthRequest, res: Response) => {
         },
       })
       .catch((err) =>
-        logger.error({ err, userId, bankId }, "Failed to create audit log")
+        logger.error({ err, userId, bankId }, "Failed to create audit log"),
       );
   } catch (error) {
     if (error instanceof z.ZodError) {
