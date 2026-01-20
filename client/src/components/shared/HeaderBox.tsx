@@ -8,12 +8,20 @@ const HeaderBox = ({
   user,
 }: HeaderBoxProps) => {
   return (
-    <div className="header-box">
-      <h1 className="header-box-title">
+    <div className="flex flex-col gap-1">
+      <h1 className="text-2xl lg:text-3xl font-semibold text-foreground tracking-tight">
         {title}{" "}
-        {type === "greeting" && <span className="text-gradient">{user}</span>}
+        {type === "greeting" && (
+          <span className="bg-gradient-to-r from-brand-main to-brand-hover bg-clip-text text-transparent">
+            {user}
+          </span>
+        )}
       </h1>
-      {subtext && <p className="header-box-subtext">{subtext}</p>}
+      {subtext && (
+        <p className="text-sm lg:text-base text-muted-foreground font-normal">
+          {subtext}
+        </p>
+      )}
     </div>
   );
 };

@@ -42,7 +42,7 @@ export function formatDate(date: Date | string) {
 export function getTransactionCategoryStyles(category: string | string[]) {
   const cat = Array.isArray(category) ? category[0] : category;
 
-  return "bg-slate-100 text-slate-700";
+  return "bg-muted text-muted-foreground";
 }
 
 // Format relative time

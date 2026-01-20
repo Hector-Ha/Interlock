@@ -2,13 +2,10 @@
 
 import { cn } from "@/lib/utils";
 
-/**
- * Credit card gradient variants matching the design mockup.
- * Each variant provides a unique gradient background.
- */
 const cardVariants = {
+  brand: "bg-gradient-to-br from-brand-main via-brand-hover to-brand-active",
   blue: "bg-gradient-to-br from-slate-800 via-slate-700 to-cyan-600",
-  pink: "bg-gradient-to-br from-pink-400 via-pink-300 to-rose-300",
+  pink: "bg-gradient-to-br from-pink-500 via-pink-400 to-rose-400",
   purple: "bg-gradient-to-br from-violet-600 via-purple-500 to-fuchsia-400",
   teal: "bg-gradient-to-br from-teal-600 via-emerald-500 to-cyan-400",
 } as const;
@@ -24,34 +21,30 @@ export interface BankCardProps {
   className?: string;
 }
 
-/**
- * A styled credit card component matching the dashboard design.
- * Displays bank name, cardholder info, masked card number, and expiration.
- */
 export function BankCard({
   bankName,
   cardholderName,
   maskedNumber,
   expiration,
-  variant = "blue",
+  variant = "brand",
   className,
 }: BankCardProps) {
   return (
     <div
       className={cn(
         "relative w-full aspect-[1.6/1] rounded-2xl p-5 text-white shadow-xl overflow-hidden",
+        "ring-1 ring-white/10",
         cardVariants[variant],
         className,
       )}
     >
-      {/* Card content */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50" />
+
       <div className="relative z-10 flex flex-col h-full justify-between">
-        {/* Top row: Bank name + Contactless icon */}
         <div className="flex items-start justify-between">
-          <span className="text-sm font-semibold tracking-wide">
+          <span className="text-sm font-semibold tracking-wide drop-shadow-sm">
             {bankName}
           </span>
-          {/* Contactless payment icon */}
           <svg
             className="w-8 h-8 opacity-80"
             viewBox="0 0 24 24"
@@ -67,17 +60,15 @@ export function BankCard({
           </svg>
         </div>
 
-        {/* Bottom section: Card details */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs opacity-80">
-            <span className="uppercase tracking-wider">{cardholderName}</span>
-            <span>{expiration}</span>
+          <div className="flex items-center justify-between text-xs opacity-90">
+            <span className="uppercase tracking-wider font-medium">{cardholderName}</span>
+            <span className="font-medium">{expiration}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="font-mono text-sm tracking-widest">
+            <span className="font-mono text-sm tracking-widest drop-shadow-sm">
               {maskedNumber}
             </span>
-            {/* Visa-style badge */}
             <span className="text-xs font-bold italic tracking-wide opacity-90">
               VISA
             </span>
@@ -85,8 +76,7 @@ export function BankCard({
         </div>
       </div>
 
-      {/* Decorative gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-white/5 pointer-events-none" />
     </div>
   );
 }

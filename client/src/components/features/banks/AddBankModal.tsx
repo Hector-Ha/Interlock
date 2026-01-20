@@ -55,7 +55,7 @@ export function AddBankModal({ open, onOpenChange }: AddBankModalProps) {
               </>
             )}
           </Button>
-          <p className="text-xs text-center text-slate-500">
+          <p className="text-xs text-center text-muted-foreground">
             Secured by Plaid. We don't store your bank credentials.
           </p>
         </div>

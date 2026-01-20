@@ -31,7 +31,6 @@ import {
 } from "@/hooks/useTransactionsByCategory";
 import { CategoryTransactionItem } from "@/components/features/sidebar/CategoryTransactionItem";
 
-// Time period options for dropdown
 const timePeriodOptions: SelectOption[] = [
   { value: "1week", label: "Last 7 Days" },
   { value: "1month", label: "Last Month" },
@@ -39,7 +38,6 @@ const timePeriodOptions: SelectOption[] = [
   { value: "alltime", label: "All Time" },
 ];
 
-// Sort options
 const sortOptions: SelectOption[] = [
   { value: "date-desc", label: "Newest First" },
   { value: "date-asc", label: "Oldest First" },
@@ -49,7 +47,6 @@ const sortOptions: SelectOption[] = [
   { value: "name-desc", label: "Name Z-A" },
 ];
 
-// Status filter options
 const statusOptions: SelectOption[] = [
   { value: "all", label: "All Status" },
   { value: "SUCCESS", label: "Success" },
@@ -57,7 +54,6 @@ const statusOptions: SelectOption[] = [
   { value: "FAILED", label: "Failed" },
 ];
 
-// Category icon mapping
 const categoryIcons: Record<string, React.ReactNode> = {
   "Food and Drink": <Utensils className="h-4 w-4" />,
   Travel: <Car className="h-4 w-4" />,
@@ -83,7 +79,6 @@ function getCategoryIcon(category: string): React.ReactNode {
   return <CreditCard className="h-4 w-4" />;
 }
 
-// Server transaction type
 interface ServerTransaction {
   id: string;
   amount: number;
@@ -113,7 +108,6 @@ export default function TransactionsPage() {
     isLoading: isCategoryLoading,
   } = useTransactionsByCategory(banks);
 
-  // Transaction list state per bank
   const [bankTransactions, setBankTransactions] = useState<BankTransactions[]>(
     [],
   );
@@ -122,19 +116,16 @@ export default function TransactionsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedBankTab, setSelectedBankTab] = useState<string>("all");
 
-  // Fetch banks on mount
   useEffect(() => {
     fetchBanks();
   }, [fetchBanks]);
 
-  // Fetch transactions for each bank
   const fetchAllTransactions = useCallback(async () => {
     if (banks.length === 0) {
       setBankTransactions([]);
       return;
     }
 
-    // Initialize loading state for all banks
     setBankTransactions(
       banks.map((bank) => ({
         bankId: bank.id,
@@ -145,7 +136,6 @@ export default function TransactionsPage() {
       })),
     );
 
-    // Fetch in parallel
     const results = await Promise.all(
       banks.map(async (bank) => {
         try {
@@ -179,17 +169,14 @@ export default function TransactionsPage() {
     fetchAllTransactions();
   }, [fetchAllTransactions]);
 
-  // Filter and sort transactions
   const getFilteredTransactions = useCallback(
     (transactions: ServerTransaction[]) => {
       let filtered = [...transactions];
 
-      // Apply status filter
       if (statusFilter !== "all") {
         filtered = filtered.filter((tx) => tx.status === statusFilter);
       }
 
-      // Apply search
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         filtered = filtered.filter(
@@ -200,7 +187,6 @@ export default function TransactionsPage() {
         );
       }
 
-      // Apply sort
       const [field, direction] = sortBy.split("-");
       filtered.sort((a, b) => {
         let comparison = 0;
@@ -224,7 +210,6 @@ export default function TransactionsPage() {
     [searchQuery, sortBy, statusFilter],
   );
 
-  // Get bank tabs
   const bankTabs = useMemo(() => {
     const tabs: SelectOption[] = [{ value: "all", label: "All Banks" }];
     banks.forEach((bank) => {
@@ -233,7 +218,6 @@ export default function TransactionsPage() {
     return tabs;
   }, [banks]);
 
-  // Get visible banks based on tab
   const visibleBankTransactions = useMemo(() => {
     if (selectedBankTab === "all") return bankTransactions;
     return bankTransactions.filter((bt) => bt.bankId === selectedBankTab);
@@ -247,19 +231,26 @@ export default function TransactionsPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Transactions</h1>
+      <div className="space-y-1">
+        <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">
+          Transactions
+        </h1>
         <p className="text-muted-foreground">
           View and analyze your transaction history across all banks
         </p>
       </div>
 
       {/* Section 1: Category Summary */}
-      <Card>
+      <Card className="border border-border/50">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-lg font-semibold">
-            Spending by Category
-          </CardTitle>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+              Overview
+            </p>
+            <CardTitle className="text-lg font-semibold">
+              Spending by Category
+            </CardTitle>
+          </div>
           <div className="w-36">
             <Select
               options={timePeriodOptions}
@@ -276,14 +267,23 @@ export default function TransactionsPage() {
             </div>
           ) : banks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <CreditCard className="h-12 w-12 text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">No banks linked yet</p>
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-surface mb-4">
+                <CreditCard className="h-6 w-6 text-brand-main" />
+              </div>
+              <p className="text-foreground font-medium">No banks linked yet</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Connect your bank accounts to see spending insights
+              </p>
             </div>
           ) : categorySummary.every((b) => b.categories.length === 0) ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <ShoppingBag className="h-12 w-12 text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">No transactions found</p>
-              <p className="text-sm text-muted-foreground/70 mt-1">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-surface mb-4">
+                <ShoppingBag className="h-6 w-6 text-brand-main" />
+              </div>
+              <p className="text-foreground font-medium">
+                No transactions found
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
                 Try selecting a different time period
               </p>
             </div>
@@ -294,7 +294,7 @@ export default function TransactionsPage() {
                 return (
                   <div
                     key={bankData.bankId}
-                    className="rounded-xl border border-border p-4"
+                    className="rounded-xl border border-border/50 p-4"
                   >
                     <h4 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
                       <CreditCard className="h-4 w-4 text-muted-foreground" />
@@ -325,12 +325,17 @@ export default function TransactionsPage() {
       </Card>
 
       {/* Section 2: Detailed Transactions */}
-      <Card>
+      <Card className="border border-border/50">
         <CardHeader className="pb-4">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <CardTitle className="text-lg font-semibold">
-              Transaction Details
-            </CardTitle>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">
+                Details
+              </p>
+              <CardTitle className="text-lg font-semibold">
+                Transaction Details
+              </CardTitle>
+            </div>
 
             {/* Filters */}
             <div className="flex flex-wrap items-center gap-3">
@@ -341,13 +346,13 @@ export default function TransactionsPage() {
                   placeholder="Search transactions..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-background"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -387,7 +392,12 @@ export default function TransactionsPage() {
                   }
                   size="sm"
                   onClick={() => setSelectedBankTab(tab.value)}
-                  className="whitespace-nowrap"
+                  className={cn(
+                    "whitespace-nowrap transition-colors",
+                    selectedBankTab === tab.value
+                      ? "bg-primary text-primary-foreground"
+                      : "",
+                  )}
                 >
                   {tab.label}
                 </Button>
@@ -403,14 +413,23 @@ export default function TransactionsPage() {
             </div>
           ) : banks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <CreditCard className="h-12 w-12 text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">No banks linked yet</p>
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-surface mb-4">
+                <CreditCard className="h-6 w-6 text-brand-main" />
+              </div>
+              <p className="text-foreground font-medium">No banks linked yet</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Connect your bank accounts to view transactions
+              </p>
             </div>
           ) : !hasAnyTransactions ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <ShoppingBag className="h-12 w-12 text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">No transactions found</p>
-              <p className="text-sm text-muted-foreground/70 mt-1">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-surface mb-4">
+                <ShoppingBag className="h-6 w-6 text-brand-main" />
+              </div>
+              <p className="text-foreground font-medium">
+                No transactions found
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
                 Sync your banks to see transactions
               </p>
             </div>
@@ -443,14 +462,14 @@ export default function TransactionsPage() {
                 }
 
                 if (filtered.length === 0 && selectedBankTab === "all") {
-                  return null; // Skip empty banks in "all" view
+                  return null;
                 }
 
                 return (
                   <div key={bankData.bankId}>
                     {/* Bank Header */}
                     {selectedBankTab === "all" && (
-                      <div className="bg-muted/50 px-6 py-3 border-b border-border">
+                      <div className="bg-muted/30 px-6 py-3 border-b border-border/50">
                         <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
                           <CreditCard className="h-4 w-4" />
                           {bankData.bankName}
@@ -496,7 +515,7 @@ export default function TransactionsPage() {
                               >
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <div className="flex items-center gap-3">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/50">
                                       {getCategoryIcon(tx.category || "Other")}
                                     </div>
                                     <div>
@@ -544,7 +563,7 @@ export default function TransactionsPage() {
                           </tbody>
                         </table>
                         {filtered.length > 20 && (
-                          <div className="px-6 py-3 text-center text-sm text-muted-foreground border-t border-border">
+                          <div className="px-6 py-3 text-center text-sm text-muted-foreground border-t border-border/50 bg-muted/20">
                             Showing 20 of {filtered.length} transactions
                           </div>
                         )}

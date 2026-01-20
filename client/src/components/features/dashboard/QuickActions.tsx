@@ -12,6 +12,7 @@ interface QuickActionsProps {
 interface QuickActionItem {
   icon: React.ReactNode;
   label: string;
+  description: string;
   href?: string;
   onClick?: () => void;
   disabled?: boolean;
@@ -26,6 +27,7 @@ export function QuickActions({ hasBanks }: QuickActionsProps) {
     {
       icon: <Plus className="h-5 w-5" />,
       label: "Add Bank",
+      description: "Connect a new account",
       onClick: () => setIsAddBankOpen(true),
       iconBgClass: "bg-brand-surface",
       iconColorClass: "text-brand-main",
@@ -33,6 +35,7 @@ export function QuickActions({ hasBanks }: QuickActionsProps) {
     {
       icon: <Send className="h-5 w-5" />,
       label: "Send Money",
+      description: "Transfer to anyone",
       href: "/transfers?type=p2p",
       disabled: !hasBanks,
       iconBgClass: "bg-success-surface",
@@ -41,6 +44,7 @@ export function QuickActions({ hasBanks }: QuickActionsProps) {
     {
       icon: <ArrowLeftRight className="h-5 w-5" />,
       label: "Transfer Funds",
+      description: "Move between accounts",
       href: "/transfers",
       disabled: !hasBanks,
       iconBgClass: "bg-warning-surface",
@@ -49,6 +53,7 @@ export function QuickActions({ hasBanks }: QuickActionsProps) {
     {
       icon: <Building2 className="h-5 w-5" />,
       label: "My Banks",
+      description: "View all accounts",
       href: "/banks",
       iconBgClass: "bg-gray-surface",
       iconColorClass: "text-gray-main",
@@ -56,23 +61,35 @@ export function QuickActions({ hasBanks }: QuickActionsProps) {
   ];
 
   return (
-    <>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div>
+      <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide mb-3">
+        Quick Actions
+      </h3>
+
+      <div className="flex flex-col gap-3 sm:grid sm:grid-cols-2 lg:flex lg:flex-col">
         {actions.map((action) => {
           const content = (
             <div
-              className={`flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-soft bg-card 
-                hover:bg-gray-surface hover:border-gray-disabled transition-colors cursor-pointer
-                ${action.disabled ? "opacity-50 pointer-events-none" : ""}`}
+              className={`flex items-center gap-3 p-4 rounded-xl border bg-card shadow-sm transition-all duration-200
+                ${
+                  action.disabled
+                    ? "opacity-50 cursor-not-allowed border-border/50"
+                    : "border-border/50 hover:border-border hover:bg-muted/50 hover:shadow-md cursor-pointer"
+                }`}
             >
               <div
-                className={`flex items-center justify-center h-10 w-10 rounded-full ${action.iconBgClass}`}
+                className={`flex items-center justify-center h-10 w-10 rounded-full shrink-0 ${action.iconBgClass}`}
               >
                 <span className={action.iconColorClass}>{action.icon}</span>
               </div>
-              <span className="text-xs sm:text-sm font-medium text-foreground text-center">
-                {action.label}
-              </span>
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-medium text-foreground">
+                  {action.label}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {action.description}
+                </span>
+              </div>
             </div>
           );
 
@@ -89,6 +106,14 @@ export function QuickActions({ hasBanks }: QuickActionsProps) {
             );
           }
 
+          if (action.disabled) {
+            return (
+              <div key={action.label}>
+                {content}
+              </div>
+            );
+          }
+
           return (
             <Link key={action.label} href={action.href || "#"}>
               {content}
@@ -98,6 +123,6 @@ export function QuickActions({ hasBanks }: QuickActionsProps) {
       </div>
 
       <AddBankModal open={isAddBankOpen} onOpenChange={setIsAddBankOpen} />
-    </>
+    </div>
   );
 }

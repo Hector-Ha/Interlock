@@ -3,11 +3,11 @@
 import { cn } from "@/lib/utils";
 
 const bgStyles = [
-  "bg-blue-100 text-blue-600",
-  "bg-pink-100 text-pink-600",
-  "bg-purple-100 text-purple-600",
-  "bg-orange-100 text-orange-600",
-  "bg-emerald-100 text-emerald-600",
+  "bg-blue-50 text-blue-600",
+  "bg-pink-50 text-pink-600",
+  "bg-purple-50 text-purple-600",
+  "bg-orange-50 text-orange-600",
+  "bg-emerald-50 text-emerald-600",
 ];
 
 export interface CategoryTransactionItemProps {
@@ -19,10 +19,6 @@ export interface CategoryTransactionItemProps {
   className?: string;
 }
 
-/**
- * Display category summarized transactions (income/expense)
- * Visual: Icon | Label | +$Income -$Expense
- */
 export function CategoryTransactionItem({
   icon,
   label,
@@ -31,31 +27,35 @@ export function CategoryTransactionItem({
   index = 0,
   className,
 }: CategoryTransactionItemProps) {
-  // Cycle background colors for icons based on index
   const iconStyle = bgStyles[index % bgStyles.length];
 
   return (
-    <div className={cn("flex items-center justify-between py-4", className)}>
-      {/* Icon + Label */}
-      <div className="flex items-center gap-3">
+    <div
+      className={cn(
+        "flex items-center justify-between py-2.5 px-2 -mx-2 rounded-lg hover:bg-muted/50 transition-colors",
+        className
+      )}
+    >
+      <div className="flex items-center gap-2.5 min-w-0">
         <div
           className={cn(
-            "flex h-10 w-10 items-center justify-center rounded-xl",
-            iconStyle,
+            "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+            iconStyle
           )}
         >
           {icon}
         </div>
-        <span className="text-sm font-medium text-foreground">{label}</span>
+        <span className="text-sm font-medium text-foreground truncate">
+          {label}
+        </span>
       </div>
 
-      {/* Amounts */}
-      <div className="flex items-center gap-2 text-sm font-semibold">
+      <div className="flex items-center gap-2 text-sm font-medium shrink-0 ml-2">
         {positiveAmount && positiveAmount > 0 && (
-          <span className="text-emerald-600">+${positiveAmount}</span>
+          <span className="text-success-main">+${positiveAmount.toLocaleString()}</span>
         )}
         {negativeAmount && negativeAmount > 0 && (
-          <span className="text-red-500">-${negativeAmount}</span>
+          <span className="text-foreground">-${negativeAmount.toLocaleString()}</span>
         )}
       </div>
     </div>

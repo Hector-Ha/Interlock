@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -12,7 +11,7 @@ import { sidebarLinks } from "@/constants/sidebarLinks";
 import { SidebarProps } from "@/types";
 import InterlockLogo from "@/assets/logos/Interlock.svg";
 
-import { Button, buttonVariants } from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { ScrollArea } from "@/components/ui/ScrollArea";
 import { SettingsMenu } from "./SettingsMenu";
 import { SidebarItem } from "./SidebarItem";
@@ -25,21 +24,22 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
   return (
     <aside
       className={cn(
-        "group/sidebar sticky left-0 top-0 z-40 flex h-screen flex-col border-r border-gray-200 bg-white transition-all duration-300 ease-in-out shadow-sm", // Reduced shadow to match Header
+        "group/sidebar sticky left-0 top-0 z-40 flex h-screen flex-col border-r border-border/50 bg-card transition-all duration-300 ease-in-out",
         sidebarCollapsed ? "w-[88px]" : "w-[280px]",
         className,
       )}
     >
-      {/* Floating Toggle Button*/}
-      <div className={cn("absolute -right-8 top-[92px] z-50")}>
+      {/* Toggle Button - Integrated into sidebar edge */}
+      <div className="absolute -right-4 top-[92px] z-50">
         <Button
+          variant="outline"
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="h-8 w-8 rounded-md p-0 shadow-lg"
+          className="h-8 w-8 rounded-full p-0 bg-background border border-border shadow-sm hover:bg-muted transition-all duration-200"
           aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <ChevronLeft
             className={cn(
-              "h-4 w-4 text-white transition-transform duration-300",
+              "h-4 w-4 text-muted-foreground transition-transform duration-300",
               sidebarCollapsed && "rotate-180",
             )}
           />
@@ -49,17 +49,20 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
       {/* Header */}
       <div
         className={cn(
-          "flex h-[64px] items-center border-b border-gray-200 transition-all duration-300",
+          "flex h-[64px] items-center border-b border-border/50 transition-all duration-300",
           sidebarCollapsed ? "justify-center px-0" : "px-6",
         )}
       >
-        <Link href="/" className="flex items-center gap-3">
+        <Link
+          href="/"
+          className="flex items-center gap-3 rounded-lg px-2 py-1.5 -mx-2 transition-colors hover:bg-muted/50"
+        >
           <Image
             src={InterlockLogo}
             alt="Interlock"
-            width={28}
-            height={28}
-            className="size-7"
+            width={32}
+            height={32}
+            className="size-8"
           />
           <AnimatePresence>
             {!sidebarCollapsed && (
@@ -68,7 +71,7 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
                 animate={{ opacity: 1, width: "auto", scale: 1 }}
                 exit={{ opacity: 0, width: 0, scale: 0.8 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="font-google-sans text-lg font-bold text-gray-900 whitespace-nowrap overflow-hidden origin-left"
+                className="font-google-sans text-xl font-bold tracking-tight text-foreground whitespace-nowrap overflow-hidden origin-left"
               >
                 Interlock
               </motion.h1>
@@ -78,26 +81,44 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
       </div>
 
       {/* Navigation */}
-      <ScrollArea className="flex-1 px-4 py-4">
-        <nav className="flex flex-col gap-2">
-          {sidebarLinks.map((link) => (
-            <SidebarItem
-              key={link.name}
-              link={link}
-              sidebarCollapsed={sidebarCollapsed}
-            />
-          ))}
-        </nav>
+      <ScrollArea className="flex-1 px-3 py-4">
+        <div className="space-y-4">
+          {/* Section Label */}
+          <AnimatePresence>
+            {!sidebarCollapsed && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground"
+              >
+                Menu
+              </motion.p>
+            )}
+          </AnimatePresence>
+
+          {/* Nav Items */}
+          <nav className="flex flex-col gap-1">
+            {sidebarLinks.map((link) => (
+              <SidebarItem
+                key={link.name}
+                link={link}
+                sidebarCollapsed={sidebarCollapsed}
+              />
+            ))}
+          </nav>
+        </div>
       </ScrollArea>
 
       {/* Footer / User Profile */}
-      <div className="border-t border-gray-100 p-4">
+      <div className="border-t border-border/50 p-3">
         {user ? (
           <div
             className={cn(
-              "flex items-center rounded-xl p-2 transition-all duration-300",
+              "flex items-center rounded-xl p-2 transition-all duration-200",
               !sidebarCollapsed
-                ? "justify-between gap-3 bg-gray-50/50 hover:bg-gray-50"
+                ? "justify-between gap-3 bg-muted/50 hover:bg-muted"
                 : "justify-center",
             )}
           >
@@ -108,7 +129,7 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
                 sidebarCollapsed ? "w-auto" : "flex-1",
               )}
             >
-              <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-700 font-bold shadow-sm border border-brand-200">
+              <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-main to-brand-hover text-white font-semibold shadow-sm">
                 {user.firstName?.[0] || "U"}
               </div>
 
@@ -121,10 +142,10 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
                     transition={{ duration: 0.2, ease: "easeInOut" }}
                     className="flex flex-col overflow-hidden origin-left"
                   >
-                    <p className="truncate text-sm font-semibold text-gray-900">
+                    <p className="truncate text-sm font-semibold text-foreground">
                       {user.firstName}
                     </p>
-                    <p className="truncate text-xs text-gray-500">
+                    <p className="truncate text-xs text-muted-foreground">
                       {user.email}
                     </p>
                   </motion.div>
@@ -133,17 +154,27 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
             </div>
 
             {/* Settings Trigger */}
-            <div className={cn("flex-shrink-0", sidebarCollapsed && "hidden")}>
-              <SettingsMenu
-                onSignOut={() => {}}
-                className="hover:bg-gray-200/50"
-              />
-            </div>
+            <AnimatePresence>
+              {!sidebarCollapsed && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.15 }}
+                  className="flex-shrink-0"
+                >
+                  <SettingsMenu
+                    onSignOut={() => {}}
+                    className="hover:bg-background/80"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         ) : (
           // Loading skeleton or fallback
-          <div className="flex h-14 w-full items-center justify-center rounded-xl bg-gray-50">
-            <div className="size-6 animate-pulse rounded-full bg-gray-200" />
+          <div className="flex h-14 w-full items-center justify-center rounded-xl bg-muted/50">
+            <div className="size-6 animate-pulse rounded-full bg-muted" />
           </div>
         )}
       </div>

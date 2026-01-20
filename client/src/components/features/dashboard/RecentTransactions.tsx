@@ -125,7 +125,7 @@ export function RecentTransactions({
 
       {/* Selected Bank Card */}
       {selectedBank && (
-        <div className="p-4 sm:p-6 border-b border-gray-100">
+        <div className="p-4 sm:p-6 border-b border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10 bg-brand-main">

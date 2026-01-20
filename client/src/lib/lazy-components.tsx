@@ -39,7 +39,7 @@ export const RecipientSearch = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <div className="h-12 animate-pulse bg-gray-200 rounded" />,
+    loading: () => <div className="h-12 animate-pulse bg-muted rounded" />,
   },
 );
 
@@ -51,6 +51,6 @@ export const P2PTransferForm = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <div className="h-64 animate-pulse bg-gray-200 rounded" />,
+    loading: () => <div className="h-64 animate-pulse bg-muted rounded" />,
   },
 );

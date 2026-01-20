@@ -29,12 +29,19 @@ export const useDashboard = (): UseDashboardResult => {
 
   const { banks, fetchBanks } = useBankStore();
 
-  const getGreeting = () => {
+  // Defer greeting calculation to client-side to avoid hydration mismatch
+  const [greeting, setGreeting] = useState("");
+
+  useEffect(() => {
     const hour = new Date().getHours();
-    if (hour < 12) return "Good Morning";
-    if (hour < 18) return "Good Afternoon";
-    return "Good Evening";
-  };
+    if (hour < 12) {
+      setGreeting("Good Morning");
+    } else if (hour < 18) {
+      setGreeting("Good Afternoon");
+    } else {
+      setGreeting("Good Evening");
+    }
+  }, []);
 
   /**
    * Loads dashboard data with support for cleanup to prevent race conditions.
@@ -146,7 +153,7 @@ export const useDashboard = (): UseDashboardResult => {
     recentTransactions,
     pendingTransfers,
     accounts,
-    greeting: getGreeting(),
+    greeting,
     refresh: () => loadDashboardData(),
   };
 };

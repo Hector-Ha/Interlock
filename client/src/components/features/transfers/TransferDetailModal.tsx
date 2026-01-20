@@ -87,12 +87,12 @@ export function TransferDetailModal({
 
         <div className="space-y-6">
           {/* Transfer ID */}
-          <div className="flex items-center justify-between bg-slate-50 rounded-lg p-3">
+          <div className="flex items-center justify-between bg-muted/50 rounded-lg p-3 border border-border/50">
             <div>
-              <p className="text-xs text-slate-500 uppercase tracking-wide">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">
                 Transfer ID
               </p>
-              <p className="text-sm font-mono text-slate-700 mt-0.5">
+              <p className="text-sm font-mono text-foreground mt-0.5">
                 {transfer.id.slice(0, 8)}...{transfer.id.slice(-4)}
               </p>
             </div>
@@ -103,7 +103,7 @@ export function TransferDetailModal({
               className="h-8 w-8 p-0"
             >
               {copied ? (
-                <Check className="h-4 w-4 text-green-500" />
+                <Check className="h-4 w-4 text-success-main" />
               ) : (
                 <Copy className="h-4 w-4" />
               )}
@@ -113,21 +113,21 @@ export function TransferDetailModal({
           {/* Banks */}
           <div className="flex items-center gap-4 justify-center py-4">
             <div className="text-center">
-              <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
                 From
               </p>
-              <p className="font-medium text-slate-900">
+              <p className="font-medium text-foreground">
                 {transfer.sourceBank.institutionName}
               </p>
             </div>
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100">
-              <ArrowRight className="h-4 w-4 text-slate-600" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+              <ArrowRight className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="text-center">
-              <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
                 To
               </p>
-              <p className="font-medium text-slate-900">
+              <p className="font-medium text-foreground">
                 {transfer.destinationBank.institutionName}
               </p>
             </div>
@@ -135,16 +135,16 @@ export function TransferDetailModal({
 
           {/* Amount & Status */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-slate-50 rounded-lg p-4 text-center">
-              <p className="text-xs text-slate-500 uppercase tracking-wide">
+            <div className="bg-muted/50 rounded-lg p-4 text-center border border-border/50">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">
                 Amount
               </p>
-              <p className="text-2xl font-bold text-slate-900 mt-1">
+              <p className="text-2xl font-bold text-foreground mt-1">
                 {formatCurrency(transfer.amount)}
               </p>
             </div>
-            <div className="bg-slate-50 rounded-lg p-4 text-center">
-              <p className="text-xs text-slate-500 uppercase tracking-wide">
+            <div className="bg-muted/50 rounded-lg p-4 text-center border border-border/50">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">
                 Status
               </p>
               <div className="mt-2">
@@ -156,23 +156,23 @@ export function TransferDetailModal({
           </div>
 
           {/* Timestamps */}
-          <div className="border-t border-slate-100 pt-4 space-y-2">
+          <div className="border-t border-border pt-4 space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-slate-500">Created</span>
-              <span className="text-slate-700">
+              <span className="text-muted-foreground">Created</span>
+              <span className="text-foreground">
                 {createdDate.dateOnly} at {createdDate.timeOnly}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-slate-500">Last Updated</span>
-              <span className="text-slate-700">
+              <span className="text-muted-foreground">Last Updated</span>
+              <span className="text-foreground">
                 {updatedDate.dateOnly} at {updatedDate.timeOnly}
               </span>
             </div>
             {transfer.dwollaTransferId && (
               <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Dwolla ID</span>
-                <span className="text-slate-700 font-mono text-xs">
+                <span className="text-muted-foreground">Dwolla ID</span>
+                <span className="text-foreground font-mono text-xs">
                   {transfer.dwollaTransferId.slice(0, 12)}...
                 </span>
               </div>

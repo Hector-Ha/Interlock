@@ -181,14 +181,19 @@ export function P2PTransferForm({
     const content = (
       <div className="flex flex-col items-center justify-center text-center space-y-4">
         <AlertCircle className="h-12 w-12 text-warning-main" />
-        <h3 className="text-lg font-semibold text-content-primary">
+        <h3 className="text-lg font-semibold text-foreground">
           No Linked Banks
         </h3>
-        <p className="text-content-secondary max-w-sm">
+        <p className="text-muted-foreground max-w-sm">
           You need at least one bank account linked with Dwolla to send money.
           Please link a bank first.
         </p>
-        <Button onClick={() => router.push("/my-banks")}>Link a Bank</Button>
+        <Button
+          onClick={() => router.push("/banks")}
+          className="bg-brand-main hover:bg-brand-hover text-white"
+        >
+          Link a Bank
+        </Button>
       </div>
     );
 
@@ -294,7 +299,7 @@ export function P2PTransferForm({
             <div className="pt-2">
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full bg-brand-main hover:bg-brand-hover text-white shadow-md hover:shadow-lg transition-all"
                 disabled={
                   !selectedRecipient || !selectedBankId || parsedAmount <= 0
                 }
@@ -366,7 +371,7 @@ export function P2PTransferForm({
                   Cancel
                 </Button>
                 <Button
-                  className="flex-1"
+                  className="flex-1 bg-brand-main hover:bg-brand-hover text-white"
                   onClick={handleConfirm}
                   disabled={isSubmitting}
                 >

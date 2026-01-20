@@ -130,13 +130,20 @@ export function TransferForm({
   if (validBanks.length < 2) {
     const content = (
       <div className="flex flex-col items-center justify-center text-center space-y-4">
-        <AlertCircle className="h-12 w-12 text-yellow-500" />
-        <h3 className="text-lg font-semibold">Not Enough Accounts</h3>
-        <p className="text-slate-500 max-w-sm">
+        <AlertCircle className="h-12 w-12 text-warning-main" />
+        <h3 className="text-lg font-semibold text-foreground">
+          Not Enough Accounts
+        </h3>
+        <p className="text-muted-foreground max-w-sm">
           You need at least 2 connected banks to make a transfer. Please connect
           another bank first.
         </p>
-        <Button onClick={() => router.push("/banks")}>Connect Bank</Button>
+        <Button
+          onClick={() => router.push("/banks")}
+          className="bg-brand-main hover:bg-brand-hover text-white"
+        >
+          Connect Bank
+        </Button>
       </div>
     );
 
@@ -155,8 +162,8 @@ export function TransferForm({
   return (
     <Wrapper {...wrapperProps}>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-slate-900">Transfer Funds</h2>
-        <p className="text-slate-500">
+        <h2 className="text-2xl font-bold text-foreground">Transfer Funds</h2>
+        <p className="text-muted-foreground">
           Move money between your connected accounts
         </p>
       </div>
@@ -183,8 +190,8 @@ export function TransferForm({
           />
 
           <div className="flex justify-center -my-2 relative z-10">
-            <div className="bg-slate-50 rounded-full p-2 border border-slate-200 text-slate-400">
-              <ArrowRightLeft className="h-4 w-4 rotate-90" />
+            <div className="bg-brand-surface rounded-full p-2.5 border border-brand-disabled/50 shadow-sm">
+              <ArrowRightLeft className="h-4 w-4 rotate-90 text-brand-main" />
             </div>
           </div>
 
@@ -206,7 +213,7 @@ export function TransferForm({
             <Input
               label="Amount"
               placeholder="0.00"
-              startIcon={<span className="text-slate-500">$</span>}
+              startIcon={<span className="text-muted-foreground">$</span>}
               {...register("amount")}
               error={errors.amount?.message}
               numericOnly
@@ -214,15 +221,17 @@ export function TransferForm({
           </div>
         </div>
 
-        <div className="pt-4 border-t border-slate-100">
+        <div className="pt-4 border-t border-border/50">
           <div className="flex justify-between text-sm mb-6">
-            <span className="text-slate-500">Estimated Arrival</span>
-            <span className="font-medium">1-3 Business Days</span>
+            <span className="text-muted-foreground">Estimated Arrival</span>
+            <span className="font-medium text-foreground">
+              1-3 Business Days
+            </span>
           </div>
 
           <Button
             type="submit"
-            className="w-full h-12 text-lg"
+            className="w-full h-12 text-lg bg-brand-main hover:bg-brand-hover text-white shadow-md hover:shadow-lg transition-all"
             disabled={isSubmitting}
           >
             {isSubmitting && <Loader2 className="h-5 w-5 mr-2 animate-spin" />}

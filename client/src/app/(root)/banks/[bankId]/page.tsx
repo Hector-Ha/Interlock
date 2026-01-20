@@ -97,7 +97,7 @@ export default function BankDetailsPage() {
     return (
       <div className="flex h-[50vh] flex-col items-center justify-center gap-4">
         <Spinner size="lg" />
-        <p className="text-slate-500">Loading bank details...</p>
+        <p className="text-muted-foreground">Loading bank details...</p>
       </div>
     );
   }
@@ -125,7 +125,7 @@ export default function BankDetailsPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">
+            <h1 className="text-2xl lg:text-3xl font-semibold tracking-tight text-foreground">
               {selectedBank.institutionName}
             </h1>
             <div className="flex items-center gap-2 mt-1">
@@ -162,7 +162,7 @@ export default function BankDetailsPage() {
 
       {/* Accounts */}
       <section>
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">Accounts</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-4">Accounts</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {accounts.map((account) => (
             <AccountCard key={account.id} account={account} bankId={bankId} />
@@ -172,7 +172,7 @@ export default function BankDetailsPage() {
 
       {/* Transactions */}
       <section>
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">
+        <h2 className="text-lg font-semibold text-foreground mb-4">
           Recent Transactions
         </h2>
         <TransactionList transactions={transactions} />

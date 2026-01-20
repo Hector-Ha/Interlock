@@ -51,29 +51,27 @@ export function NotificationBell() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-lg hover:bg-surface-alt transition-colors"
+        className="relative p-2 rounded-xl hover:bg-muted/50 transition-colors"
         aria-label={`Notifications${
           unreadCount > 0 ? ` (${unreadCount} unread)` : ""
         }`}
       >
-        <Bell className="h-5 w-5 text-content-secondary" />
+        <Bell className="h-5 w-5 text-muted-foreground" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-error-main text-white text-xs flex items-center justify-center font-medium">
+          <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-gradient-to-br from-brand-main to-brand-hover text-white text-xs flex items-center justify-center font-semibold shadow-sm">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-card rounded-lg shadow-lg border border-border z-50">
-          <div className="flex items-center justify-between p-3 border-b border-border">
-            <h3 className="font-semibold text-content-primary">
-              Notifications
-            </h3>
+        <div className="absolute right-0 mt-2 w-80 bg-card rounded-xl shadow-xl border border-border z-50 overflow-hidden">
+          <div className="flex items-center justify-between p-4 border-b border-border bg-muted/30">
+            <h3 className="font-semibold text-foreground">Notifications</h3>
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="text-sm text-brand-main hover:text-brand-hover flex items-center gap-1"
+                className="text-sm text-brand-main hover:text-brand-hover flex items-center gap-1 font-medium transition-colors"
               >
                 <CheckCheck className="h-4 w-4" />
                 Mark all read
@@ -83,7 +81,7 @@ export function NotificationBell() {
 
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="p-6 text-center text-content-secondary">
+              <div className="p-8 text-center text-muted-foreground">
                 No notifications yet
               </div>
             ) : (
@@ -94,31 +92,31 @@ export function NotificationBell() {
                       type="button"
                       onClick={() => handleNotificationClick(notification.id)}
                       className={cn(
-                        "w-full text-left p-3 hover:bg-surface-alt cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
-                        !notification.isRead && "bg-brand-surface",
+                        "w-full text-left p-4 hover:bg-muted/50 cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-main",
+                        !notification.isRead && "bg-brand-surface/50",
                       )}
                       aria-label={`${!notification.isRead ? "Unread: " : ""}${notification.title}`}
                     >
-                      <div className="flex items-start gap-2">
+                      <div className="flex items-start gap-3">
                         <div className="flex-1">
                           <p
                             className={cn(
-                              "text-sm text-content-primary",
+                              "text-sm text-foreground",
                               !notification.isRead && "font-medium",
                             )}
                           >
                             {notification.title}
                           </p>
-                          <p className="text-sm text-content-secondary">
+                          <p className="text-sm text-muted-foreground mt-0.5">
                             {notification.message}
                           </p>
-                          <p className="text-xs text-content-tertiary mt-1">
+                          <p className="text-xs text-muted-foreground/70 mt-1.5">
                             {formatRelativeTime(notification.createdAt)}
                           </p>
                         </div>
                         {!notification.isRead && (
                           <div
-                            className="h-2 w-2 rounded-full bg-brand-main flex-shrink-0 mt-1.5"
+                            className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-brand-main to-brand-hover flex-shrink-0 mt-1.5 shadow-sm"
                             aria-hidden="true"
                           />
                         )}

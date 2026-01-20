@@ -13,6 +13,8 @@ import {
   Gift,
   CreditCard,
   Loader2,
+  User,
+  Building2,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -32,7 +34,6 @@ interface RightSideBarProps {
   className?: string;
 }
 
-// Time period options for dropdown
 const timePeriodOptions: SelectOption[] = [
   { value: "1week", label: "Last 7 Days" },
   { value: "1month", label: "Last Month" },
@@ -40,44 +41,35 @@ const timePeriodOptions: SelectOption[] = [
   { value: "alltime", label: "All Time" },
 ];
 
-// Category icon mapping
 const categoryIcons: Record<string, React.ReactNode> = {
-  "Food and Drink": <Utensils className="h-5 w-5" />,
-  Travel: <Car className="h-5 w-5" />,
-  Shops: <ShoppingBag className="h-5 w-5" />,
-  Shopping: <ShoppingBag className="h-5 w-5" />,
-  Transfer: <CreditCard className="h-5 w-5" />,
-  Payment: <CreditCard className="h-5 w-5" />,
-  Recreation: <Tv className="h-5 w-5" />,
-  Entertainment: <Tv className="h-5 w-5" />,
-  Service: <Briefcase className="h-5 w-5" />,
-  Healthcare: <Heart className="h-5 w-5" />,
-  Community: <Gift className="h-5 w-5" />,
-  "Bank Fees": <Home className="h-5 w-5" />,
-  Interest: <PiggyBank className="h-5 w-5" />,
-  Tax: <Briefcase className="h-5 w-5" />,
+  "Food and Drink": <Utensils className="h-4 w-4" />,
+  Travel: <Car className="h-4 w-4" />,
+  Shops: <ShoppingBag className="h-4 w-4" />,
+  Shopping: <ShoppingBag className="h-4 w-4" />,
+  Transfer: <CreditCard className="h-4 w-4" />,
+  Payment: <CreditCard className="h-4 w-4" />,
+  Recreation: <Tv className="h-4 w-4" />,
+  Entertainment: <Tv className="h-4 w-4" />,
+  Service: <Briefcase className="h-4 w-4" />,
+  Healthcare: <Heart className="h-4 w-4" />,
+  Community: <Gift className="h-4 w-4" />,
+  "Bank Fees": <Home className="h-4 w-4" />,
+  Interest: <PiggyBank className="h-4 w-4" />,
+  Tax: <Briefcase className="h-4 w-4" />,
 };
 
 function getCategoryIcon(category: string): React.ReactNode {
-  // Try exact match first
   if (categoryIcons[category]) {
     return categoryIcons[category];
   }
-  // Try partial match
   for (const [key, icon] of Object.entries(categoryIcons)) {
     if (category.toLowerCase().includes(key.toLowerCase())) {
       return icon;
     }
   }
-  // Default icon
-  return <CreditCard className="h-5 w-5" />;
+  return <CreditCard className="h-4 w-4" />;
 }
 
-/**
- * Right sidebar for the dashboard.
- * Displays user profile, bank cards stack, and transaction history by category.
- * Hidden on mobile/tablet, visible on desktop (xl+).
- */
 export function RightSideBar({ className }: RightSideBarProps) {
   const { user } = useAuthStore();
   const { banks } = useBankStore();
@@ -88,139 +80,153 @@ export function RightSideBar({ className }: RightSideBarProps) {
 
   const userInitial = user.firstName?.[0]?.toUpperCase() || "U";
   const fullName = `${user.firstName || ""} ${user.lastName || ""}`.trim();
-
-  // Check if there's any transaction data
   const hasAnyTransactions = data.some((bank) => bank.categories.length > 0);
 
   return (
     <aside
       className={cn(
-        "flex w-80 flex-col border-l border-border bg-card",
-        className,
+        "flex w-80 flex-col border-l border-border/50 bg-background",
+        className
       )}
     >
       <ScrollArea className="flex-1">
-        {/* Gradient Banner */}
-        <div className="relative h-24 w-full overflow-hidden bg-gradient-to-r from-pink-300 via-purple-200 to-cyan-300 shrink-0">
-          {/* Curved bottom effect */}
-          <div className="absolute -bottom-4 left-0 right-0 h-8 rounded-t-[2rem] bg-card" />
-        </div>
-
-        {/* Profile Section - overlaps banner */}
-        <div className="relative -mt-10 flex flex-col items-start px-6 pb-6 shrink-0">
-          {/* Avatar */}
-          <Avatar className="h-16 w-16 border-4 border-card shadow-lg">
-            <AvatarImage src={undefined} alt={fullName} />
-            <AvatarFallback className="text-2xl font-bold bg-gradient-to-br from-violet-500 to-purple-600 text-white">
-              {userInitial}
-            </AvatarFallback>
-          </Avatar>
-
-          {/* Name and Email */}
-          <div className="mt-4 space-y-1">
-            <h2 className="text-lg font-semibold text-foreground">
-              {fullName}
-            </h2>
-            <p className="text-sm text-muted-foreground">{user.email}</p>
-          </div>
-        </div>
-
-        {/* My Banks Section */}
-        <div className="px-6 pb-6 shrink-0">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold text-foreground">
-              My Banks
-            </h3>
+        <div className="p-6 space-y-6">
+          {/* Profile Section */}
+          <div className="bg-card border border-border/50 rounded-xl p-4">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={undefined} alt={fullName} />
+                <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-brand-main to-brand-hover text-white">
+                  {userInitial}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-base font-semibold text-foreground truncate">
+                  {fullName}
+                </h2>
+                <p className="text-sm text-muted-foreground truncate">
+                  {user.email}
+                </p>
+              </div>
+            </div>
             <Link
-              href="/banks"
-              className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              href="/settings"
+              className="mt-3 flex items-center gap-1.5 text-xs font-medium text-brand-main hover:text-brand-hover transition-colors"
             >
-              <Plus className="h-4 w-4" />
-              Add bank
+              <User className="h-3 w-3" />
+              View Profile
             </Link>
           </div>
 
-          {/* Stacked Bank Cards */}
-          <div className="min-h-[140px]">
-            <BankCardStack banks={banks} />
-          </div>
-        </div>
-
-        {/* Transactions History Section */}
-        <div className="flex-1 px-6 pb-6 min-h-0">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold text-foreground">
-              Transactions
-            </h3>
-            <div className="w-32">
-              <Select
-                options={timePeriodOptions}
-                value={timePeriod}
-                onChange={(value) => setTimePeriod(value as TimePeriod)}
-                placeholder="Period"
-              />
-            </div>
-          </div>
-
-          {/* Loading State */}
-          {isLoading && (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          )}
-
-          {/* Empty State - No Banks */}
-          {!isLoading && banks.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <CreditCard className="h-10 w-10 text-muted-foreground/50 mb-3" />
-              <p className="text-sm text-muted-foreground">
-                No banks linked yet
-              </p>
+          {/* My Banks Section */}
+          <div className="bg-card border border-border/50 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                My Banks
+              </h3>
               <Link
                 href="/banks"
-                className="mt-2 text-sm font-medium text-primary hover:underline"
+                className="flex items-center gap-1 text-xs font-medium text-brand-main hover:text-brand-hover transition-colors"
               >
-                Add your first bank
+                <Plus className="h-3.5 w-3.5" />
+                Add
               </Link>
             </div>
-          )}
 
-          {/* Empty State - No Transactions */}
-          {!isLoading && banks.length > 0 && !hasAnyTransactions && (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <ShoppingBag className="h-10 w-10 text-muted-foreground/50 mb-3" />
-              <p className="text-sm text-muted-foreground">
-                No transactions found
-              </p>
-              <p className="text-xs text-muted-foreground/70 mt-1">
-                Try selecting a different time period
-              </p>
+            {banks.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-surface mb-3">
+                  <Building2 className="h-6 w-6 text-brand-main" />
+                </div>
+                <p className="text-sm font-medium text-foreground mb-1">
+                  No banks linked
+                </p>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Connect your bank to get started
+                </p>
+                <Link
+                  href="/banks"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-brand-main hover:bg-brand-hover rounded-lg transition-colors"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Link Bank Account
+                </Link>
+              </div>
+            ) : (
+              <div className="min-h-[140px]">
+                <BankCardStack banks={banks} />
+              </div>
+            )}
+          </div>
+
+          {/* Transactions Section */}
+          <div className="bg-card border border-border/50 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Transactions
+              </h3>
+              <div className="w-28">
+                <Select
+                  options={timePeriodOptions}
+                  value={timePeriod}
+                  onChange={(value) => setTimePeriod(value as TimePeriod)}
+                  placeholder="Period"
+                />
+              </div>
             </div>
-          )}
 
-          {/* Transaction Data by Bank */}
-          {!isLoading && hasAnyTransactions && (
-            <div className="space-y-6">
-              {data.map((bankData, bankIndex) => {
-                if (bankData.categories.length === 0) return null;
+            {isLoading && (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-5 w-5 animate-spin text-brand-main" />
+              </div>
+            )}
 
-                return (
-                  <div key={bankData.bankId}>
-                    {/* Bank Header */}
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        {bankData.bankName}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {bankData.categories.length} categories
-                      </span>
-                    </div>
+            {!isLoading && banks.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-surface mb-3">
+                  <CreditCard className="h-6 w-6 text-brand-main" />
+                </div>
+                <p className="text-sm font-medium text-foreground mb-1">
+                  No transaction data
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Link a bank to see your spending
+                </p>
+              </div>
+            )}
 
-                    {/* Category Items */}
-                    <div className="divide-y divide-border">
-                      {bankData.categories
-                        .slice(0, 5)
-                        .map((category, index) => (
+            {!isLoading && banks.length > 0 && !hasAnyTransactions && (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-warning-surface mb-3">
+                  <ShoppingBag className="h-6 w-6 text-warning-main" />
+                </div>
+                <p className="text-sm font-medium text-foreground mb-1">
+                  No transactions found
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Try selecting a different time period
+                </p>
+              </div>
+            )}
+
+            {!isLoading && hasAnyTransactions && (
+              <div className="space-y-5">
+                {data.map((bankData, bankIndex) => {
+                  if (bankData.categories.length === 0) return null;
+
+                  return (
+                    <div key={bankData.bankId}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {bankData.bankName}
+                        </span>
+                        <span className="text-xs text-muted-foreground/70">
+                          {bankData.categories.length} categories
+                        </span>
+                      </div>
+
+                      <div className="space-y-1">
+                        {bankData.categories.slice(0, 5).map((category, index) => (
                           <CategoryTransactionItem
                             key={`${bankData.bankId}-${category.category}`}
                             index={bankIndex * 5 + index}
@@ -230,18 +236,17 @@ export function RightSideBar({ className }: RightSideBarProps) {
                               category.income > 0 ? category.income : undefined
                             }
                             negativeAmount={
-                              category.expense > 0
-                                ? category.expense
-                                : undefined
+                              category.expense > 0 ? category.expense : undefined
                             }
                           />
                         ))}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </ScrollArea>
     </aside>

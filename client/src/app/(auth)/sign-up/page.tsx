@@ -1,25 +1,21 @@
+import { Shield, UserPlus } from "lucide-react";
 import { SignUpForm } from "@/components/forms";
+import { AuthHeader } from "@/components/auth";
 
-const SignUp = () => {
+export default function SignUpPage() {
   return (
-    <section className="flex-center size-full max-sm:px-6">
-      <div className="auth-form w-full max-w-[420px]">
-        <header className="flex flex-col gap-5 md:gap-8">
-          <div className="flex flex-col gap-1 md:gap-3">
-            <h1 className="text-24 lg:text-36 font-semibold text-gray-900">
-              Sign Up
-              <p className="text-16 font-normal text-gray-600">
-                Please enter your details to get started
-              </p>
-            </h1>
-          </div>
-        </header>
-        <div className="mt-10">
-          <SignUpForm />
-        </div>
+    <>
+      <AuthHeader
+        title="Create Account"
+        subtitle="Start managing your finances securely"
+        trustItems={[
+          { icon: Shield, label: "Bank-level security" },
+          { icon: UserPlus, label: "Free to join" },
+        ]}
+      />
+      <div className="mt-4">
+        <SignUpForm />
       </div>
-    </section>
+    </>
   );
-};
-
-export default SignUp;
+}

@@ -11,12 +11,12 @@ export function Header() {
   const user = useAuthStore((s) => s.user);
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white shadow-sm px-4 md:px-6">
+    <header className="flex h-16 items-center justify-between border-b border-border/50 bg-background px-4 lg:px-6">
       {/* Left side */}
       <div className="flex items-center gap-4">
         {/* Mobile menu button */}
         <Button
-          variant="secondary"
+          variant="ghost"
           size="icon"
           className="md:hidden"
           onClick={toggleSidebar}
@@ -27,19 +27,19 @@ export function Header() {
       </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         {/* Search (desktop) */}
-        <div className="hidden md:block w-80">
+        <div className="hidden md:block max-w-md w-80">
           <Input
-            placeholder="Search transactions, banks..."
-            startIcon={<Search className="h-4 w-4" />}
-            className="h-10"
+            placeholder="Search…"
+            startIcon={<Search className="h-4 w-4 text-muted-foreground" />}
+            className="h-10 bg-muted/50 rounded-lg border-transparent focus:border-border"
           />
         </div>
 
         {/* Search (mobile) */}
         <Button
-          variant="secondary"
+          variant="ghost"
           size="icon"
           className="md:hidden"
           aria-label="Search"
@@ -52,7 +52,7 @@ export function Header() {
 
         {/* User avatar */}
         {user && (
-          <div className="md:hidden flex h-9 w-9 items-center justify-center rounded-full bg-brand-main text-white text-sm font-medium shadow-sm">
+          <div className="md:hidden flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
             {user.firstName[0]}
             {user.lastName[0]}
           </div>

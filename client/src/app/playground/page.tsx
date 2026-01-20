@@ -758,7 +758,14 @@ export default function PlaygroundPage() {
                   <h4 className="text-sm font-semibold mb-2">Bank Cards</h4>
                   <div className="flex gap-4 overflow-x-auto p-4">
                     {/* BankCard expects props usually, passing mockup */}
-                    <BankCard />
+                    <BankCard
+                      bankName="Chase Bank"
+                      cardholderName="JOHN DOE"
+                      maskedNumber="•••• •••• •••• 1234"
+                      expiration="12/28"
+                      balance={5250.0}
+                      variant="brand"
+                    />
                   </div>
                 </div>
               </div>

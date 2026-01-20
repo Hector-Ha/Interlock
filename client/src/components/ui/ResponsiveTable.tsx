@@ -31,7 +31,7 @@ export function ResponsiveTable<T extends Record<string, unknown>>({
 }: ResponsiveTableProps<T>) {
   if (data.length === 0) {
     return (
-      <div className="py-12 text-center text-gray-500">{emptyMessage}</div>
+      <div className="py-12 text-center text-muted-foreground">{emptyMessage}</div>
     );
   }
 
@@ -44,7 +44,7 @@ export function ResponsiveTable<T extends Record<string, unknown>>({
           {data.map((item) => (
             <div
               key={keyExtractor(item)}
-              className="bg-white rounded-lg border border-gray-200 p-4"
+              className="bg-card rounded-lg border border-border p-4"
             >
               {mobileCardRender(item)}
             </div>
@@ -54,13 +54,13 @@ export function ResponsiveTable<T extends Record<string, unknown>>({
         {/* Desktop table view */}
         <div className="hidden md:block overflow-x-auto">
           <table className={clsx("w-full", className)}>
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-muted/50 border-b border-border">
               <tr>
                 {columns.map((col) => (
                   <th
                     key={String(col.key)}
                     className={clsx(
-                      "px-4 py-3 text-left text-sm font-semibold text-gray-700",
+                      "px-4 py-3 text-left text-sm font-semibold text-foreground",
                       col.className
                     )}
                   >
@@ -69,11 +69,11 @@ export function ResponsiveTable<T extends Record<string, unknown>>({
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {data.map((item) => (
                 <tr
                   key={keyExtractor(item)}
-                  className="hover:bg-gray-50 transition-colors"
+                  className="hover:bg-muted/50 transition-colors"
                 >
                   {columns.map((col) => (
                     <td
@@ -98,7 +98,7 @@ export function ResponsiveTable<T extends Record<string, unknown>>({
   return (
     <div className="overflow-x-auto">
       <table className={clsx("w-full min-w-[600px]", className)}>
-        <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
+        <thead className="bg-muted/50 border-b border-border sticky top-0">
           <tr>
             {columns
               .filter((col) => !col.hideOnMobile)
@@ -106,7 +106,7 @@ export function ResponsiveTable<T extends Record<string, unknown>>({
                 <th
                   key={String(col.key)}
                   className={clsx(
-                    "px-4 py-3 text-left text-sm font-semibold text-gray-700",
+                    "px-4 py-3 text-left text-sm font-semibold text-foreground",
                     col.className
                   )}
                 >
@@ -115,11 +115,11 @@ export function ResponsiveTable<T extends Record<string, unknown>>({
               ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="divide-y divide-border">
           {data.map((item) => (
             <tr
               key={keyExtractor(item)}
-              className="hover:bg-gray-50 transition-colors"
+              className="hover:bg-muted/50 transition-colors"
             >
               {columns
                 .filter((col) => !col.hideOnMobile)

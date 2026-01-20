@@ -24,22 +24,32 @@ interface TransactionListProps {
 export function TransactionList({ transactions }: TransactionListProps) {
   if (transactions.length === 0) {
     return (
-      <div className="text-center py-10 border rounded-lg bg-slate-50">
-        <p className="text-slate-500">No recent transactions found.</p>
+      <div className="text-center py-10 border border-border rounded-xl bg-muted/30">
+        <p className="text-muted-foreground">No recent transactions found.</p>
       </div>
     );
   }
 
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="border border-border rounded-xl overflow-hidden bg-card shadow-sm">
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead>Transaction</TableHead>
-            <TableHead>Amount</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Category</TableHead>
+          <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border">
+            <TableHead className="text-muted-foreground font-medium">
+              Transaction
+            </TableHead>
+            <TableHead className="text-muted-foreground font-medium">
+              Amount
+            </TableHead>
+            <TableHead className="text-muted-foreground font-medium">
+              Status
+            </TableHead>
+            <TableHead className="text-muted-foreground font-medium">
+              Date
+            </TableHead>
+            <TableHead className="text-muted-foreground font-medium">
+              Category
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -90,8 +100,11 @@ export function TransactionList({ transactions }: TransactionListProps) {
             const statusConfig = getStatusBadge(tx.status);
 
             return (
-              <TableRow key={tx.id}>
-                <TableCell className="font-medium">
+              <TableRow
+                key={tx.id}
+                className="hover:bg-muted/30 transition-colors border-b border-border last:border-b-0"
+              >
+                <TableCell className="font-medium text-foreground">
                   <div className="flex flex-col">
                     <span className="truncate max-w-[200px]">{tx.name}</span>
                   </div>
@@ -115,11 +128,14 @@ export function TransactionList({ transactions }: TransactionListProps) {
                     {statusConfig.label}
                   </div>
                 </TableCell>
-                <TableCell className="text-gray-main">
+                <TableCell className="text-muted-foreground">
                   {formatDateTime(new Date(tx.date)).dateOnly}
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className="truncate max-w-[120px]">
+                  <Badge
+                    variant="outline"
+                    className="truncate max-w-[120px] border-border text-muted-foreground"
+                  >
                     {tx.category?.[0] || "Uncategorized"}
                   </Badge>
                 </TableCell>

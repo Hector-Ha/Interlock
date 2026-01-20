@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, User } from "lucide-react";
 import { useAuthStore } from "@/stores/auth.store";
 import { authService } from "@/services/auth.service";
 import { apiCall } from "@/lib/api-handler";
@@ -63,10 +63,20 @@ export function ProfileSettings() {
   };
 
   return (
-    <Card>
-      <h2 className="text-lg font-semibold text-content-primary mb-6">
-        Personal Information
-      </h2>
+    <Card className="border border-border/50">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 rounded-lg bg-brand-surface">
+          <User className="h-5 w-5 text-brand-main" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">
+            Personal Information
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Update your account details
+          </p>
+        </div>
+      </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2">
@@ -92,7 +102,11 @@ export function ProfileSettings() {
         />
 
         <div className="flex justify-end">
-          <Button type="submit" disabled={!isDirty || isSubmitting}>
+          <Button
+            type="submit"
+            disabled={!isDirty || isSubmitting}
+            className="bg-brand-main hover:bg-brand-hover text-white"
+          >
             {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Save Changes
           </Button>

@@ -13,13 +13,14 @@ interface BankCardProps {
 /**
  * Credit card gradient variants for visual distinction.
  * Cycles through variants based on bank index.
+ * Uses brand-based color palette for premium SaaS look.
  */
 const cardVariants = [
-  "bg-gradient-to-br from-slate-800 via-slate-700 to-cyan-600", // Dark blue → cyan
-  "bg-gradient-to-br from-pink-400 via-pink-300 to-rose-300", // Pink
+  "bg-gradient-to-br from-brand-main via-brand-hover to-brand-text", // Brand primary
+  "bg-gradient-to-br from-success-main via-success-hover to-success-text", // Success green
   "bg-gradient-to-br from-violet-600 via-purple-500 to-fuchsia-400", // Purple
   "bg-gradient-to-br from-teal-600 via-emerald-500 to-cyan-400", // Teal/Green
-  "bg-gradient-to-br from-orange-500 via-amber-400 to-yellow-300", // Orange/Gold
+  "bg-gradient-to-br from-warning-main via-amber-400 to-yellow-300", // Warning/Gold
   "bg-gradient-to-br from-indigo-600 via-blue-500 to-sky-400", // Blue
 ] as const;
 

@@ -146,14 +146,22 @@ export default function TransfersPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Transfers</h1>
-          <p className="text-slate-500">Send money and manage your transfers</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground">
+            Transfers
+          </h1>
+          <p className="text-muted-foreground">
+            Send money and manage your transfers
+          </p>
         </div>
         <div className="flex gap-2">
           <RefreshButton onClick={refresh} isRefreshing={isRefreshing} />
-          <Button variant="outline" onClick={() => setShowFilters(true)}>
+          <Button
+            variant="outline"
+            onClick={() => setShowFilters(true)}
+            className="border-border/50 hover:border-brand-disabled hover:bg-brand-surface/30 transition-all"
+          >
             <Filter className="h-4 w-4 mr-2" />
             Filter
           </Button>
@@ -163,17 +171,17 @@ export default function TransfersPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column: Transfer Tabs & Form */}
         <div className="space-y-6">
-          <Card className="p-0 overflow-hidden">
+          <Card className="p-0 overflow-hidden border border-border/50 shadow-sm rounded-xl">
             {/* Transfer Type Tabs Header */}
-            <div className="border-b border-slate-100 bg-slate-50/50 p-2">
+            <div className="border-b border-border bg-gradient-to-r from-muted/40 to-muted/20 p-2">
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => handleTabChange("internal")}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                     transferType === "internal"
-                      ? "bg-white text-slate-900 shadow-sm border border-slate-200/60"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/50"
+                      ? "bg-card text-foreground shadow-md border border-border/50"
+                      : "text-muted-foreground hover:text-foreground hover:bg-card/50"
                   }`}
                 >
                   <ArrowRightLeft className="h-4 w-4" aria-hidden="true" />
@@ -182,10 +190,10 @@ export default function TransfersPage() {
                 <button
                   type="button"
                   onClick={() => handleTabChange("p2p")}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                     transferType === "p2p"
-                      ? "bg-white text-slate-900 shadow-sm border border-slate-200/60"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/50"
+                      ? "bg-card text-foreground shadow-md border border-border/50"
+                      : "text-muted-foreground hover:text-foreground hover:bg-card/50"
                   }`}
                 >
                   <Send className="h-4 w-4" aria-hidden="true" />
@@ -214,31 +222,31 @@ export default function TransfersPage() {
         {/* Right Column: Transfer History */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-foreground">
               Transfer History
             </h2>
           </div>
 
-          <Card className="overflow-hidden p-0 h-fit">
+          <Card className="overflow-hidden p-0 h-fit border border-border/50 shadow-sm">
             {isLoading ? (
               <div className="flex justify-center items-center py-12">
                 <Spinner size="lg" />
               </div>
             ) : transfers.length === 0 ? (
               <div className="p-12 text-center flex flex-col items-center justify-center">
-                <div className="bg-slate-50 p-4 rounded-full mb-4">
-                  <Filter className="h-8 w-8 text-slate-400" />
+                <div className="bg-brand-surface p-4 rounded-full mb-4">
+                  <Filter className="h-8 w-8 text-brand-main" />
                 </div>
-                <h3 className="text-lg font-medium text-slate-900">
+                <h3 className="text-lg font-medium text-foreground">
                   No transfers found
                 </h3>
-                <p className="text-slate-500 mt-1">
+                <p className="text-muted-foreground mt-1">
                   You haven't made any transfers yet, or no transfers match your
                   filters.
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-border">
                 {transfers.map((transfer) => (
                   <TransferRow
                     key={transfer.id}
@@ -251,8 +259,8 @@ export default function TransfersPage() {
 
             {/* Pagination */}
             {!isLoading && transfers.length > 0 && (
-              <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/30">
-                <p className="text-sm text-slate-500">
+              <div className="p-4 border-t border-border flex items-center justify-between bg-muted/30">
+                <p className="text-sm text-muted-foreground">
                   Showing {pagination.offset + 1} to{" "}
                   {Math.min(
                     pagination.offset + transfers.length,
