@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { Card } from "@/components/ui/Card";
 
 export function BalanceCardSkeleton() {
@@ -18,7 +18,10 @@ export function BankCardSkeleton() {
   return (
     <Card className="p-4 border-border/50">
       <div className="flex items-center gap-3 mb-4">
-        <Skeleton variant="circular" className="h-10 w-10 bg-muted animate-pulse" />
+        <Skeleton
+          variant="circular"
+          className="h-10 w-10 bg-muted animate-pulse"
+        />
         <div className="flex-1">
           <Skeleton className="h-4 w-32 mb-2 bg-muted animate-pulse" />
           <Skeleton className="h-3 w-20 bg-muted animate-pulse" />
@@ -32,7 +35,10 @@ export function BankCardSkeleton() {
 export function TransactionRowSkeleton() {
   return (
     <div className="flex items-center gap-4 py-3 px-4 border-b border-border/50">
-      <Skeleton variant="circular" className="h-10 w-10 bg-muted animate-pulse" />
+      <Skeleton
+        variant="circular"
+        className="h-10 w-10 bg-muted animate-pulse"
+      />
       <div className="flex-1">
         <Skeleton className="h-4 w-40 mb-2 bg-muted animate-pulse" />
         <Skeleton className="h-3 w-24 bg-muted animate-pulse" />

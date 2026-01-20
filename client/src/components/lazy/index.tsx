@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 // Loading component for lazy-loaded pages.
 // Displays a skeleton UI while the actual component is being loaded.
@@ -22,12 +22,12 @@ function PageLoader() {
 export const LazyTransferDetailModal = dynamic(
   () =>
     import("@/components/features/transfers/TransferDetailModal").then(
-      (mod) => mod.TransferDetailModal
+      (mod) => mod.TransferDetailModal,
     ),
   {
     loading: () => <PageLoader />,
     ssr: false,
-  }
+  },
 );
 
 // Lazy-loaded RecipientSearch component for P2P transfers.
@@ -35,12 +35,12 @@ export const LazyTransferDetailModal = dynamic(
 export const LazyRecipientSearch = dynamic(
   () =>
     import("@/components/features/p2p/RecipientSearch").then(
-      (mod) => mod.RecipientSearch
+      (mod) => mod.RecipientSearch,
     ),
   {
     loading: () => <Skeleton className="h-10 w-full" />,
     ssr: false,
-  }
+  },
 );
 
 export { PageLoader };

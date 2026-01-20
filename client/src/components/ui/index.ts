@@ -46,7 +46,7 @@ export {
 } from "./Sheet";
 export { ToastContainer } from "./Toast";
 export { ResponsiveTable } from "./ResponsiveTable";
-export { Skeleton, TextSkeleton, AvatarSkeleton } from "./skeleton";
+export { Skeleton, TextSkeleton, AvatarSkeleton } from "./Skeleton";
 export { OptimizedImage } from "./OptimizedImage";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./Tabs";
 export { Avatar, AvatarImage, AvatarFallback } from "./Avatar";

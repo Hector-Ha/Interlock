@@ -35,7 +35,7 @@ export function TransferFiltersModal({
   const onSubmit = (data: TransferFilters) => {
     // Remove empty strings/undefined
     const cleanedData = Object.fromEntries(
-      Object.entries(data).filter(([_, v]) => v !== "" && v !== undefined)
+      Object.entries(data).filter(([_, v]) => v !== "" && v !== undefined),
     );
     onApply(cleanedData);
     onOpenChange(false);

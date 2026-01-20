@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { Card } from "@/components/ui/Card";
 
 // Skeleton for a single transfer row item

@@ -3,7 +3,7 @@
 import Image, { ImageProps } from "next/image";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Skeleton } from "./skeleton";
+import { Skeleton } from "./Skeleton";
 
 interface OptimizedImageProps extends Omit<ImageProps, "onLoadingComplete"> {
   fallback?: string;
@@ -32,7 +32,7 @@ export function OptimizedImage({
         alt={alt}
         className={cn(
           "transition-opacity duration-300",
-          isLoading ? "opacity-0" : "opacity-100"
+          isLoading ? "opacity-0" : "opacity-100",
         )}
         onLoad={() => setIsLoading(false)}
         onError={() => {

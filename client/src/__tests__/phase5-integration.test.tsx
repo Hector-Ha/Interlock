@@ -8,7 +8,7 @@ import {
   Skeleton,
   TextSkeleton,
   AvatarSkeleton,
-} from "@/components/ui/skeleton";
+} from "@/components/ui/Skeleton";
 import { DashboardSkeleton } from "@/components/features/dashboard/DashboardSkeleton";
 import { getErrorMessage, handleApiError } from "@/lib/api-handler";
 import { AxiosError } from "axios";

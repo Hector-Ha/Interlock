@@ -83,7 +83,9 @@ export function MobileSidebar({ open }: MobileSidebarProps) {
                         aria-hidden="true"
                         className={cn(
                           "h-5 w-5",
-                          isActive ? "text-brand-main" : "text-muted-foreground",
+                          isActive
+                            ? "text-brand-main"
+                            : "text-muted-foreground",
                         )}
                       />
                       {link.name}
