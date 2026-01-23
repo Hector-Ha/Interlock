@@ -107,11 +107,7 @@ export function QuickActions({ hasBanks }: QuickActionsProps) {
           }
 
           if (action.disabled) {
-            return (
-              <div key={action.label}>
-                {content}
-              </div>
-            );
+            return <div key={action.label}>{content}</div>;
           }
 
           return (

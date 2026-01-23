@@ -1,0 +1,165 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { ArrowUpRight, ArrowDownLeft, ChevronRight, Search, Filter } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+import { Avatar, AvatarFallback } from "@/components/ui/Avatar";
+import { cn, formatDayTime, getCategoryBadgeVariant } from "@/lib/utils";
+import type { Transaction, Bank } from "@/types/bank";
+
+interface TransactionsCardProps {
+  transactions: Transaction[];
+  banks: Bank[];
+}
+
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+function getStatusConfig(status: Transaction["status"]) {
+  const configs = {
+    SUCCESS: { dot: "bg-[var(--color-success-main)]", text: "text-[var(--color-success-main)]", label: "Success" },
+    PENDING: { dot: "bg-[var(--color-warning-main)]", text: "text-[var(--color-warning-main)]", label: "Pending" },
+    PROCESSING: { dot: "bg-[var(--color-gray-main)]", text: "text-[var(--color-gray-main)]", label: "Processing" },
+    FAILED: { dot: "bg-[var(--color-error-main)]", text: "text-[var(--color-error-main)]", label: "Failed" },
+    DECLINED: { dot: "bg-[var(--color-error-main)]", text: "text-[var(--color-error-main)]", label: "Declined" },
+    RETURNED: { dot: "bg-[var(--color-error-main)]", text: "text-[var(--color-error-main)]", label: "Returned" },
+    CANCELLED: { dot: "bg-[var(--color-gray-main)]", text: "text-[var(--color-gray-main)]", label: "Cancelled" },
+  };
+  return configs[status] || configs.CANCELLED;
+}
+
+export function TransactionsCard({ transactions, banks }: TransactionsCardProps) {
+  const [selectedBankId, setSelectedBankId] = useState<string>("all");
+
+  const filteredTransactions =
+    selectedBankId === "all"
+      ? transactions
+      : transactions.filter((tx) => tx.id.includes(selectedBankId));
+
+  return (
+    <Card padding="none" className="overflow-hidden">
+      {/* Header */}
+      <CardHeader className="flex-row items-center justify-between p-5 sm:p-6 pb-4 border-b border-[var(--color-gray-soft)]">
+        <div>
+          <CardTitle className="text-xl font-semibold">Recent Transactions</CardTitle>
+          <p className="text-sm text-[var(--color-gray-main)] mt-0.5">
+            Track your spending and income
+          </p>
+        </div>
+        <Link href="/transfers">
+          <Button variant="outline" size="sm" className="gap-1.5">
+            View All
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </Link>
+      </CardHeader>
+
+      {/* Bank Filter Tabs */}
+      {banks.length > 1 && (
+        <div className="px-5 sm:px-6 py-3 border-b border-[var(--color-gray-soft)] bg-[var(--color-gray-surface)]/50">
+          <Tabs value={selectedBankId} onValueChange={setSelectedBankId}>
+            <TabsList className="bg-transparent gap-2 p-0">
+              <TabsTrigger
+                value="all"
+                className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg px-4 py-2 text-sm"
+              >
+                All Banks
+              </TabsTrigger>
+              {banks.map((bank) => (
+                <TabsTrigger
+                  key={bank.id}
+                  value={bank.id}
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg px-4 py-2 text-sm whitespace-nowrap"
+                >
+                  {bank.institutionName}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
+      )}
+
+      {/* Transactions List */}
+      <CardContent className="p-0">
+        {filteredTransactions.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-[var(--color-gray-surface)] flex items-center justify-center mb-4">
+              <Search className="w-7 h-7 text-[var(--color-gray-disabled)]" />
+            </div>
+            <p className="text-[var(--color-gray-text)] font-medium mb-1">No transactions yet</p>
+            <p className="text-sm text-[var(--color-gray-main)]">
+              Your transactions will appear here once you start using your accounts.
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y divide-[var(--color-gray-soft)]">
+            {filteredTransactions.slice(0, 8).map((tx) => {
+              const isDebit = tx.amount > 0;
+              const statusConfig = getStatusConfig(tx.status);
+              const category = Array.isArray(tx.category) ? tx.category[0] : tx.category || "Other";
+
+              return (
+                <div
+                  key={tx.id}
+                  className="flex items-center gap-4 px-5 sm:px-6 py-4 hover:bg-[var(--color-gray-surface)]/50 transition-colors cursor-pointer"
+                >
+                  {/* Transaction Icon */}
+                  <div
+                    className={cn(
+                      "flex items-center justify-center w-11 h-11 rounded-xl shrink-0",
+                      isDebit ? "bg-[var(--color-error-surface)]" : "bg-[var(--color-success-surface)]"
+                    )}
+                  >
+                    {isDebit ? (
+                      <ArrowUpRight className="w-5 h-5 text-[var(--color-error-main)]" />
+                    ) : (
+                      <ArrowDownLeft className="w-5 h-5 text-[var(--color-success-main)]" />
+                    )}
+                  </div>
+
+                  {/* Transaction Details */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-[var(--color-gray-text)] truncate">{tx.name}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className={cn("w-1.5 h-1.5 rounded-full", statusConfig.dot)} />
+                      <span className={cn("text-xs", statusConfig.text)}>{statusConfig.label}</span>
+                      <span className="text-xs text-[var(--color-gray-disabled)]">•</span>
+                      <span className="text-xs text-[var(--color-gray-main)]">
+                        {formatDayTime(tx.date)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Amount & Category */}
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span
+                      className={cn(
+                        "font-semibold tabular-nums",
+                        isDebit ? "text-[var(--color-error-main)]" : "text-[var(--color-success-main)]"
+                      )}
+                    >
+                      {isDebit ? "-" : "+"}${Math.abs(tx.amount).toFixed(2)}
+                    </span>
+                    <Badge variant={getCategoryBadgeVariant(category)} className="text-[10px] px-2 py-0">
+                      {category}
+                    </Badge>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

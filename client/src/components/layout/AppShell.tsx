@@ -11,6 +11,7 @@ import { RightSideBar } from "./RightSideBar";
 import { ToastContainer } from "./ToastContainer";
 import { Spinner, ScrollArea } from "@/components/ui";
 import { SkipLink } from "@/components/a11y";
+import { Shield } from "lucide-react";
 
 interface AppShellProps {
   children: ReactNode;
@@ -26,37 +27,51 @@ export function AppShell({ children }: AppShellProps) {
     initialize();
   }, [initialize]);
 
-  // Show loading while initializing
   if (!isInitialized || isLoading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <Spinner size="lg" />
-          <p className="text-sm text-muted-foreground">Loading…</p>
+      <div className="flex h-screen w-full items-center justify-center bg-gradient-to-br from-[var(--color-gray-surface)] to-[var(--color-brand-surface)]/30">
+        <div className="flex flex-col items-center gap-6">
+          {/* Loading Card */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-[var(--color-brand-main)] rounded-2xl blur-xl opacity-20 animate-pulse" />
+            <div className="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--color-brand-main)] to-[var(--color-brand-hover)] shadow-xl shadow-[var(--color-brand-main)]/25">
+              <Shield className="w-10 h-10 text-white" />
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <Spinner size="lg" />
+            <p className="text-sm font-medium text-[var(--color-gray-main)]">
+              Securing your session...
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-[var(--color-gray-surface)]">
       {/* Skip Link for Keyboard Users */}
       <SkipLink />
 
-      {/* Desktop Sidebar (left) */}
+      {/* Desktop Sidebar (left) - UNCHANGED */}
       <Sidebar className="hidden md:flex" />
 
       {/* Mobile Sidebar */}
       <MobileSidebar open={sidebarOpen} />
 
-      {/* Main Content */}
+      {/* Main Content Area */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
         <Header />
 
+        {/* Main Content */}
         <ScrollArea className="flex-1">
-          <main id="main-content" className="h-full p-4 md:p-6 lg:p-8">
-            <div className="mx-auto max-w-7xl">{children}</div>
+          <main
+            id="main-content"
+            className="min-h-full"
+          >
+            {children}
           </main>
         </ScrollArea>
       </div>

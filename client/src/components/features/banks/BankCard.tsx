@@ -1,121 +1,141 @@
 "use client";
 
 import Link from "next/link";
+import { Wifi, ChevronRight } from "lucide-react";
 import type { Bank } from "@/types/bank";
 import { cn } from "@/lib/utils";
 
 interface BankCardProps {
   bank: Bank;
-  /** Index used to assign distinct gradient variants */
   index?: number;
 }
 
-/**
- * Credit card gradient variants for visual distinction.
- * Cycles through variants based on bank index.
- * Uses brand-based color palette for premium SaaS look.
- */
 const cardVariants = [
-  "bg-gradient-to-br from-brand-main via-brand-hover to-brand-text", // Brand primary
-  "bg-gradient-to-br from-success-main via-success-hover to-success-text", // Success green
-  "bg-gradient-to-br from-violet-600 via-purple-500 to-fuchsia-400", // Purple
-  "bg-gradient-to-br from-teal-600 via-emerald-500 to-cyan-400", // Teal/Green
-  "bg-gradient-to-br from-warning-main via-amber-400 to-yellow-300", // Warning/Gold
-  "bg-gradient-to-br from-indigo-600 via-blue-500 to-sky-400", // Blue
+  {
+    gradient: "from-[var(--color-gray-text)] via-[#2d2d3a] to-[var(--color-brand-text)]",
+    accent: "bg-[var(--color-brand-main)]",
+  },
+  {
+    gradient: "from-[#1a365d] via-[#2c5282] to-[#2b6cb0]",
+    accent: "bg-[var(--color-success-main)]",
+  },
+  {
+    gradient: "from-[#322659] via-[#44337a] to-[#553c9a]",
+    accent: "bg-[var(--color-brand-disabled)]",
+  },
+  {
+    gradient: "from-[#1a4731] via-[#22543d] to-[#276749]",
+    accent: "bg-[var(--color-success-main)]",
+  },
+  {
+    gradient: "from-[#742a2a] via-[#9b2c2c] to-[#c53030]",
+    accent: "bg-[var(--color-warning-main)]",
+  },
 ] as const;
 
-/**
- * Generate a consistent variant index based on bank name for color consistency.
- */
 function hashBankName(name: string): number {
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
-    const char = name.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
+    hash = (hash << 5) - hash + name.charCodeAt(i);
     hash = hash & hash;
   }
   return Math.abs(hash);
 }
 
 export function BankCard({ bank, index }: BankCardProps) {
-  // Use index if provided, otherwise hash the bank name for consistent color
   const variantIndex =
     index !== undefined
       ? index % cardVariants.length
       : hashBankName(bank.institutionName) % cardVariants.length;
 
-  const gradientClass = cardVariants[variantIndex];
-
-  // Get masked account number from first account or fallback
-  const mask = bank.accounts?.[0]?.mask || "****";
-  const maskedNumber = `•••• •••• •••• ${mask}`;
+  const variant = cardVariants[variantIndex];
+  const mask = bank.accounts?.[0]?.mask || "••••";
+  const totalBalance = bank.accounts?.reduce(
+    (sum, acc) => sum + (acc.balance.current || 0),
+    0
+  ) || 0;
 
   return (
-    <Link href={`/banks/${bank.id}`} className="block">
+    <Link href={`/banks/${bank.id}`} className="block group">
       <div
         className={cn(
-          "group relative w-full aspect-[1.6/1] rounded-2xl p-5 text-white shadow-xl overflow-hidden transition-transform hover:scale-[1.02] cursor-pointer",
-          gradientClass,
+          "relative w-full aspect-[1.7/1] rounded-2xl p-5 sm:p-6 text-white overflow-hidden",
+          "shadow-xl shadow-black/20 hover:shadow-2xl hover:shadow-black/30",
+          "transition-all duration-300 hover:-translate-y-1 hover:scale-[1.01]",
+          "bg-gradient-to-br",
+          variant.gradient
         )}
       >
-        {/* Card content */}
+        {/* Security Pattern */}
+        <div className="absolute inset-0 opacity-[0.04]">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id={`card-grid-${bank.id}`} width="24" height="24" patternUnits="userSpaceOnUse">
+                <circle cx="12" cy="12" r="1" fill="white" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill={`url(#card-grid-${bank.id})`} />
+          </svg>
+        </div>
+
+        {/* Card Content */}
         <div className="relative z-10 flex flex-col h-full justify-between">
-          {/* Top row: Bank name + Contactless icon */}
+          {/* Top Row */}
           <div className="flex items-start justify-between">
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold tracking-wide">
+            <div>
+              <p className="text-white/60 text-xs uppercase tracking-wider mb-1">
+                {bank.accounts?.length || 0} {bank.accounts?.length === 1 ? "Account" : "Accounts"}
+              </p>
+              <h3 className="text-lg font-bold tracking-tight">
                 {bank.institutionName}
-              </span>
+              </h3>
+            </div>
+            <div className="flex items-center gap-2">
               <span
                 className={cn(
-                  "text-xs font-medium mt-1 px-2 py-0.5 rounded-full w-fit",
+                  "text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider",
                   bank.status === "ACTIVE"
-                    ? "bg-white/20 text-white"
-                    : "bg-white/30 text-white/90",
+                    ? "bg-[var(--color-success-main)]/20 text-[var(--color-success-soft)]"
+                    : "bg-white/20 text-white/80"
                 )}
               >
                 {bank.status === "ACTIVE" ? "Active" : "Inactive"}
               </span>
             </div>
-            {/* Contactless payment icon */}
-            <svg
-              className="w-8 h-8 opacity-80"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6" />
-              <path d="M11.5 16.5A3.5 3.5 0 0 0 15 13c0-2-.5-3-1-4.5C12.654 5.775 13.417 3.25 16 1" />
-              <path d="M14.5 18.5A4.5 4.5 0 0 0 19 14c0-2.5-.5-4-1-6-.8-3.2.2-6.36 3-9" />
-            </svg>
           </div>
 
-          {/* Bottom section: Card details */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs opacity-80">
-              <span className="uppercase tracking-wider">ACCOUNT</span>
-              <span>{bank.accounts?.length || 0} linked</span>
+          {/* Middle - Chip & Contactless */}
+          <div className="flex items-center gap-4">
+            <div className={cn("w-10 h-7 rounded-md", variant.accent, "opacity-80")} />
+            <Wifi className="w-6 h-6 rotate-90 opacity-60" />
+          </div>
+
+          {/* Bottom Row */}
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-white/50 text-xs mb-1">Card Number</p>
+              <p className="font-mono text-sm tracking-widest">
+                •••• •••• •••• {mask}
+              </p>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-sm tracking-widest">
-                {maskedNumber}
-              </span>
-              {/* Card network badge */}
-              <span className="text-xs font-bold italic tracking-wide opacity-90">
-                BANK
-              </span>
+            <div className="text-right">
+              <p className="text-white/50 text-xs mb-1">Balance</p>
+              <p className="font-bold text-lg tabular-nums">
+                ${totalBalance.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Decorative gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+        {/* Hover Arrow */}
+        <div className="absolute bottom-5 right-5 sm:bottom-6 sm:right-6 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
+            <ChevronRight className="w-4 h-4" />
+          </div>
+        </div>
 
-        {/* Hover effect */}
-        <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors pointer-events-none" />
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/5 pointer-events-none" />
       </div>
     </Link>
   );
