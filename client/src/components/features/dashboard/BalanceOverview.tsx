@@ -1,10 +1,14 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+import Link from "next/link";
+
 import { useState } from "react";
 import CountUp from "react-countup";
 import {
   Shield,
   TrendingUp,
+  TrendingDown,
   Eye,
   EyeOff,
   Plus,
@@ -17,6 +21,7 @@ import type { Account } from "@/types/bank";
 
 interface BalanceOverviewProps {
   totalBalance: number;
+  balanceChange?: number;
   accounts: Account[];
   totalBanks: number;
   onAddBank: () => void;
@@ -24,6 +29,7 @@ interface BalanceOverviewProps {
 
 export function BalanceOverview({
   totalBalance,
+  balanceChange = 0,
   accounts,
   totalBanks,
   onAddBank,
@@ -33,6 +39,9 @@ export function BalanceOverview({
     ...accounts.map((a) => a.balance.current || 0),
     1,
   );
+
+  const isPositive = balanceChange >= 0;
+  const ChangeIcon = isPositive ? TrendingUp : TrendingUp; // Keep TrendingUp but rotate for down? Or import TrendingDown.
 
   return (
     <Card
@@ -112,14 +121,32 @@ export function BalanceOverview({
                   />
                 </>
               ) : (
-                <span className="tracking-widest">$••••••</span>
+                <div className="flex items-center">
+                  <span className="tracking-widest text-white/60">$</span>
+                  <span className="tracking-widest">••••••</span>
+                </div>
               )}
             </span>
           </div>
+
           <div className="flex items-center gap-4 mt-3">
-            <div className="flex items-center gap-1.5 text-[var(--color-success-main)]">
-              <TrendingUp className="w-4 h-4" />
-              <span className="text-sm font-medium">+2.4%</span>
+            <div
+              className={cn(
+                "flex items-center gap-1.5",
+                isPositive
+                  ? "text-[var(--color-success-main)]"
+                  : "text-[var(--color-error-main)]",
+              )}
+            >
+              {isPositive ? (
+                <TrendingUp className="w-4 h-4" />
+              ) : (
+                <TrendingDown className="w-4 h-4" />
+              )}
+              <span className="text-sm font-medium">
+                {isPositive ? "+" : ""}
+                {balanceChange.toFixed(1)}%
+              </span>
             </div>
             <span className="text-white/40 text-sm">vs last month</span>
           </div>
@@ -157,6 +184,14 @@ export function BalanceOverview({
                   </div>
                 );
               })}
+              {accounts.length > 3 && (
+                <Link
+                  href="/banks"
+                  className="text-right text-xs text-white/40 font-medium mt-1 hover:underline hover:text-white block ml-auto w-fit cursor-pointer transition-colors"
+                >
+                  +{accounts.length - 3} more
+                </Link>
+              )}
             </div>
           </div>
         )}
@@ -169,12 +204,11 @@ export function BalanceOverview({
           <Button
             variant="ghost"
             size="sm"
-            className="text-white hover:bg-white/10 gap-1.5"
+            className="text-white hover:bg-white/20 hover:text-white gap-1.5"
             onClick={onAddBank}
           >
             <Plus className="w-4 h-4" />
             Add Bank
-            <ChevronRight className="w-3 h-3" />
           </Button>
         </div>
       </div>

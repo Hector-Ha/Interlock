@@ -102,7 +102,7 @@ export function TransactionsCard({
             Track your spending and income
           </p>
         </div>
-        <Link href="/transfers">
+        <Link href="/transactions">
           <Button variant="outline" size="sm" className="gap-1.5">
             View All
             <ChevronRight className="w-4 h-4" />
@@ -112,12 +112,15 @@ export function TransactionsCard({
 
       {/* Bank Filter Tabs */}
       {banks.length > 1 && (
-        <div className="px-5 sm:px-6 py-3 border-b border-[var(--color-gray-soft)] bg-[var(--color-gray-surface)]/50">
+        <div className="pt-4">
           <Tabs value={selectedBankId} onValueChange={setSelectedBankId}>
-            <TabsList className="bg-transparent gap-2 p-0">
+            <TabsList className="h-auto bg-transparent p-0 gap-3 justify-start overflow-x-auto overflow-y-hidden w-full no-scrollbar px-6 pb-4">
               <TabsTrigger
                 value="all"
-                className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg px-4 py-2 text-sm"
+                className="rounded-md border border-[var(--color-gray-soft)] px-4 py-2 text-sm font-medium text-[var(--color-gray-text)] bg-white 
+                hover:border-[var(--color-primary)] transition-all hover:text-[var(--color-primary)] hover:bg-primary/10
+                data-[state=active]:bg-[var(--color-brand-main)] data-[state=active]:border-[var(--color-brand-main)] 
+                data-[state=active]:text-white shadow-sm"
               >
                 All Banks
               </TabsTrigger>
@@ -125,7 +128,10 @@ export function TransactionsCard({
                 <TabsTrigger
                   key={bank.id}
                   value={bank.id}
-                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg px-4 py-2 text-sm whitespace-nowrap"
+                  className="rounded-md border border-[var(--color-gray-soft)] px-4 py-2 text-sm font-medium text-[var(--color-gray-text)] bg-white 
+                  hover:border-[var(--color-primary)] transition-all hover:text-[var(--color-primary)] hover:bg-primary/10
+                  data-[state=active]:bg-[var(--color-brand-main)] data-[state=active]:border-[var(--color-brand-main)] 
+                  data-[state=active]:text-white shadow-sm whitespace-nowrap"
                 >
                   {bank.institutionName}
                 </TabsTrigger>

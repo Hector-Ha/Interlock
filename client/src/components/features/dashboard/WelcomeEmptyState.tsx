@@ -1,6 +1,7 @@
-"use client";
-
+// Imports
+import Image from "next/image"; // Add this
 import { Building2, Shield, Zap, Lock } from "lucide-react";
+import InterlockLogo from "@/assets/logos/Interlock.svg"; // Add this
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 
@@ -27,7 +28,10 @@ const features = [
   },
 ];
 
-export function WelcomeEmptyState({ userName, onAddBank }: WelcomeEmptyStateProps) {
+export function WelcomeEmptyState({
+  userName,
+  onAddBank,
+}: WelcomeEmptyStateProps) {
   return (
     <div className="space-y-8">
       {/* Hero Card */}
@@ -39,7 +43,12 @@ export function WelcomeEmptyState({ userName, onAddBank }: WelcomeEmptyStateProp
         <div className="absolute inset-0 opacity-[0.03]">
           <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <pattern id="welcome-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <pattern
+                id="welcome-grid"
+                width="40"
+                height="40"
+                patternUnits="userSpaceOnUse"
+              >
                 <circle cx="20" cy="20" r="1" fill="white" />
               </pattern>
             </defs>
@@ -52,9 +61,15 @@ export function WelcomeEmptyState({ userName, onAddBank }: WelcomeEmptyStateProp
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-[var(--color-success-main)] rounded-full blur-[100px] opacity-15" />
 
         <div className="relative px-6 py-12 sm:px-12 sm:py-16 lg:py-20 text-center">
-          {/* Icon */}
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-[var(--color-brand-main)] to-[var(--color-brand-hover)] mb-8 shadow-2xl shadow-[var(--color-brand-main)]/30">
-            <Building2 className="w-10 h-10 text-white" />
+          {/* Logo */}
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-white mb-8 shadow-2xl shadow-black/20">
+            <Image
+              src={InterlockLogo}
+              alt="Interlock"
+              width={48}
+              height={48}
+              className="w-12 h-12"
+            />
           </div>
 
           {/* Text */}
@@ -62,14 +77,14 @@ export function WelcomeEmptyState({ userName, onAddBank }: WelcomeEmptyStateProp
             Welcome to Interlock, {userName}
           </h1>
           <p className="text-white/60 text-lg max-w-xl mx-auto mb-8 leading-relaxed">
-            Connect your bank account to unlock powerful financial insights, seamless transfers, and
-            complete control over your money.
+            Connect your bank account to unlock powerful financial insights,
+            seamless transfers, and complete control over your money.
           </p>
 
           {/* CTA */}
           <Button
             size="lg"
-            className="bg-white text-[var(--color-brand-main)] hover:bg-white/90 shadow-xl shadow-black/20 px-8 h-12 text-base font-semibold"
+            className="bg-brand-main hover:bg-brand-hover text-white shadow-xl shadow-brand-main/20 px-8 h-12 text-base font-semibold"
             onClick={onAddBank}
           >
             <Building2 className="w-5 h-5 mr-2" />
@@ -83,13 +98,17 @@ export function WelcomeEmptyState({ userName, onAddBank }: WelcomeEmptyStateProp
         {features.map((feature) => (
           <Card
             key={feature.title}
-            className="text-center py-6 px-4 border-[var(--color-gray-soft)] hover:border-[var(--color-brand-disabled)] hover:shadow-lg transition-all duration-300"
+            className="text-center py-6 px-4 border-[var(--color-gray-soft)]"
           >
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[var(--color-brand-surface)] mb-4">
               <feature.icon className="w-6 h-6 text-[var(--color-brand-main)]" />
             </div>
-            <h3 className="font-semibold text-[var(--color-gray-text)] mb-1">{feature.title}</h3>
-            <p className="text-sm text-[var(--color-gray-main)]">{feature.description}</p>
+            <h3 className="font-semibold text-[var(--color-gray-text)] mb-1">
+              {feature.title}
+            </h3>
+            <p className="text-sm text-[var(--color-gray-main)]">
+              {feature.description}
+            </p>
           </Card>
         ))}
       </div>

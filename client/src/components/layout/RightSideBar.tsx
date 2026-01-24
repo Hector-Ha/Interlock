@@ -176,8 +176,8 @@ export function RightSideBar({ className }: RightSideBarProps) {
             <div className="p-4">
               {banks.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-6 text-center">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--color-brand-surface)] to-[var(--color-brand-soft)] mb-3">
-                    <Building2 className="h-7 w-7 text-[var(--color-brand-main)]" />
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--color-gray-surface)] mb-3">
+                    <Building2 className="h-7 w-7 text-[var(--color-gray-disabled)]" />
                   </div>
                   <p className="text-sm font-medium text-[var(--color-gray-text)] mb-1">
                     No banks linked

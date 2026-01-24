@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 interface QuickActionCardProps {
   icon: React.ReactNode;
   label: string;
-  description: string;
+  description?: string;
   href?: string;
   onClick?: () => void;
   disabled?: boolean;
@@ -21,24 +21,28 @@ const variantStyles = {
     iconColor: "text-[var(--color-brand-main)]",
     hoverBorder: "group-hover:border-[var(--color-brand-disabled)]",
     gradientFrom: "from-[var(--color-brand-surface)]/50",
+    hoverText: "group-hover:text-[var(--color-brand-main)]",
   },
   success: {
     iconBg: "bg-[var(--color-success-surface)]",
     iconColor: "text-[var(--color-success-main)]",
     hoverBorder: "group-hover:border-[var(--color-success-disabled)]",
     gradientFrom: "from-[var(--color-success-surface)]/50",
+    hoverText: "group-hover:text-[var(--color-success-main)]",
   },
   warning: {
     iconBg: "bg-[var(--color-warning-surface)]",
     iconColor: "text-[var(--color-warning-main)]",
     hoverBorder: "group-hover:border-[var(--color-warning-disabled)]",
     gradientFrom: "from-[var(--color-warning-surface)]/50",
+    hoverText: "group-hover:text-[var(--color-warning-main)]",
   },
   default: {
     iconBg: "bg-[var(--color-gray-surface)]",
     iconColor: "text-[var(--color-gray-main)]",
     hoverBorder: "group-hover:border-[var(--color-gray-disabled)]",
     gradientFrom: "from-[var(--color-gray-surface)]/50",
+    hoverText: "group-hover:text-[var(--color-gray-hover)]",
   },
 };
 
@@ -92,20 +96,21 @@ export function QuickActionCard({
           <p
             className={cn(
               "font-semibold text-[var(--color-gray-text)] transition-colors",
-              !disabled && "group-hover:text-[var(--color-brand-main)]",
+              !disabled && styles.hoverText,
             )}
           >
             {label}
           </p>
-          <p className="text-sm text-[var(--color-gray-main)] truncate">
-            {description}
-          </p>
+          {description && (
+            <p className="text-sm text-[var(--color-gray-main)] truncate">
+              {description}
+            </p>
+          )}
         </div>
         <ChevronRight
           className={cn(
             "w-5 h-5 text-[var(--color-gray-disabled)] transition-all duration-300 shrink-0",
-            !disabled &&
-              "group-hover:text-[var(--color-brand-main)] group-hover:translate-x-1",
+            !disabled && cn(styles.hoverText, "group-hover:translate-x-1"),
           )}
         />
       </div>

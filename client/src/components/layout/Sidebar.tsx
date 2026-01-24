@@ -1,5 +1,4 @@
-"use client";
-
+// Imports
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronLeft, ArrowLeftToLine, ArrowRightFromLine } from "lucide-react";
@@ -7,6 +6,7 @@ import { ChevronLeft, ArrowLeftToLine, ArrowRightFromLine } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth.store";
 import { useUIStore } from "@/stores/ui.store";
+import { useBankStore } from "@/stores/bank.store";
 import { sidebarLinks } from "@/constants/sidebarLinks";
 import { SidebarProps } from "@/types";
 import InterlockLogo from "@/assets/logos/Interlock.svg";
@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
   const { user } = useAuthStore();
   const { sidebarCollapsed, setSidebarCollapsed } = useUIStore();
+  const { banks } = useBankStore();
 
   return (
     <aside

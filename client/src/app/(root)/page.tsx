@@ -21,11 +21,12 @@ import { WelcomeEmptyState } from "@/components/features/dashboard/WelcomeEmptyS
 import { DashboardSkeleton } from "@/components/features/dashboard/DashboardSkeleton";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/Alert";
 import { AddBankModal } from "@/components/features/banks/AddBankModal";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card"; // Add imports
 
 interface QuickAction {
   icon: React.ReactNode;
   label: string;
-  description: string;
+  description?: string; // Optional
   href?: string;
   onClick?: () => void;
   disabled?: boolean;
@@ -41,6 +42,7 @@ export default function DashboardPage() {
     isLoading,
     error,
     totalBalance,
+    balanceChange,
     recentTransactions,
     accounts,
     greeting,
@@ -55,14 +57,12 @@ export default function DashboardPage() {
     {
       icon: <Plus className="h-5 w-5" />,
       label: "Add Bank",
-      description: "Connect a new bank account",
       onClick: () => setIsAddBankOpen(true),
       variant: "brand",
     },
     {
       icon: <Send className="h-5 w-5" />,
       label: "Send Money",
-      description: "Transfer to anyone instantly",
       href: "/transfers?type=p2p",
       disabled: !hasBanks,
       variant: "success",
@@ -70,7 +70,6 @@ export default function DashboardPage() {
     {
       icon: <ArrowLeftRight className="h-5 w-5" />,
       label: "Transfer Funds",
-      description: "Move money between accounts",
       href: "/transfers",
       disabled: !hasBanks,
       variant: "warning",
@@ -78,7 +77,6 @@ export default function DashboardPage() {
     {
       icon: <Building2 className="h-5 w-5" />,
       label: "My Banks",
-      description: "View all connected banks",
       href: "/banks",
       variant: "default",
     },
@@ -150,34 +148,42 @@ export default function DashboardPage() {
             {/* Balance Overview */}
             <BalanceOverview
               totalBalance={totalBalance}
+              balanceChange={balanceChange}
               accounts={accounts}
               totalBanks={banks.length}
               onAddBank={() => setIsAddBankOpen(true)}
             />
 
             {/* Quick Actions Section */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="h-4 w-4 text-[var(--color-brand-main)]" />
-                <h2 className="text-sm font-semibold text-[var(--color-gray-text)] uppercase tracking-wide">
-                  Quick Actions
-                </h2>
-              </div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {quickActions.map((action) => (
-                  <QuickActionCard
-                    key={action.label}
-                    icon={action.icon}
-                    label={action.label}
-                    description={action.description}
-                    href={action.href}
-                    onClick={action.onClick}
-                    disabled={action.disabled}
-                    variant={action.variant}
-                  />
-                ))}
-              </div>
-            </div>
+            <Card padding="none" className="overflow-hidden">
+              <CardHeader className="flex-row items-center justify-between p-5 sm:p-6 pb-4 border-b border-[var(--color-gray-soft)]">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <CardTitle className="text-xl font-semibold">
+                      Quick Actions
+                    </CardTitle>
+                  </div>
+                  <p className="text-sm text-[var(--color-gray-main)] mt-0.5">
+                    Common tasks and shortcuts
+                  </p>
+                </div>
+              </CardHeader>
+              <CardContent className="p-5 sm:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {quickActions.map((action) => (
+                    <QuickActionCard
+                      key={action.label}
+                      icon={action.icon}
+                      label={action.label}
+                      href={action.href}
+                      onClick={action.onClick}
+                      disabled={action.disabled}
+                      variant={action.variant}
+                    />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Recent Transactions */}
             <TransactionsCard transactions={recentTransactions} banks={banks} />

@@ -13,6 +13,7 @@ interface UseDashboardResult {
   pendingTransfers: Transfer[];
   accounts: Account[];
   greeting: string;
+  balanceChange: number;
   refresh: () => Promise<void>;
 }
 
@@ -25,6 +26,7 @@ export const useDashboard = (): UseDashboardResult => {
   const [pendingTransfers, setPendingTransfers] = useState<Transfer[]>([]);
   // Use local state for total balance since we calculate it from accounts
   const [totalBalance, setTotalBalance] = useState(0);
+  const [balanceChange, setBalanceChange] = useState(0);
   const [accounts, setAccounts] = useState<Account[]>([]);
 
   const { banks, fetchBanks } = useBankStore();
@@ -69,6 +71,7 @@ export const useDashboard = (): UseDashboardResult => {
         let transactions: Transaction[] = [];
         let calculatedBalance = 0;
         let allAccounts: Account[] = [];
+        let calculatedChange = 0;
 
         if (currentBanks.length > 0) {
           // Fetch recent transactions from the first bank as a primary source
@@ -100,6 +103,54 @@ export const useDashboard = (): UseDashboardResult => {
                 account.balance.available ?? account.balance.current ?? 0;
             });
           });
+
+          // Calculate Percentage Change vs 30 days ago
+          try {
+            // 1. Fetch transactions for the last 30 days for all banks
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            const startDate = thirtyDaysAgo.toISOString().split("T")[0];
+            const endDate = new Date().toISOString().split("T")[0];
+
+            const historyPromises = currentBanks.map((bank) =>
+              bankService.getTransactions(bank.id, {
+                startDate,
+                endDate,
+                limit: 100, // Reduced limit to be safer
+              }),
+            );
+
+            // Use allSettled to avoid failing the entire dashboard if one history fetch fails
+            const historyResults = await Promise.allSettled(historyPromises);
+
+            let totalNetFlow = 0; // Sum of all transaction amounts (Positive = Expense, Negative = Income)
+
+            historyResults.forEach((result) => {
+              if (result.status === "fulfilled") {
+                result.value.transactions.forEach((tx) => {
+                  totalNetFlow += tx.amount;
+                });
+              } else {
+                console.warn(
+                  "Failed to fetch history for bank:",
+                  result.reason,
+                );
+              }
+            });
+
+            // Previous Balance = Current Balance + Net Flow (since positive amount is money OUT, we add it back to get previous state)
+            const previousBalance = calculatedBalance + totalNetFlow;
+
+            if (previousBalance !== 0) {
+              calculatedChange =
+                ((calculatedBalance - previousBalance) /
+                  Math.abs(previousBalance)) *
+                100;
+            }
+          } catch (calcError) {
+            console.error("Error calculating balance change:", calcError);
+            // calculatedChange remains 0
+          }
         }
 
         // Fetch pending transfers
@@ -114,6 +165,7 @@ export const useDashboard = (): UseDashboardResult => {
         setRecentTransactions(transactions);
         setPendingTransfers(transfersRes.transfers || []);
         setTotalBalance(calculatedBalance);
+        setBalanceChange(calculatedChange);
         setAccounts(allAccounts);
       } catch (err: unknown) {
         // Don't update error state if component is unmounted
@@ -150,6 +202,7 @@ export const useDashboard = (): UseDashboardResult => {
     isLoading,
     error,
     totalBalance,
+    balanceChange,
     recentTransactions,
     pendingTransfers,
     accounts,
