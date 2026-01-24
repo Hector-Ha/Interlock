@@ -32,7 +32,7 @@ export function BankCard({
   return (
     <div
       className={cn(
-        "relative w-full aspect-[1.6/1] rounded-2xl p-5 text-white shadow-xl overflow-hidden",
+        "relative w-full aspect-[1.586/1] rounded-xl p-4 text-white shadow-lg overflow-hidden",
         "ring-1 ring-white/10",
         cardVariants[variant],
         className,
@@ -62,7 +62,9 @@ export function BankCard({
 
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs opacity-90">
-            <span className="uppercase tracking-wider font-medium">{cardholderName}</span>
+            <span className="uppercase tracking-wider font-medium">
+              {cardholderName}
+            </span>
             <span className="font-medium">{expiration}</span>
           </div>
           <div className="flex items-center justify-between">

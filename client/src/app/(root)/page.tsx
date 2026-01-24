@@ -180,10 +180,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Recent Transactions */}
-            <TransactionsCard
-              transactions={recentTransactions}
-              banks={banks}
-            />
+            <TransactionsCard transactions={recentTransactions} banks={banks} />
           </div>
         )}
       </div>

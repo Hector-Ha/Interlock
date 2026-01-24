@@ -18,6 +18,7 @@ import {
   Shield,
   TrendingUp,
   ChevronRight,
+  LogOut,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -27,6 +28,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
 import { ScrollArea } from "@/components/ui/ScrollArea";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { BankCardStack } from "@/components/features/sidebar/BankCardStack";
 import { CategoryTransactionItem } from "@/components/features/sidebar/CategoryTransactionItem";
 import {
@@ -75,7 +77,7 @@ function getCategoryIcon(category: string): React.ReactNode {
 }
 
 export function RightSideBar({ className }: RightSideBarProps) {
-  const { user } = useAuthStore();
+  const { user, signOut } = useAuthStore();
   const { banks } = useBankStore();
   const { data, isLoading, timePeriod, setTimePeriod } =
     useTransactionsByCategory(banks);
@@ -89,8 +91,8 @@ export function RightSideBar({ className }: RightSideBarProps) {
   return (
     <aside
       className={cn(
-        "flex w-80 flex-col border-l border-[var(--color-gray-soft)] bg-white",
-        className
+        "flex w-96 flex-col border-l border-[var(--color-gray-soft)] bg-white",
+        className,
       )}
     >
       <ScrollArea className="flex-1">
@@ -102,7 +104,7 @@ export function RightSideBar({ className }: RightSideBarProps) {
           >
             {/* Gradient Header */}
             <div className="h-16 bg-gradient-to-br from-[var(--color-brand-main)] to-[var(--color-brand-hover)]" />
-            
+
             <div className="px-4 pb-4">
               {/* Avatar - overlapping header */}
               <div className="-mt-8 mb-3">
@@ -124,22 +126,28 @@ export function RightSideBar({ className }: RightSideBarProps) {
                 </p>
               </div>
 
-              {/* Security Badge */}
-              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[var(--color-gray-soft)]">
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-[var(--color-success-surface)]">
-                  <Shield className="h-3 w-3 text-[var(--color-success-main)]" />
-                  <span className="text-[10px] font-semibold text-[var(--color-success-main)] uppercase tracking-wider">
-                    Verified
-                  </span>
-                </div>
-                <Link
-                  href="/settings"
-                  className="ml-auto flex items-center gap-1 text-xs font-medium text-[var(--color-brand-main)] hover:text-[var(--color-brand-hover)] transition-colors"
-                >
-                  <User className="h-3 w-3" />
-                  Profile
-                  <ChevronRight className="h-3 w-3" />
+              {/* Footer Actions */}
+              <div className="flex items-center justify-between mt-3 pt-3 border-t border-[var(--color-gray-soft)]">
+                <Link href="/settings">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs font-medium text-[var(--color-brand-main)] hover:text-[var(--color-brand-main)] hover:bg-[var(--color-brand-surface)] gap-1.5"
+                  >
+                    <User className="h-3.5 w-3.5" />
+                    Profile
+                  </Button>
                 </Link>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => signOut()}
+                  className="h-7 px-2 text-xs font-medium text-[var(--color-error-main)] hover:text-[var(--color-error-hover)] hover:bg-[var(--color-error-surface)] gap-1.5"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  Sign Out
+                </Button>
               </div>
             </div>
           </Card>
@@ -153,12 +161,15 @@ export function RightSideBar({ className }: RightSideBarProps) {
                   My Banks
                 </h3>
               </div>
-              <Link
-                href="/banks"
-                className="flex items-center gap-1 text-xs font-medium text-[var(--color-brand-main)] hover:text-[var(--color-brand-hover)] transition-colors"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                Add
+              <Link href="/banks">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs font-medium text-[var(--color-brand-main)] hover:text-[var(--color-brand-main)] hover:bg-[var(--color-brand-surface)] gap-1"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add
+                </Button>
               </Link>
             </div>
 
@@ -205,6 +216,8 @@ export function RightSideBar({ className }: RightSideBarProps) {
                   value={timePeriod}
                   onChange={(value) => setTimePeriod(value as TimePeriod)}
                   placeholder="Period"
+                  triggerClassName="h-8 text-xs py-1.5 px-2.5 rounded-lg"
+                  itemClassName="text-xs py-2"
                 />
               </div>
             </div>
@@ -261,20 +274,26 @@ export function RightSideBar({ className }: RightSideBarProps) {
                         </div>
 
                         <div className="space-y-1">
-                          {bankData.categories.slice(0, 5).map((category, index) => (
-                            <CategoryTransactionItem
-                              key={`${bankData.bankId}-${category.category}`}
-                              index={bankIndex * 5 + index}
-                              icon={getCategoryIcon(category.category)}
-                              label={category.category}
-                              positiveAmount={
-                                category.income > 0 ? category.income : undefined
-                              }
-                              negativeAmount={
-                                category.expense > 0 ? category.expense : undefined
-                              }
-                            />
-                          ))}
+                          {bankData.categories
+                            .slice(0, 5)
+                            .map((category, index) => (
+                              <CategoryTransactionItem
+                                key={`${bankData.bankId}-${category.category}`}
+                                index={bankIndex * 5 + index}
+                                icon={getCategoryIcon(category.category)}
+                                label={category.category}
+                                positiveAmount={
+                                  category.income > 0
+                                    ? category.income
+                                    : undefined
+                                }
+                                negativeAmount={
+                                  category.expense > 0
+                                    ? category.expense
+                                    : undefined
+                                }
+                              />
+                            ))}
                         </div>
                       </div>
                     );

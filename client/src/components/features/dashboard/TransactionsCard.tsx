@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, ArrowDownLeft, ChevronRight, Search, Filter } from "lucide-react";
+import {
+  ArrowUpRight,
+  ArrowDownLeft,
+  ChevronRight,
+  Search,
+  Filter,
+} from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -27,18 +33,56 @@ function getInitials(name: string): string {
 
 function getStatusConfig(status: Transaction["status"]) {
   const configs = {
-    SUCCESS: { dot: "bg-[var(--color-success-main)]", text: "text-[var(--color-success-main)]", label: "Success" },
-    PENDING: { dot: "bg-[var(--color-warning-main)]", text: "text-[var(--color-warning-main)]", label: "Pending" },
-    PROCESSING: { dot: "bg-[var(--color-gray-main)]", text: "text-[var(--color-gray-main)]", label: "Processing" },
-    FAILED: { dot: "bg-[var(--color-error-main)]", text: "text-[var(--color-error-main)]", label: "Failed" },
-    DECLINED: { dot: "bg-[var(--color-error-main)]", text: "text-[var(--color-error-main)]", label: "Declined" },
-    RETURNED: { dot: "bg-[var(--color-error-main)]", text: "text-[var(--color-error-main)]", label: "Returned" },
-    CANCELLED: { dot: "bg-[var(--color-gray-main)]", text: "text-[var(--color-gray-main)]", label: "Cancelled" },
+    SUCCESS: {
+      dot: "bg-emerald-500",
+      text: "text-emerald-700",
+      bg: "bg-emerald-50",
+      label: "Success",
+    },
+    PENDING: {
+      dot: "bg-amber-500",
+      text: "text-amber-700",
+      bg: "bg-amber-50",
+      label: "Pending",
+    },
+    PROCESSING: {
+      dot: "bg-blue-500",
+      text: "text-blue-700",
+      bg: "bg-blue-50",
+      label: "Processing",
+    },
+    FAILED: {
+      dot: "bg-red-500",
+      text: "text-red-700",
+      bg: "bg-red-50",
+      label: "Failed",
+    },
+    DECLINED: {
+      dot: "bg-red-500",
+      text: "text-red-700",
+      bg: "bg-red-50",
+      label: "Declined",
+    },
+    RETURNED: {
+      dot: "bg-red-500",
+      text: "text-red-700",
+      bg: "bg-red-50",
+      label: "Returned",
+    },
+    CANCELLED: {
+      dot: "bg-gray-500",
+      text: "text-gray-700",
+      bg: "bg-gray-50",
+      label: "Cancelled",
+    },
   };
   return configs[status] || configs.CANCELLED;
 }
 
-export function TransactionsCard({ transactions, banks }: TransactionsCardProps) {
+export function TransactionsCard({
+  transactions,
+  banks,
+}: TransactionsCardProps) {
   const [selectedBankId, setSelectedBankId] = useState<string>("all");
 
   const filteredTransactions =
@@ -51,7 +95,9 @@ export function TransactionsCard({ transactions, banks }: TransactionsCardProps)
       {/* Header */}
       <CardHeader className="flex-row items-center justify-between p-5 sm:p-6 pb-4 border-b border-[var(--color-gray-soft)]">
         <div>
-          <CardTitle className="text-xl font-semibold">Recent Transactions</CardTitle>
+          <CardTitle className="text-xl font-semibold">
+            Recent Transactions
+          </CardTitle>
           <p className="text-sm text-[var(--color-gray-main)] mt-0.5">
             Track your spending and income
           </p>
@@ -96,9 +142,12 @@ export function TransactionsCard({ transactions, banks }: TransactionsCardProps)
             <div className="w-16 h-16 rounded-2xl bg-[var(--color-gray-surface)] flex items-center justify-center mb-4">
               <Search className="w-7 h-7 text-[var(--color-gray-disabled)]" />
             </div>
-            <p className="text-[var(--color-gray-text)] font-medium mb-1">No transactions yet</p>
+            <p className="text-[var(--color-gray-text)] font-medium mb-1">
+              No transactions yet
+            </p>
             <p className="text-sm text-[var(--color-gray-main)]">
-              Your transactions will appear here once you start using your accounts.
+              Your transactions will appear here once you start using your
+              accounts.
             </p>
           </div>
         ) : (
@@ -106,7 +155,9 @@ export function TransactionsCard({ transactions, banks }: TransactionsCardProps)
             {filteredTransactions.slice(0, 8).map((tx) => {
               const isDebit = tx.amount > 0;
               const statusConfig = getStatusConfig(tx.status);
-              const category = Array.isArray(tx.category) ? tx.category[0] : tx.category || "Other";
+              const category = Array.isArray(tx.category)
+                ? tx.category[0]
+                : tx.category || "Other";
 
               return (
                 <div
@@ -117,7 +168,9 @@ export function TransactionsCard({ transactions, banks }: TransactionsCardProps)
                   <div
                     className={cn(
                       "flex items-center justify-center w-11 h-11 rounded-xl shrink-0",
-                      isDebit ? "bg-[var(--color-error-surface)]" : "bg-[var(--color-success-surface)]"
+                      isDebit
+                        ? "bg-[var(--color-error-surface)]"
+                        : "bg-[var(--color-success-surface)]",
                     )}
                   >
                     {isDebit ? (
@@ -129,11 +182,29 @@ export function TransactionsCard({ transactions, banks }: TransactionsCardProps)
 
                   {/* Transaction Details */}
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-[var(--color-gray-text)] truncate">{tx.name}</p>
+                    <p className="font-medium text-[var(--color-gray-text)] truncate">
+                      {tx.name}
+                    </p>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className={cn("w-1.5 h-1.5 rounded-full", statusConfig.dot)} />
-                      <span className={cn("text-xs", statusConfig.text)}>{statusConfig.label}</span>
-                      <span className="text-xs text-[var(--color-gray-disabled)]">•</span>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "text-[10px] px-1.5 py-0 h-5 gap-1 border-0",
+                          statusConfig.bg,
+                          statusConfig.text,
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "w-1.5 h-1.5 rounded-full",
+                            statusConfig.dot,
+                          )}
+                        />
+                        {statusConfig.label}
+                      </Badge>
+                      <span className="text-xs text-[var(--color-gray-disabled)]">
+                        •
+                      </span>
                       <span className="text-xs text-[var(--color-gray-main)]">
                         {formatDayTime(tx.date)}
                       </span>
@@ -145,12 +216,17 @@ export function TransactionsCard({ transactions, banks }: TransactionsCardProps)
                     <span
                       className={cn(
                         "font-semibold tabular-nums",
-                        isDebit ? "text-[var(--color-error-main)]" : "text-[var(--color-success-main)]"
+                        isDebit
+                          ? "text-[var(--color-error-main)]"
+                          : "text-[var(--color-success-main)]",
                       )}
                     >
                       {isDebit ? "-" : "+"}${Math.abs(tx.amount).toFixed(2)}
                     </span>
-                    <Badge variant={getCategoryBadgeVariant(category)} className="text-[10px] px-2 py-0">
+                    <Badge
+                      variant={getCategoryBadgeVariant(category)}
+                      className="text-[10px] px-2 py-0"
+                    >
                       {category}
                     </Badge>
                   </div>

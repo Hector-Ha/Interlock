@@ -21,6 +21,8 @@ interface SelectProps {
   error?: string;
   disabled?: boolean;
   className?: string;
+  triggerClassName?: string;
+  itemClassName?: string;
 }
 
 export function Select({
@@ -32,6 +34,8 @@ export function Select({
   error,
   disabled = false,
   className,
+  triggerClassName,
+  itemClassName,
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -76,6 +80,7 @@ export function Select({
               ? "border-red-500 focus:ring-red-500"
               : "border-border focus:border-border",
             isOpen && "border-border ring-2 ring-ring ring-offset-2",
+            triggerClassName,
           )}
           disabled={disabled}
         >
@@ -86,7 +91,9 @@ export function Select({
             )}
           >
             {selectedOption?.icon && (
-              <span className="text-muted-foreground">{selectedOption.icon}</span>
+              <span className="text-muted-foreground">
+                {selectedOption.icon}
+              </span>
             )}
             {selectedOption ? selectedOption.label : placeholder}
           </span>
@@ -119,6 +126,7 @@ export function Select({
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:bg-muted focus-visible:bg-muted focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                     option.value === value && "bg-muted/50 font-medium",
+                    itemClassName,
                   )}
                 >
                   <div className="flex items-center gap-3">

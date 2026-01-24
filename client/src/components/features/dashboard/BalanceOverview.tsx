@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import CountUp from "react-countup";
-import { Shield, TrendingUp, Eye, EyeOff, Plus, ChevronRight } from "lucide-react";
+import {
+  Shield,
+  TrendingUp,
+  Eye,
+  EyeOff,
+  Plus,
+  ChevronRight,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Progress } from "@/components/ui/Progress";
@@ -22,7 +29,10 @@ export function BalanceOverview({
   onAddBank,
 }: BalanceOverviewProps) {
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
-  const maxBalance = Math.max(...accounts.map((a) => a.balance.current || 0), 1);
+  const maxBalance = Math.max(
+    ...accounts.map((a) => a.balance.current || 0),
+    1,
+  );
 
   return (
     <Card
@@ -33,8 +43,18 @@ export function BalanceOverview({
       <div className="absolute inset-0 opacity-[0.03]">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <pattern id="security-grid" width="32" height="32" patternUnits="userSpaceOnUse">
-              <path d="M0 16h32M16 0v32" stroke="white" strokeWidth="0.5" fill="none" />
+            <pattern
+              id="security-grid"
+              width="32"
+              height="32"
+              patternUnits="userSpaceOnUse"
+            >
+              <path
+                d="M0 16h32M16 0v32"
+                stroke="white"
+                strokeWidth="0.5"
+                fill="none"
+              />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#security-grid)" />
@@ -68,7 +88,11 @@ export function BalanceOverview({
             className="text-white/60 hover:text-white hover:bg-white/10"
             onClick={() => setIsBalanceVisible(!isBalanceVisible)}
           >
-            {isBalanceVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            {isBalanceVisible ? (
+              <Eye className="w-4 h-4" />
+            ) : (
+              <EyeOff className="w-4 h-4" />
+            )}
           </Button>
         </div>
 
@@ -118,7 +142,10 @@ export function BalanceOverview({
                         {account.name}
                       </span>
                       <span className="text-white font-medium text-sm tabular-nums">
-                        ${balance.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                        $
+                        {balance.toLocaleString("en-US", {
+                          minimumFractionDigits: 2,
+                        })}
                       </span>
                     </div>
                     <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">

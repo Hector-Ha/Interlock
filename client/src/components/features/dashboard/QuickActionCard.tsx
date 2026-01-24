@@ -66,7 +66,7 @@ export function QuickActionCard({
               "hover:shadow-lg hover:shadow-[var(--color-gray-main)]/5",
               "hover:-translate-y-0.5",
               styles.hoverBorder,
-            ]
+            ],
       )}
     >
       {/* Hover gradient */}
@@ -74,7 +74,7 @@ export function QuickActionCard({
         className={cn(
           "absolute inset-0 bg-gradient-to-br to-transparent opacity-0 transition-opacity duration-300",
           styles.gradientFrom,
-          !disabled && "group-hover:opacity-100"
+          !disabled && "group-hover:opacity-100",
         )}
       />
 
@@ -83,7 +83,7 @@ export function QuickActionCard({
           className={cn(
             "flex items-center justify-center w-12 h-12 rounded-xl transition-transform duration-300 shrink-0",
             styles.iconBg,
-            !disabled && "group-hover:scale-110"
+            !disabled && "group-hover:scale-110",
           )}
         >
           <span className={styles.iconColor}>{icon}</span>
@@ -92,17 +92,20 @@ export function QuickActionCard({
           <p
             className={cn(
               "font-semibold text-[var(--color-gray-text)] transition-colors",
-              !disabled && "group-hover:text-[var(--color-brand-main)]"
+              !disabled && "group-hover:text-[var(--color-brand-main)]",
             )}
           >
             {label}
           </p>
-          <p className="text-sm text-[var(--color-gray-main)] truncate">{description}</p>
+          <p className="text-sm text-[var(--color-gray-main)] truncate">
+            {description}
+          </p>
         </div>
         <ChevronRight
           className={cn(
             "w-5 h-5 text-[var(--color-gray-disabled)] transition-all duration-300 shrink-0",
-            !disabled && "group-hover:text-[var(--color-brand-main)] group-hover:translate-x-1"
+            !disabled &&
+              "group-hover:text-[var(--color-brand-main)] group-hover:translate-x-1",
           )}
         />
       </div>

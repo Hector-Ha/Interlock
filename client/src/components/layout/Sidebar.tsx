@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ArrowLeftToLine, ArrowRightFromLine } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth.store";
@@ -29,23 +29,6 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
         className,
       )}
     >
-      {/* Toggle Button - Integrated into sidebar edge */}
-      <div className="absolute -right-4 top-[92px] z-50">
-        <Button
-          variant="outline"
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="h-8 w-8 rounded-full p-0 bg-background border border-border shadow-sm hover:bg-muted transition-all duration-200"
-          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          <ChevronLeft
-            className={cn(
-              "h-4 w-4 text-muted-foreground transition-transform duration-300",
-              sidebarCollapsed && "rotate-180",
-            )}
-          />
-        </Button>
-      </div>
-
       {/* Header */}
       <div
         className={cn(
@@ -83,20 +66,45 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
       {/* Navigation */}
       <ScrollArea className="flex-1 px-3 py-4">
         <div className="space-y-4">
-          {/* Section Label */}
-          <AnimatePresence>
-            {!sidebarCollapsed && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground"
-              >
-                Menu
-              </motion.p>
+          {/* Section Label & Toggle */}
+          <div
+            className={cn(
+              "flex items-center mb-2 px-3",
+              sidebarCollapsed ? "justify-center" : "justify-between",
             )}
-          </AnimatePresence>
+          >
+            <AnimatePresence>
+              {!sidebarCollapsed && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+                >
+                  Menu
+                </motion.p>
+              )}
+            </AnimatePresence>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className={cn(
+                "h-8 w-8 p-1 text-[var(--color-brand-main)] hover:text-[var(--color-brand-main)] hover:bg-[var(--color-brand-surface)] transition-colors",
+                sidebarCollapsed ? "mx-auto" : "ml-auto",
+              )}
+              aria-label={
+                sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"
+              }
+            >
+              {sidebarCollapsed ? (
+                <ArrowRightFromLine className="h-4 w-4" />
+              ) : (
+                <ArrowLeftToLine className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
 
           {/* Nav Items */}
           <nav className="flex flex-col gap-1">
@@ -153,23 +161,7 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
               </AnimatePresence>
             </div>
 
-            {/* Settings Trigger */}
-            <AnimatePresence>
-              {!sidebarCollapsed && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.15 }}
-                  className="flex-shrink-0"
-                >
-                  <SettingsMenu
-                    onSignOut={() => {}}
-                    className="hover:bg-background/80"
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {/* Settings Trigger Removed */}
           </div>
         ) : (
           // Loading skeleton or fallback

@@ -51,7 +51,7 @@ export function NotificationBell() {
           "relative flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200",
           isOpen
             ? "bg-[var(--color-brand-surface)] text-[var(--color-brand-main)]"
-            : "hover:bg-[var(--color-gray-surface)] text-[var(--color-gray-main)]"
+            : "hover:bg-[var(--color-brand-surface)] text-[var(--color-brand-main)]",
         )}
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
       >
@@ -112,7 +112,8 @@ export function NotificationBell() {
                       onClick={() => handleNotificationClick(notification.id)}
                       className={cn(
                         "w-full text-left p-4 hover:bg-[var(--color-gray-surface)]/50 cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-brand-main)]",
-                        !notification.isRead && "bg-[var(--color-brand-surface)]/30"
+                        !notification.isRead &&
+                          "bg-[var(--color-brand-surface)]/30",
                       )}
                     >
                       <div className="flex items-start gap-3">
@@ -121,7 +122,7 @@ export function NotificationBell() {
                             <p
                               className={cn(
                                 "text-sm text-[var(--color-gray-text)] truncate",
-                                !notification.isRead && "font-semibold"
+                                !notification.isRead && "font-semibold",
                               )}
                             >
                               {notification.title}
