@@ -40,10 +40,7 @@ interface ServerTransaction {
   pending: boolean;
 }
 
-/**
- * Calculate date range based on time period.
- * Returns ISO 8601 datetime strings for API compatibility.
- */
+// Calculate date range based on time period.
 function getDateRange(period: TimePeriod): {
   startDate?: string;
   endDate?: string;
@@ -78,11 +75,7 @@ function getDateRange(period: TimePeriod): {
   }
 }
 
-/**
- * Group transactions by category and calculate income/expense.
- * Note: In Plaid, positive amounts = money leaving (expense),
- * negative amounts = money entering (income).
- */
+// Group transactions by category and calculate income/expense.
 function groupByCategory(transactions: ServerTransaction[]): CategorySummary[] {
   const categoryMap = new Map<string, { income: number; expense: number }>();
 
@@ -96,10 +89,6 @@ function groupByCategory(transactions: ServerTransaction[]): CategorySummary[] {
 
     const summary = categoryMap.get(category)!;
 
-    // The server stores Math.abs(amount), but we can infer from pending status
-    // Actually after reviewing sync logic: all amounts are stored as positive
-    // We'll treat all as expenses for now (most common case)
-    // A proper solution would track the original sign from Plaid
     summary.expense += Math.abs(tx.amount);
   }
 
@@ -113,10 +102,7 @@ function groupByCategory(transactions: ServerTransaction[]): CategorySummary[] {
     .sort((a, b) => b.expense + b.income - (a.expense + a.income));
 }
 
-/**
- * Hook to fetch and aggregate transactions by category for all banks.
- * Uses async-parallel pattern from best practices for concurrent fetching.
- */
+// Hook to fetch and aggregate transactions by category for all banks.
 export function useTransactionsByCategory(
   banks: Bank[],
 ): UseTransactionsByCategoryResult {
@@ -141,7 +127,7 @@ export function useTransactionsByCategory(
       const results = await Promise.all(
         banks.map(async (bank) => {
           try {
-            // Don't filter by status - let server return all, we'll filter client-side
+            // Let server return all, we'll filter client-side
             const response = await bankService.getTransactions(bank.id, {
               startDate,
               endDate,

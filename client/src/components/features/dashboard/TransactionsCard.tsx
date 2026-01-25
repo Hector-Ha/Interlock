@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/Avatar";
-import { cn, formatDayTime, getCategoryBadgeVariant } from "@/lib/utils";
+import { cn, formatDayTime, getCategoryBadgeVariant, formatCategory } from "@/lib/utils";
 import type { Transaction, Bank } from "@/types/bank";
 
 interface TransactionsCardProps {
@@ -233,7 +233,7 @@ export function TransactionsCard({
                       variant={getCategoryBadgeVariant(category)}
                       className="text-[10px] px-2 py-0"
                     >
-                      {category}
+                      {formatCategory(category)}
                     </Badge>
                   </div>
                 </div>

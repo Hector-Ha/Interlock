@@ -34,7 +34,19 @@ export const useBankStore = create<BankState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       const { banks } = await bankService.getBanks();
-      set({ banks, isLoading: false });
+
+      const banksWithAccounts = await Promise.all(
+        banks.map(async (bank) => {
+          try {
+            const { accounts } = await bankService.getAccounts(bank.id);
+            return { ...bank, accounts };
+          } catch {
+            return { ...bank, accounts: [] };
+          }
+        })
+      );
+
+      set({ banks: banksWithAccounts, isLoading: false });
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to fetch banks";

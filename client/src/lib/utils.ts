@@ -77,6 +77,11 @@ export function formatDayTime(date: Date | string): string {
   return `${dayName} ${time}`;
 }
 
+// Format category: replace underscores with spaces and uppercase
+export function formatCategory(category: string): string {
+  return category.replace(/_/g, " ").toUpperCase();
+}
+
 // Get category badge variant based on category name
 export function getCategoryBadgeVariant(
   category: string,

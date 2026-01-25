@@ -18,7 +18,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Spinner } from "@/components/ui/Spinner";
-import { cn, formatDate } from "@/lib/utils";
+import { cn, formatDate, formatCategory } from "@/lib/utils";
 
 interface Transaction {
   id: string;
@@ -199,7 +199,7 @@ export function TransactionTable({
                             {formatDate(tx.date)}
                           </span>
                           <span className="text-[var(--color-gray-disabled)]">•</span>
-                          <span className="text-xs text-[var(--color-gray-main)]">{category}</span>
+                          <span className="text-xs text-[var(--color-gray-main)]">{formatCategory(category)}</span>
                         </div>
                       </div>
                     </div>
@@ -211,7 +211,7 @@ export function TransactionTable({
                       <span className="text-[var(--color-gray-main)]">
                         {getCategoryIcon(category)}
                       </span>
-                      <span className="text-sm text-[var(--color-gray-main)]">{category}</span>
+                      <span className="text-sm text-[var(--color-gray-main)]">{formatCategory(category)}</span>
                     </div>
                   </td>
 

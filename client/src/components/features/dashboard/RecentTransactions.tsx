@@ -14,7 +14,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
-import { formatDayTime, getCategoryBadgeVariant, cn } from "@/lib/utils";
+import { formatDayTime, getCategoryBadgeVariant, cn, formatCategory } from "@/lib/utils";
 import type { Transaction, Bank } from "@/types/bank";
 
 interface RecentTransactionsProps {
@@ -293,7 +293,7 @@ export function RecentTransactions({
                           variant={getCategoryBadgeVariant(category)}
                           className="text-xs"
                         >
-                          {category}
+                          {formatCategory(category)}
                         </Badge>
                       </TableCell>
                     </TableRow>

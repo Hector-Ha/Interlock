@@ -4,3 +4,10 @@ export { AccountCard } from "./AccountCard";
 export { EmptyBanks } from "./EmptyBanks";
 export { AddBankModal } from "./AddBankModal";
 export { BanksSkeleton, BanksHeaderSkeleton, BankCardSkeleton } from "./BanksSkeleton";
+export {
+  BankDetailSkeleton,
+  HeroCardSkeleton,
+  AccountCardSkeleton,
+  TransactionRowSkeleton,
+  TransactionsSectionSkeleton,
+} from "./BankDetailSkeleton";

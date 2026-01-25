@@ -18,12 +18,12 @@ export default function BanksPage() {
 
   const totalAccounts = banks.reduce(
     (acc, bank) => acc + (bank.accounts?.length || 0),
-    0
+    0,
   );
 
   if (isLoading) {
     return (
-      <section className="min-h-screen bg-[var(--color-gray-surface)]">
+      <section className="min-h-screen bg-muted/30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
           <BanksSkeleton />
         </div>
@@ -32,7 +32,7 @@ export default function BanksPage() {
   }
 
   return (
-    <section className="min-h-screen bg-[var(--color-gray-surface)]">
+    <section className="min-h-screen bg-muted/30">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         <div className="space-y-8">
           {/* Header with Stats */}
@@ -46,7 +46,7 @@ export default function BanksPage() {
           {banks.length === 0 ? (
             <EmptyBanks onAddBank={() => setShowAddModal(true)} />
           ) : (
-            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {banks.map((bank, index) => (
                 <BankCard key={bank.id} bank={bank} index={index} />
               ))}

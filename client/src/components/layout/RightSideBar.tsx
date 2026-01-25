@@ -153,7 +153,10 @@ export function RightSideBar({ className }: RightSideBarProps) {
           </Card>
 
           {/* My Banks Section */}
-          <Card padding="none" className="border-[var(--color-gray-soft)]">
+          <Card
+            padding="none"
+            className="border-[var(--color-gray-soft)] overflow-hidden"
+          >
             <div className="flex items-center justify-between p-4 border-b border-[var(--color-gray-soft)]">
               <div className="flex items-center gap-2">
                 <Building2 className="h-4 w-4 text-[var(--color-brand-main)]" />

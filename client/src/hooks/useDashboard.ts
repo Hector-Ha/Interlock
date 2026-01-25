@@ -45,10 +45,7 @@ export const useDashboard = (): UseDashboardResult => {
     }
   }, []);
 
-  /**
-   * Loads dashboard data with support for cleanup to prevent race conditions.
-   * @param shouldIgnore - Callback to check if the request should be ignored (component unmounted)
-   */
+  // Loads dashboard data with support for cleanup to prevent race conditions.
   const loadDashboardData = useCallback(
     async (shouldIgnore?: () => boolean) => {
       try {
@@ -106,7 +103,7 @@ export const useDashboard = (): UseDashboardResult => {
 
           // Calculate Percentage Change vs 30 days ago
           try {
-            // 1. Fetch transactions for the last 30 days for all banks
+            // Fetch transactions for the last 30 days for all banks
             const thirtyDaysAgo = new Date();
             thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
             const startDate = thirtyDaysAgo.toISOString().split("T")[0];
@@ -123,7 +120,7 @@ export const useDashboard = (): UseDashboardResult => {
             // Use allSettled to avoid failing the entire dashboard if one history fetch fails
             const historyResults = await Promise.allSettled(historyPromises);
 
-            let totalNetFlow = 0; // Sum of all transaction amounts (Positive = Expense, Negative = Income)
+            let totalNetFlow = 0; // Sum of all transaction amounts
 
             historyResults.forEach((result) => {
               if (result.status === "fulfilled") {
@@ -138,7 +135,7 @@ export const useDashboard = (): UseDashboardResult => {
               }
             });
 
-            // Previous Balance = Current Balance + Net Flow (since positive amount is money OUT, we add it back to get previous state)
+            // Previous Balance = Current Balance + Net Flow
             const previousBalance = calculatedBalance + totalNetFlow;
 
             if (previousBalance !== 0) {
@@ -187,12 +184,11 @@ export const useDashboard = (): UseDashboardResult => {
 
   useEffect(() => {
     // Flag to track if component is still mounted (prevents race conditions)
-    // Note: For even more robustness, AbortController could be used to cancel pending requests
     let ignore = false;
 
     loadDashboardData(() => ignore);
 
-    // Cleanup function: Mark as ignored to prevent state updates after unmount
+    // Mark as ignored to prevent state updates after unmount
     return () => {
       ignore = true;
     };

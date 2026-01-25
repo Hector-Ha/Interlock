@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { cn } from "@/lib/utils";
-import { BankCard } from "./BankCard";
+import { BankCard } from "@/components/features/banks/BankCard";
 import type { Bank } from "@/types/bank";
 
 export interface BankCardStackProps {
@@ -11,10 +11,7 @@ export interface BankCardStackProps {
   className?: string;
 }
 
-/**
- * Carousel visualization for bank cards.
- * Shows all cards, one at a time, with swipe support and dot indicators.
- */
+// Carousel visualization for bank cards.
 export function BankCardStack({ banks, className }: BankCardStackProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false });
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -56,34 +53,16 @@ export function BankCardStack({ banks, className }: BankCardStackProps) {
     );
   }
 
-  // Get cardholder name from bank data or fallback
-  const getCardholderName = (bank: Bank) => {
-    // Use institution name as a display name fallback
-    return bank.institutionName.toUpperCase();
-  };
-
-  // Generate masked card number from account mask or default
-  const getMaskedNumber = (bank: Bank) => {
-    const mask = bank.accounts?.[0]?.mask || "••••";
-    return `•••• •••• •••• ${mask}`;
-  };
-
   return (
     <div className={cn("relative w-full", className)}>
-      <div className="overflow-hidden" ref={emblaRef}>
+      <div className="" ref={emblaRef}>
         <div className="flex touch-pan-y touch-pinch-zoom -ml-4">
           {banks.map((bank, index) => (
             <div
               key={bank.id}
               className="flex-[0_0_100%] min-w-0 pl-4 relative"
             >
-              <BankCard
-                bankName={bank.institutionName}
-                cardholderName={getCardholderName(bank)}
-                maskedNumber={getMaskedNumber(bank)}
-                expiration="12/26"
-                variant={index % 2 === 0 ? "blue" : "pink"}
-              />
+              <BankCard bank={bank} index={index} compact={true} />
             </div>
           ))}
         </div>

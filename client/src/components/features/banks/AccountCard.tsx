@@ -1,83 +1,103 @@
 "use client";
 
-import { CreditCard, TrendingUp, ArrowUpRight } from "lucide-react";
+import { Wallet, PiggyBank, CreditCard, Landmark } from "lucide-react";
 import type { Account } from "@/types/bank";
 import { formatCurrency, cn } from "@/lib/utils";
 import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 
 interface AccountCardProps {
   account: Account;
   bankId: string;
 }
 
+const accountTypeConfig: Record<
+  string,
+  { icon: React.ElementType; bgColor: string; iconColor: string }
+> = {
+  checking: {
+    icon: Wallet,
+    bgColor: "bg-[var(--color-brand-surface)]",
+    iconColor: "text-[var(--color-brand-main)]",
+  },
+  savings: {
+    icon: PiggyBank,
+    bgColor: "bg-[var(--color-success-surface)]",
+    iconColor: "text-[var(--color-success-main)]",
+  },
+  credit: {
+    icon: CreditCard,
+    bgColor: "bg-[var(--color-warning-surface)]",
+    iconColor: "text-[var(--color-warning-main)]",
+  },
+  default: {
+    icon: Landmark,
+    bgColor: "bg-[var(--color-gray-surface)]",
+    iconColor: "text-[var(--color-gray-main)]",
+  },
+};
+
+function getAccountConfig(subtype: string | undefined, type: string | undefined) {
+  const key = (subtype || type || "default").toLowerCase();
+  return accountTypeConfig[key] || accountTypeConfig.default;
+}
+
 export function AccountCard({ account }: AccountCardProps) {
   const balance = account.balance.current || 0;
   const available = account.balance.available;
   const isPositive = balance >= 0;
+  const config = getAccountConfig(account.subtype, account.type);
+  const Icon = config.icon;
 
   return (
     <Card
       padding="none"
-      className="group relative overflow-hidden hover:shadow-lg hover:shadow-[var(--color-gray-main)]/5 transition-all duration-300 hover:-translate-y-0.5"
+      className="hover:shadow-md transition-shadow duration-200"
     >
-      {/* Hover Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-brand-surface)]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="p-4">
+        <div className="flex items-center gap-3">
+          {/* Icon */}
+          <div
+            className={cn(
+              "flex items-center justify-center w-10 h-10 rounded-xl shrink-0",
+              config.bgColor
+            )}
+          >
+            <Icon className={cn("h-5 w-5", config.iconColor)} aria-hidden="true" />
+          </div>
 
-      <div className="relative p-5">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-[var(--color-brand-surface)] group-hover:scale-110 transition-transform duration-300">
-              <CreditCard className="h-5 w-5 text-[var(--color-brand-main)]" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="font-semibold text-[var(--color-gray-text)] truncate group-hover:text-[var(--color-brand-main)] transition-colors">
+          {/* Account Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="font-medium text-sm text-[var(--color-gray-text)] truncate">
                 {account.name}
               </h3>
-              <p className="text-sm text-[var(--color-gray-main)]">
-                •••• {account.mask}
-              </p>
-            </div>
-          </div>
-          <Badge
-            variant="outline"
-            className="capitalize text-[10px] px-2 border-[var(--color-gray-disabled)] text-[var(--color-gray-main)]"
-          >
-            {account.subtype || account.type}
-          </Badge>
-        </div>
-
-        {/* Balance Section */}
-        <div className="space-y-3">
-          <div>
-            <p className="text-xs text-[var(--color-gray-main)] uppercase tracking-wider mb-1">
-              Current Balance
-            </p>
-            <div className="flex items-baseline gap-2">
-              <p className={cn(
-                "text-2xl font-bold tabular-nums",
-                isPositive ? "text-[var(--color-gray-text)]" : "text-[var(--color-error-main)]"
-              )}>
-                {formatCurrency(balance)}
-              </p>
-              {isPositive && (
-                <span className="flex items-center text-[var(--color-success-main)] text-xs font-medium">
-                  <TrendingUp className="w-3 h-3 mr-0.5" />
-                  Active
-                </span>
-              )}
-            </div>
-          </div>
-
-          {available !== null && available !== undefined && (
-            <div className="flex items-center justify-between pt-3 border-t border-[var(--color-gray-soft)]">
-              <span className="text-xs text-[var(--color-gray-main)]">Available</span>
-              <span className="text-sm font-medium text-[var(--color-gray-text)] tabular-nums">
-                {formatCurrency(available)}
+              <span className="text-[10px] font-medium uppercase tracking-wider text-[var(--color-gray-main)] bg-[var(--color-gray-surface)] px-1.5 py-0.5 rounded shrink-0">
+                {account.subtype || account.type}
               </span>
             </div>
-          )}
+            <p className="text-xs text-[var(--color-gray-main)] font-mono">
+              •••• {account.mask}
+            </p>
+          </div>
+
+          {/* Balance */}
+          <div className="text-right shrink-0">
+            <p
+              className={cn(
+                "font-semibold tabular-nums",
+                isPositive
+                  ? "text-[var(--color-gray-text)]"
+                  : "text-[var(--color-error-main)]"
+              )}
+            >
+              {formatCurrency(balance)}
+            </p>
+            {available !== null && available !== undefined && (
+              <p className="text-xs text-[var(--color-gray-main)] tabular-nums">
+                {formatCurrency(available)} avail.
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </Card>

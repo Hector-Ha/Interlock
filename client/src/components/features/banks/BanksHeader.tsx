@@ -10,7 +10,11 @@ interface BanksHeaderProps {
   onAddBank: () => void;
 }
 
-export function BanksHeader({ totalBanks, totalAccounts, onAddBank }: BanksHeaderProps) {
+export function BanksHeader({
+  totalBanks,
+  totalAccounts,
+  onAddBank,
+}: BanksHeaderProps) {
   return (
     <div className="space-y-6">
       {/* Title Row */}
@@ -34,7 +38,7 @@ export function BanksHeader({ totalBanks, totalAccounts, onAddBank }: BanksHeade
 
       {/* Stats Cards */}
       {totalBanks > 0 && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <Card
             padding="none"
             className="relative overflow-hidden p-5 border-[var(--color-brand-soft)]"
@@ -70,28 +74,6 @@ export function BanksHeader({ totalBanks, totalAccounts, onAddBank }: BanksHeade
                 </p>
                 <p className="text-sm text-[var(--color-gray-main)]">
                   {totalAccounts === 1 ? "Account" : "Accounts"}
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card
-            padding="none"
-            className="relative overflow-hidden p-5 border-[var(--color-gray-soft)] col-span-2 lg:col-span-2"
-          >
-            <div className="relative flex items-center gap-4">
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-[var(--color-gray-surface)]">
-                <Shield className="h-6 w-6 text-[var(--color-success-main)]" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="font-semibold text-[var(--color-gray-text)]">
-                    Bank-Grade Security
-                  </p>
-                  <span className="w-2 h-2 rounded-full bg-[var(--color-success-main)] animate-pulse" />
-                </div>
-                <p className="text-sm text-[var(--color-gray-main)]">
-                  256-bit encryption • Read-only access • SOC 2 certified
                 </p>
               </div>
             </div>
