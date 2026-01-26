@@ -3,7 +3,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { transferService } from "@/services/transfer.service";
-import type { Transfer, TransferDetails, TransferFilters } from "@/types/transfer";
+import type {
+  Transfer,
+  TransferDetails,
+  TransferFilters,
+} from "@/types/transfer";
 import { Card } from "@/components/ui/Card";
 import { TransfersHeader } from "@/components/features/transfers/TransfersHeader";
 import { TransferTypeCard } from "@/components/features/transfers/TransferTypeCard";
@@ -16,6 +20,7 @@ import { TransfersPageSkeleton } from "@/components/features/transfers/Transfers
 import { useToast } from "@/stores/ui.store";
 import { useTransferPolling } from "@/hooks/useTransferPolling";
 import { useRefresh } from "@/hooks/useRefresh";
+import { useDebounce } from "@/hooks/useDebounce";
 
 type TransferType = "internal" | "p2p";
 
@@ -26,14 +31,15 @@ export default function TransfersPage() {
 
   const typeParam = searchParams.get("type");
   const [transferType, setTransferType] = useState<TransferType>(
-    typeParam === "p2p" ? "p2p" : "internal"
+    typeParam === "p2p" ? "p2p" : "internal",
   );
 
   const [transfers, setTransfers] = useState<Transfer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<TransferFilters>({});
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedTransfer, setSelectedTransfer] = useState<TransferDetails | null>(null);
+  const [selectedTransfer, setSelectedTransfer] =
+    useState<TransferDetails | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const [pagination, setPagination] = useState({
     total: 0,
@@ -41,6 +47,13 @@ export default function TransfersPage() {
     offset: 0,
     limit: 10,
   });
+
+  // Independent state for stats
+  const [pendingCount, setPendingCount] = useState(0);
+
+  // Search debounce state
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 300);
 
   useEffect(() => {
     const newType = searchParams.get("type");
@@ -51,6 +64,27 @@ export default function TransfersPage() {
     }
   }, [searchParams]);
 
+  // Sync debounced search to filters
+  useEffect(() => {
+    setFilters((prev) => {
+      if (prev.search === debouncedSearch) return prev;
+      return { ...prev, search: debouncedSearch };
+    });
+  }, [debouncedSearch]);
+
+  // Fetch specific stats independent of filters
+  const fetchStats = useCallback(async () => {
+    try {
+      const response = await transferService.getTransfers({
+        status: "PENDING",
+        limit: 1, // Minimize payload
+      });
+      setPendingCount(response.pagination.total);
+    } catch (error) {
+      console.error("Failed to fetch transfer stats", error);
+    }
+  }, []);
+
   const handleTabChange = (type: TransferType) => {
     setTransferType(type);
     const params = new URLSearchParams(searchParams.toString());
@@ -59,9 +93,12 @@ export default function TransfersPage() {
     } else {
       params.delete("type");
     }
-    router.replace(`/transfers${params.toString() ? `?${params.toString()}` : ""}`, {
-      scroll: false,
-    });
+    router.replace(
+      `/transfers${params.toString() ? `?${params.toString()}` : ""}`,
+      {
+        scroll: false,
+      },
+    );
   };
 
   const loadTransfers = useCallback(
@@ -69,6 +106,7 @@ export default function TransfersPage() {
       setIsLoading(true);
       try {
         const activeFilters = currentFilters || filters;
+        // Ensure we use the debounced search from filters, or override if passed explicitly
         const response = await transferService.getTransfers({
           ...activeFilters,
           limit: pagination.limit,
@@ -82,25 +120,41 @@ export default function TransfersPage() {
         setIsLoading(false);
       }
     },
-    [filters, pagination.limit]
+    [filters, pagination.limit],
   );
 
   useEffect(() => {
     loadTransfers();
   }, [loadTransfers]);
 
+  // Initial stats fetch
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
   const { isRefreshing, refresh } = useRefresh(async () => {
-    await loadTransfers(filters, 0);
+    await Promise.all([loadTransfers(filters, 0), fetchStats()]);
   });
 
   useTransferPolling(transfers, {
     enabled: true,
-    onStatusChange: () => loadTransfers(),
+    onStatusChange: () => {
+      loadTransfers();
+      fetchStats();
+    },
   });
 
   const handleApplyFilters = (newFilters: TransferFilters) => {
-    setFilters(newFilters);
-    loadTransfers(newFilters, 0);
+    const mergedFilters = {
+      ...newFilters,
+      search: filters.search, // Preserve current search (debounced)
+      sortBy: filters.sortBy,
+    };
+    setFilters(mergedFilters);
+    // loadTransfers will be triggered by useEffect on filters change
+    // But if we want immediate feedback for non-search filters:
+    // Actually, setFilters triggers re-render -> new filters -> useEffect triggers loadTransfers.
+    // That's fine.
   };
 
   const handlePageChange = (newOffset: number) => {
@@ -121,13 +175,28 @@ export default function TransfersPage() {
     await transferService.cancelTransfer(transferId);
     toast.success("Transfer cancelled successfully");
     loadTransfers();
+    fetchStats();
   };
 
   const handleTransferSuccess = () => {
     loadTransfers(filters, 0);
+    fetchStats();
   };
 
-  const pendingCount = transfers.filter((t) => t.status === "PENDING").length;
+  const handleFilterChange = (updates: Partial<TransferFilters>) => {
+    if ("search" in updates) {
+      setSearchQuery(updates.search || "");
+      // Don't update filters immediately; useEffect will handle it
+    } else {
+      setFilters((prev) => ({ ...prev, ...updates }));
+    }
+  };
+
+  // Combine filters with immediate search query for display
+  const displayFilters = {
+    ...filters,
+    search: searchQuery,
+  };
 
   if (isLoading && transfers.length === 0) {
     return <TransfersPageSkeleton />;
@@ -146,11 +215,14 @@ export default function TransfersPage() {
           />
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             {/* Left Column: Transfer Form */}
-            <div className="space-y-4">
-              {/* Transfer Type Selector */}
-              <div className="grid grid-cols-2 gap-3">
+            <Card
+              padding="none"
+              className="overflow-hidden border-[var(--color-gray-soft)] h-fit"
+            >
+              {/* Transfer Type Tabs */}
+              <div className="flex border-b border-[var(--color-gray-soft)]">
                 <TransferTypeCard
                   type="internal"
                   isActive={transferType === "internal"}
@@ -164,20 +236,28 @@ export default function TransfersPage() {
               </div>
 
               {/* Transfer Form */}
-              <Card padding="none" className="overflow-hidden border-[var(--color-gray-soft)]">
-                {transferType === "internal" ? (
-                  <TransferForm onSuccess={handleTransferSuccess} isEmbedded className="p-6" />
-                ) : (
-                  <P2PTransferForm onSuccess={handleTransferSuccess} isEmbedded className="p-6" />
-                )}
-              </Card>
-            </div>
+              {transferType === "internal" ? (
+                <TransferForm
+                  onSuccess={handleTransferSuccess}
+                  isEmbedded
+                  className="p-6"
+                />
+              ) : (
+                <P2PTransferForm
+                  onSuccess={handleTransferSuccess}
+                  isEmbedded
+                  className="p-6"
+                />
+              )}
+            </Card>
 
             {/* Right Column: Transfer History */}
             <TransferHistoryCard
               transfers={transfers}
               isLoading={isLoading}
               pagination={pagination}
+              filters={displayFilters}
+              onFilterChange={handleFilterChange}
               onTransferClick={handleTransferClick}
               onPageChange={handlePageChange}
             />

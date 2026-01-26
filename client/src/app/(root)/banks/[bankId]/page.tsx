@@ -105,10 +105,15 @@ export default function BankDetailsPage() {
     });
   }, [transactions, searchQuery, dateFilter]);
 
-  const totalPages = Math.ceil(filteredTransactions.length / TRANSACTIONS_PER_PAGE);
+  const totalPages = Math.ceil(
+    filteredTransactions.length / TRANSACTIONS_PER_PAGE,
+  );
   const paginatedTransactions = useMemo(() => {
     const startIndex = (currentPage - 1) * TRANSACTIONS_PER_PAGE;
-    return filteredTransactions.slice(startIndex, startIndex + TRANSACTIONS_PER_PAGE);
+    return filteredTransactions.slice(
+      startIndex,
+      startIndex + TRANSACTIONS_PER_PAGE,
+    );
   }, [filteredTransactions, currentPage]);
 
   useEffect(() => {
@@ -408,7 +413,7 @@ export default function BankDetailsPage() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     startIcon={<Search className="w-4 h-4" />}
-                    className="h-8 text-sm"
+                    className="h-9 text-sm"
                     containerClassName="w-full"
                   />
                 </div>
@@ -418,8 +423,8 @@ export default function BankDetailsPage() {
                     value={dateFilter}
                     onChange={(value) => setDateFilter(value)}
                     placeholder="Period"
-                    triggerClassName="h-8 text-xs py-1.5 px-2.5 rounded-lg"
-                    itemClassName="text-xs py-2"
+                    triggerClassName="h-9 text-sm"
+                    itemClassName="text-sm py-2"
                   />
                 </div>
               </div>

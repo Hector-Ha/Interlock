@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { Search, User, AlertCircle, Loader2 } from "lucide-react";
+import { User, AlertCircle, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui";
 import { p2pService } from "@/services/p2p.service";
 import type { Recipient } from "@/types/p2p";
@@ -53,24 +53,24 @@ export function RecipientSearch({ onSelect, className }: RecipientSearchProps) {
 
   return (
     <div className={cn("space-y-3", className)}>
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search by email or phone…"
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            search(e.target.value);
-          }}
-          className="pl-10 bg-background border-border focus:border-brand-main focus:ring-brand-main/20"
-          autoComplete="off"
-          spellCheck={false}
-          aria-label="Search for recipient by email or phone"
-        />
-        {isSearching && (
-          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-brand-main" />
-        )}
-      </div>
+      <Input
+        placeholder="Search by email or phone…"
+        value={query}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          search(e.target.value);
+        }}
+        startIcon={<User className="h-4 w-4" />}
+        endIcon={
+          isSearching ? (
+            <Loader2 className="h-4 w-4 animate-spin text-brand-main" />
+          ) : undefined
+        }
+        className="bg-background border-border focus:border-brand-main focus:ring-brand-main/20"
+        autoComplete="off"
+        spellCheck={false}
+        aria-label="Search for recipient by email or phone"
+      />
 
       {error && (
         <div className="text-sm text-error-main flex items-center gap-1.5 p-2 bg-error-surface rounded-lg">

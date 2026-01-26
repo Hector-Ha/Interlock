@@ -38,7 +38,12 @@ export function EmptyBanks({ onAddBank }: EmptyBanksProps) {
         <div className="absolute inset-0 opacity-[0.03]">
           <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <pattern id="empty-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <pattern
+                id="empty-grid"
+                width="40"
+                height="40"
+                patternUnits="userSpaceOnUse"
+              >
                 <circle cx="20" cy="20" r="1" fill="white" />
               </pattern>
             </defs>
@@ -59,8 +64,8 @@ export function EmptyBanks({ onAddBank }: EmptyBanksProps) {
             Connect Your First Bank
           </h2>
           <p className="text-white/60 text-lg max-w-md mx-auto mb-8 leading-relaxed">
-            Link your bank account to start tracking expenses, managing transfers, and taking
-            control of your finances.
+            Link your bank account to start tracking expenses, managing
+            transfers, and taking control of your finances.
           </p>
 
           <Button
@@ -79,7 +84,7 @@ export function EmptyBanks({ onAddBank }: EmptyBanksProps) {
         {securityFeatures.map((feature) => (
           <Card
             key={feature.title}
-            className="text-center py-6 px-4 border-[var(--color-gray-soft)] hover:border-[var(--color-brand-disabled)] hover:shadow-lg transition-all duration-300"
+            className="text-center py-6 px-4 border-[var(--color-gray-soft)] transition-all duration-300"
           >
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[var(--color-brand-surface)] mb-4">
               <feature.icon className="w-6 h-6 text-[var(--color-brand-main)]" />
@@ -87,7 +92,9 @@ export function EmptyBanks({ onAddBank }: EmptyBanksProps) {
             <h3 className="font-semibold text-[var(--color-gray-text)] mb-1">
               {feature.title}
             </h3>
-            <p className="text-sm text-[var(--color-gray-main)]">{feature.description}</p>
+            <p className="text-sm text-[var(--color-gray-main)]">
+              {feature.description}
+            </p>
           </Card>
         ))}
       </div>

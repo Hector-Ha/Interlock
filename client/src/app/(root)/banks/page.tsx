@@ -23,7 +23,7 @@ export default function BanksPage() {
 
   if (isLoading) {
     return (
-      <section className="min-h-screen bg-muted/30">
+      <section className="min-h-screen bg-[var(--color-gray-surface)]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
           <BanksSkeleton />
         </div>
@@ -32,7 +32,7 @@ export default function BanksPage() {
   }
 
   return (
-    <section className="min-h-screen bg-muted/30">
+    <section className="min-h-screen bg-[var(--color-gray-surface)]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         <div className="space-y-8">
           {/* Header with Stats */}

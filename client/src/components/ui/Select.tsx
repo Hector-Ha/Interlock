@@ -73,13 +73,13 @@ export function Select({
           type="button"
           onClick={() => !disabled && setIsOpen(!isOpen)}
           className={cn(
-            "flex h-12 w-full items-center justify-between rounded-xl border bg-card px-3 py-2 text-sm ring-offset-white transition-all",
-            "hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+            "flex h-10 w-full items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background transition-colors",
+            "hover:bg-muted/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             disabled && "cursor-not-allowed opacity-50",
             error
-              ? "border-red-500 focus:ring-red-500"
-              : "border-border focus:border-border",
-            isOpen && "border-border ring-2 ring-ring ring-offset-2",
+              ? "border-destructive focus-visible:ring-destructive"
+              : "border-input",
+            isOpen && "ring-2 ring-ring ring-offset-2",
             triggerClassName,
           )}
           disabled={disabled}
@@ -106,7 +106,7 @@ export function Select({
         </button>
 
         {isOpen && (
-          <div className="absolute z-50 mt-2 max-h-60 w-full overflow-auto rounded-xl border border-border bg-card p-1 shadow-lg animate-in fade-in-0 zoom-in-95">
+          <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-input bg-popover p-1 shadow-md animate-in fade-in-0 zoom-in-95">
             {options.length === 0 ? (
               <div className="p-2 text-center text-sm text-muted-foreground">
                 No options available
@@ -121,11 +121,11 @@ export function Select({
                   role="option"
                   aria-selected={option.value === value}
                   className={cn(
-                    "relative flex w-full cursor-pointer select-none items-center rounded-lg py-2.5 pl-2 pr-8 text-sm outline-none transition-colors text-left",
+                    "relative flex w-full cursor-pointer select-none items-center rounded-sm py-2 pl-2 pr-8 text-sm outline-none transition-colors text-left",
                     option.disabled
                       ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-muted focus-visible:bg-muted focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
-                    option.value === value && "bg-muted/50 font-medium",
+                      : "hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent",
+                    option.value === value && "bg-accent/50 font-medium",
                     itemClassName,
                   )}
                 >
