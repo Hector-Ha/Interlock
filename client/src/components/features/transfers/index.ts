@@ -5,5 +5,12 @@ export { TransferForm } from "./TransferForm";
 export { TransferHistoryCard } from "./TransferHistoryCard";
 export { TransferRow } from "./TransferRow";
 export { TransfersHeader } from "./TransfersHeader";
-export { TransferRowSkeleton, TransferFormSkeleton, TransfersPageSkeleton } from "./TransfersSkeleton";
 export { TransferTypeCard } from "./TransferTypeCard";
+export {
+  TransferRowSkeleton,
+  TransferFormSkeleton,
+  TransfersHeaderSkeleton,
+  TransferTypeCardSkeleton,
+  TransferHistoryCardSkeleton,
+  TransfersPageSkeleton,
+} from "./TransfersSkeleton";

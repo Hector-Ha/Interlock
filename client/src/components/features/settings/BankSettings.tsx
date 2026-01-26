@@ -7,10 +7,9 @@ import {
   ExternalLink,
   RefreshCw,
   Plus,
-  CheckCircle2,
   AlertTriangle,
   ChevronRight,
-  Shield,
+  CheckCircle2,
 } from "lucide-react";
 import { useBankStore } from "@/stores/bank.store";
 import { Card } from "@/components/ui/Card";
@@ -37,84 +36,39 @@ export function BankSettings() {
 
   return (
     <div className="space-y-6">
-      {/* Bank Overview Card */}
-      <Card
-        padding="none"
-        className="relative overflow-hidden bg-gradient-to-br from-[var(--color-gray-text)] via-[#2a2a35] to-[var(--color-brand-text)]"
-      >
-        {/* Pattern Overlay */}
-        <div className="absolute inset-0 opacity-[0.03]">
-          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern
-                id="bank-grid"
-                width="32"
-                height="32"
-                patternUnits="userSpaceOnUse"
-              >
-                <path
-                  d="M0 16h32M16 0v32"
-                  stroke="white"
-                  strokeWidth="0.5"
-                  fill="none"
-                />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#bank-grid)" />
-          </svg>
+      {/* Bank Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-[var(--color-gray-text)]">
+            Connected Banks
+          </h2>
+          <p className="text-sm text-[var(--color-gray-main)] mt-0.5">
+            {banks.length === 0
+              ? "No banks connected yet"
+              : `${banks.length} bank${banks.length !== 1 ? "s" : ""} linked`}
+            {activeBanks > 0 && (
+              <span className="text-[var(--color-success-main)]">
+                {" "}
+                · {activeBanks} active
+              </span>
+            )}
+            {needsAttention > 0 && (
+              <span className="text-[var(--color-warning-main)]">
+                {" "}
+                · {needsAttention} needs attention
+              </span>
+            )}
+          </p>
         </div>
-
-        {/* Gradient Orbs */}
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-[var(--color-brand-main)] rounded-full blur-[100px] opacity-20" />
-        <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-[var(--color-success-main)] rounded-full blur-[120px] opacity-10" />
-
-        <div className="relative p-6 sm:p-8">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-sm">
-                <Building2 className="h-7 w-7 text-[var(--color-brand-main)]" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-white">Connected Banks</h2>
-                <p className="text-white/60 text-sm mt-0.5">
-                  Manage your linked bank accounts
-                </p>
-                <div className="flex items-center gap-3 mt-3">
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--color-success-main)]/20">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-[var(--color-success-main)]" />
-                    <span className="text-xs text-[var(--color-success-main)] font-medium">
-                      {activeBanks} Active
-                    </span>
-                  </div>
-                  {needsAttention > 0 && (
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--color-warning-main)]/20">
-                      <AlertTriangle className="h-3.5 w-3.5 text-[var(--color-warning-main)]" />
-                      <span className="text-xs text-[var(--color-warning-main)] font-medium">
-                        {needsAttention} Need Attention
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10">
-                    <Shield className="h-3.5 w-3.5 text-white/70" />
-                    <span className="text-xs text-white/70 font-medium">
-                      Plaid Secured
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/10 gap-1.5"
-              onClick={() => setIsAddBankOpen(true)}
-            >
-              <Plus className="w-4 h-4" />
-              Add Bank
-            </Button>
-          </div>
-        </div>
-      </Card>
+        <Button
+          size="sm"
+          onClick={() => setIsAddBankOpen(true)}
+          className="bg-[var(--color-brand-main)] hover:bg-[var(--color-brand-hover)] text-white"
+        >
+          <Plus className="w-4 h-4 mr-1.5" />
+          Add Bank
+        </Button>
+      </div>
 
       {/* Bank List Card */}
       <Card padding="none" className="border-[var(--color-gray-soft)]">
@@ -162,9 +116,9 @@ export function BankSettings() {
               </Button>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="flex flex-col gap-3">
               {banks.map((bank) => (
-                <Link key={bank.id} href={`/banks/${bank.id}`}>
+                <Link key={bank.id} href={`/banks/${bank.id}`} className="block">
                   <div
                     className={cn(
                       "flex items-center justify-between p-4 rounded-xl border transition-all",
