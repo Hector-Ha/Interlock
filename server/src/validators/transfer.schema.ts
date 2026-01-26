@@ -6,6 +6,10 @@ export const getTransfersQuerySchema = z.object({
   status: z.enum(["PENDING", "SUCCESS", "FAILED", "RETURNED"]).optional(),
   startDate: z.string().datetime().optional(),
   endDate: z.string().datetime().optional(),
+  search: z.string().optional(),
+  sortBy: z
+    .enum(["date_desc", "date_asc", "amount_desc", "amount_asc"])
+    .default("date_desc"),
 });
 
 export const transferIdSchema = z.object({

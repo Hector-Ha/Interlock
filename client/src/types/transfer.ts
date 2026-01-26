@@ -36,6 +36,8 @@ export interface TransferFilters {
   status?: string;
   startDate?: string;
   endDate?: string;
+  search?: string;
+  sortBy?: "date_desc" | "date_asc" | "amount_desc" | "amount_asc";
 }
 
 export interface InitiateTransferData {

@@ -1,9 +1,10 @@
 "use client";
 
-import { ArrowRightLeft, Send, Shield, Filter, Clock } from "lucide-react";
+import { Shield, Filter, Clock, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { RefreshButton } from "@/components/shared/RefreshButton";
+import { cn } from "@/lib/utils";
 
 interface TransfersHeaderProps {
   onRefresh: () => void;
@@ -18,6 +19,8 @@ export function TransfersHeader({
   onOpenFilters,
   pendingCount = 0,
 }: TransfersHeaderProps) {
+  const hasPending = pendingCount > 0;
+
   return (
     <div className="space-y-6">
       {/* Title Row */}
@@ -37,94 +40,111 @@ export function TransfersHeader({
             onClick={onOpenFilters}
             className="border-[var(--color-gray-disabled)] hover:border-[var(--color-brand-disabled)] hover:bg-[var(--color-brand-surface)]/30 transition-all"
           >
-            <Filter className="h-4 w-4 mr-2" />
+            <Filter className="h-4 w-4 mr-2" aria-hidden="true" />
             Filters
           </Button>
         </div>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Stats Row - 2 cards taking equal space */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Pending Transfers Card */}
         <Card
           padding="none"
-          className="relative overflow-hidden p-4 border-[var(--color-brand-soft)]"
+          className={cn(
+            "relative overflow-hidden p-5 transition-colors",
+            hasPending
+              ? "border-[var(--color-warning-soft)]"
+              : "border-[var(--color-success-soft)]"
+          )}
         >
-          <div className="absolute top-0 right-0 w-16 h-16 bg-[var(--color-brand-main)] rounded-full blur-[30px] opacity-10" />
-          <div className="relative flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--color-brand-surface)]">
-              <ArrowRightLeft className="h-5 w-5 text-[var(--color-brand-main)]" />
-            </div>
-            <div>
-              <p className="text-xs text-[var(--color-gray-main)] uppercase tracking-wider">
-                Internal
-              </p>
-              <p className="text-sm font-semibold text-[var(--color-gray-text)]">
-                Between Accounts
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card
-          padding="none"
-          className="relative overflow-hidden p-4 border-[var(--color-success-soft)]"
-        >
-          <div className="absolute top-0 right-0 w-16 h-16 bg-[var(--color-success-main)] rounded-full blur-[30px] opacity-10" />
-          <div className="relative flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--color-success-surface)]">
-              <Send className="h-5 w-5 text-[var(--color-success-main)]" />
-            </div>
-            <div>
-              <p className="text-xs text-[var(--color-gray-main)] uppercase tracking-wider">
-                P2P
-              </p>
-              <p className="text-sm font-semibold text-[var(--color-gray-text)]">
-                Send to Users
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        {pendingCount > 0 && (
-          <Card
-            padding="none"
-            className="relative overflow-hidden p-4 border-[var(--color-warning-soft)]"
-          >
-            <div className="absolute top-0 right-0 w-16 h-16 bg-[var(--color-warning-main)] rounded-full blur-[30px] opacity-10" />
-            <div className="relative flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--color-warning-surface)]">
-                <Clock className="h-5 w-5 text-[var(--color-warning-main)]" />
+          <div
+            className={cn(
+              "absolute top-0 right-0 w-20 h-20 rounded-full blur-[40px] opacity-15",
+              hasPending
+                ? "bg-[var(--color-warning-main)]"
+                : "bg-[var(--color-success-main)]"
+            )}
+          />
+          <div className="relative flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div
+                className={cn(
+                  "flex items-center justify-center w-12 h-12 rounded-xl",
+                  hasPending
+                    ? "bg-[var(--color-warning-surface)]"
+                    : "bg-[var(--color-success-surface)]"
+                )}
+              >
+                {hasPending ? (
+                  <Clock
+                    className="h-6 w-6 text-[var(--color-warning-main)]"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <CheckCircle2
+                    className="h-6 w-6 text-[var(--color-success-main)]"
+                    aria-hidden="true"
+                  />
+                )}
               </div>
               <div>
-                <p className="text-xs text-[var(--color-gray-main)] uppercase tracking-wider">
-                  Pending
+                <p className="text-xs text-[var(--color-gray-main)] uppercase tracking-wider font-medium">
+                  {hasPending ? "Pending Transfers" : "Transfer Status"}
                 </p>
-                <p className="text-lg font-bold text-[var(--color-gray-text)] tabular-nums">
-                  {pendingCount}
+                <p
+                  className={cn(
+                    "text-lg font-semibold mt-0.5",
+                    hasPending
+                      ? "text-[var(--color-warning-text)]"
+                      : "text-[var(--color-success-text)]"
+                  )}
+                >
+                  {hasPending
+                    ? `${pendingCount} in progress`
+                    : "All transfers complete"}
                 </p>
               </div>
             </div>
-          </Card>
-        )}
+            {hasPending && (
+              <div className="flex items-center gap-1.5">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-warning-main)] opacity-75" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[var(--color-warning-main)]" />
+                </span>
+              </div>
+            )}
+          </div>
+        </Card>
 
+        {/* Secure Card */}
         <Card
           padding="none"
-          className="relative overflow-hidden p-4 border-[var(--color-gray-soft)] col-span-2 lg:col-span-1"
+          className="relative overflow-hidden p-5 border-[var(--color-gray-soft)]"
         >
-          <div className="relative flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--color-gray-surface)]">
-              <Shield className="h-5 w-5 text-[var(--color-success-main)]" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <p className="text-sm font-semibold text-[var(--color-gray-text)]">
-                  Secure
-                </p>
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-success-main)] animate-pulse" />
+          <div className="absolute top-0 right-0 w-20 h-20 bg-[var(--color-brand-main)] rounded-full blur-[40px] opacity-10" />
+          <div className="relative flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-[var(--color-brand-surface)]">
+                <Shield
+                  className="h-6 w-6 text-[var(--color-brand-main)]"
+                  aria-hidden="true"
+                />
               </div>
-              <p className="text-xs text-[var(--color-gray-main)]">
-                Encrypted transfers
-              </p>
+              <div>
+                <p className="text-xs text-[var(--color-gray-main)] uppercase tracking-wider font-medium">
+                  Security
+                </p>
+                <p className="text-lg font-semibold text-[var(--color-gray-text)] mt-0.5">
+                  Bank-Level Encryption
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[var(--color-success-main)] animate-pulse" />
+              <span className="text-xs font-medium text-[var(--color-success-text)]">
+                Active
+              </span>
             </div>
           </div>
         </Card>

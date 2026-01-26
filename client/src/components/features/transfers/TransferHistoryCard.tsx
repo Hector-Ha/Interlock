@@ -1,11 +1,13 @@
 "use client";
 
-import { History, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import { TransferRow } from "./TransferRow";
-import type { Transfer } from "@/types/transfer";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import { Pagination } from "@/components/ui/Pagination";
+import type { Transfer, TransferFilters } from "@/types/transfer";
 
 interface TransferHistoryCardProps {
   transfers: Transfer[];
@@ -16,34 +18,86 @@ interface TransferHistoryCardProps {
     offset: number;
     limit: number;
   };
+  filters: TransferFilters;
+  onFilterChange: (filters: Partial<TransferFilters>) => void;
   onTransferClick: (transferId: string) => void;
   onPageChange: (offset: number) => void;
 }
+
+const sortOptions = [
+  { value: "date_desc", label: "Newest First" },
+  { value: "date_asc", label: "Oldest First" },
+  { value: "amount_desc", label: "Amount: High to Low" },
+  { value: "amount_asc", label: "Amount: Low to High" },
+];
 
 export function TransferHistoryCard({
   transfers,
   isLoading,
   pagination,
+  filters,
+  onFilterChange,
   onTransferClick,
   onPageChange,
 }: TransferHistoryCardProps) {
   const currentPage = Math.floor(pagination.offset / pagination.limit) + 1;
   const totalPages = Math.ceil(pagination.total / pagination.limit);
 
+  const handlePageChange = (page: number) => {
+    const newOffset = (page - 1) * pagination.limit;
+    onPageChange(newOffset);
+  };
+
   return (
-    <Card padding="none" className="overflow-hidden border-[var(--color-gray-soft)]">
+    <Card
+      padding="none"
+      className="overflow-hidden border-[var(--color-gray-soft)]"
+    >
       {/* Header */}
-      <CardHeader className="flex-row items-center justify-between p-5 border-b border-[var(--color-gray-soft)] bg-[var(--color-gray-surface)]/30">
-        <div className="flex items-center gap-2">
-          <History className="h-5 w-5 text-[var(--color-brand-main)]" />
+      <div className="flex flex-col gap-4 p-5 border-b border-[var(--color-gray-soft)] bg-[var(--color-gray-surface)]/30">
+        <div>
           <CardTitle className="text-lg">Transfer History</CardTitle>
         </div>
-        {pagination.total > 0 && (
-          <span className="text-sm text-[var(--color-gray-main)]">
-            {pagination.total} transfer{pagination.total !== 1 ? "s" : ""}
-          </span>
-        )}
-      </CardHeader>
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <div className="flex-1 w-full sm:w-auto">
+            <Input
+              type="text"
+              placeholder="Search transfers..."
+              value={filters.search || ""}
+              onChange={(e) => onFilterChange({ search: e.target.value })}
+              startIcon={<Search className="w-4 h-4" />}
+              className="h-9 text-sm"
+              containerClassName="w-full"
+            />
+          </div>
+          <div className="w-full sm:w-40 shrink-0">
+            <Select
+              options={sortOptions}
+              value={filters.sortBy || "date_desc"}
+              onChange={(value) =>
+                onFilterChange({
+                  sortBy: value as TransferFilters["sortBy"],
+                })
+              }
+              placeholder="Sort by"
+              triggerClassName="h-9 text-sm"
+              itemClassName="text-sm py-2"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Results Info Bar */}
+      {(filters.search ||
+        (filters.startDate && filters.endDate) ||
+        filters.status) && (
+        <div className="px-4 sm:px-5 py-2 bg-[var(--color-gray-surface)] border-b border-[var(--color-gray-soft)]">
+          <p className="text-xs text-[var(--color-gray-main)]">
+            Showing {transfers.length} of {pagination.total} transactions
+            {filters.search && <span> matching "{filters.search}"</span>}
+          </p>
+        </div>
+      )}
 
       {/* Content */}
       <CardContent className="p-0">
@@ -60,7 +114,8 @@ export function TransferHistoryCard({
               No transfers found
             </h3>
             <p className="text-sm text-[var(--color-gray-main)] max-w-xs">
-              You haven't made any transfers yet, or no transfers match your current filters.
+              You haven't made any transfers yet, or no transfers match your
+              current filters.
             </p>
           </div>
         ) : (
@@ -77,36 +132,13 @@ export function TransferHistoryCard({
       </CardContent>
 
       {/* Pagination */}
-      {!isLoading && transfers.length > 0 && (
-        <div className="flex items-center justify-between p-4 border-t border-[var(--color-gray-soft)] bg-[var(--color-gray-surface)]/30">
-          <p className="text-sm text-[var(--color-gray-main)]">
-            Showing {pagination.offset + 1}-
-            {Math.min(pagination.offset + transfers.length, pagination.total)} of{" "}
-            {pagination.total}
-          </p>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={pagination.offset === 0}
-              onClick={() => onPageChange(Math.max(0, pagination.offset - pagination.limit))}
-              className="h-8 w-8 p-0"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="px-3 text-sm font-medium text-[var(--color-gray-text)]">
-              {currentPage} / {totalPages}
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={!pagination.hasMore}
-              onClick={() => onPageChange(pagination.offset + pagination.limit)}
-              className="h-8 w-8 p-0"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+      {!isLoading && totalPages > 1 && (
+        <div className="p-4 border-t border-[var(--color-gray-soft)] bg-[var(--color-gray-surface)]/30">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </div>
       )}
     </Card>

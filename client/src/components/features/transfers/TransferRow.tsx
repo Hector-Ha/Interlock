@@ -63,7 +63,7 @@ export function TransferRow({ transfer, onClick }: TransferRowProps) {
         "group flex items-center justify-between p-4 sm:p-5",
         "hover:bg-[var(--color-gray-surface)]/50 transition-all duration-200",
         "cursor-pointer border-b border-[var(--color-gray-soft)] last:border-b-0",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand-main)] focus-visible:ring-inset"
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand-main)] focus-visible:ring-inset",
       )}
       onClick={onClick}
       role="button"
@@ -74,41 +74,41 @@ export function TransferRow({ transfer, onClick }: TransferRowProps) {
         {/* Status Icon */}
         <div
           className={cn(
-            "flex h-11 w-11 items-center justify-center rounded-xl shrink-0 transition-transform duration-200 group-hover:scale-105",
-            statusConfig.bg
+            "flex h-10 w-10 items-center justify-center rounded-xl shrink-0 transition-transform duration-200 group-hover:scale-105",
+            statusConfig.bg,
           )}
         >
           <StatusIcon className={cn("h-5 w-5", statusConfig.text)} />
         </div>
 
         {/* Transfer Details */}
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-medium text-[var(--color-gray-text)] truncate max-w-[120px] sm:max-w-none group-hover:text-[var(--color-brand-main)] transition-colors">
-              {transfer.sourceBankName}
-            </span>
-            <ArrowRight className="h-3.5 w-3.5 text-[var(--color-gray-disabled)] shrink-0" />
-            <span className="font-medium text-[var(--color-gray-text)] truncate max-w-[120px] sm:max-w-none">
+        <div className="min-w-0 flex-1 grid gap-0.5">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-[var(--color-gray-text)] truncate group-hover:text-[var(--color-brand-main)] transition-colors">
               {transfer.destinationBankName}
             </span>
           </div>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-sm text-[var(--color-gray-main)]">
-              {formatDate(transfer.createdAt)}
-            </span>
+          <div className="flex items-center gap-1.5 text-xs text-[var(--color-gray-main)] truncate">
+            <span>From {transfer.sourceBankName}</span>
             <span className="text-[var(--color-gray-disabled)]">•</span>
-            <Badge variant={statusConfig.badge} className="text-[10px] px-2 py-0">
-              {transfer.status}
-            </Badge>
+            <span>{formatDate(transfer.createdAt)}</span>
           </div>
         </div>
       </div>
 
-      {/* Amount & Arrow */}
-      <div className="flex items-center gap-3 shrink-0">
-        <span className="font-semibold text-[var(--color-gray-text)] tabular-nums text-base">
-          {formatCurrency(transfer.amount)}
-        </span>
+      {/* Amount & Status */}
+      <div className="flex items-center gap-4 shrink-0">
+        <div className="flex flex-col items-end gap-1">
+          <span className="font-semibold text-[var(--color-gray-text)] tabular-nums text-sm sm:text-base">
+            {formatCurrency(transfer.amount)}
+          </span>
+          <Badge
+            variant={statusConfig.badge}
+            className="text-[10px] h-5 px-2 py-0 w-fit"
+          >
+            {transfer.status}
+          </Badge>
+        </div>
         <ChevronRight className="h-4 w-4 text-[var(--color-gray-disabled)] group-hover:text-[var(--color-brand-main)] group-hover:translate-x-0.5 transition-all" />
       </div>
     </div>

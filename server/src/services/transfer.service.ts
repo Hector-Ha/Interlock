@@ -6,7 +6,7 @@ import type { TransferDetails, TransferListItem } from "@/types/transfer.types";
 // Gets a transfer by ID with full details.
 export const getTransferById = async (
   transferId: string,
-  userId: string
+  userId: string,
 ): Promise<TransferDetails | null> => {
   const transfer = await prisma.transaction.findFirst({
     where: {
@@ -54,8 +54,10 @@ export const getTransfers = async (
     status?: string;
     startDate?: Date;
     endDate?: Date;
+    search?: string;
+    sortBy?: "date_desc" | "date_asc" | "amount_desc" | "amount_asc";
   },
-  pagination: { limit: number; offset: number }
+  pagination: { limit: number; offset: number },
 ): Promise<{
   data: TransferListItem[];
   pagination: {
@@ -84,7 +86,7 @@ export const getTransfers = async (
     };
   }
 
-  const where: Record<string, unknown> = {
+  const where: any = {
     bankId: { in: bankIds },
     dwollaTransferId: { not: null },
   };
@@ -96,17 +98,55 @@ export const getTransfers = async (
   if (filters.startDate || filters.endDate) {
     where.createdAt = {};
     if (filters.startDate) {
-      (where.createdAt as Record<string, Date>).gte = filters.startDate;
+      where.createdAt.gte = filters.startDate;
     }
     if (filters.endDate) {
-      (where.createdAt as Record<string, Date>).lte = filters.endDate;
+      where.createdAt.lte = filters.endDate;
+    }
+  }
+
+  if (filters.search) {
+    where.OR = [
+      {
+        name: {
+          contains: filters.search,
+          mode: "insensitive",
+        },
+      },
+      {
+        bank: {
+          institutionName: {
+            contains: filters.search,
+            mode: "insensitive",
+          },
+        },
+      },
+    ];
+  }
+
+  let orderBy: any = { createdAt: "desc" };
+  if (filters.sortBy) {
+    switch (filters.sortBy) {
+      case "date_asc":
+        orderBy = { createdAt: "asc" };
+        break;
+      case "amount_desc":
+        orderBy = { amount: "desc" };
+        break;
+      case "amount_asc":
+        orderBy = { amount: "asc" };
+        break;
+      case "date_desc":
+      default:
+        orderBy = { createdAt: "desc" };
+        break;
     }
   }
 
   const [transfers, total] = await Promise.all([
     prisma.transaction.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy,
       take: pagination.limit,
       skip: pagination.offset,
       include: {
@@ -143,7 +183,7 @@ export const getTransfers = async (
 //Cancels a pending transfer.
 export const cancelTransfer = async (
   transferId: string,
-  userId: string
+  userId: string,
 ): Promise<boolean> => {
   const transfer = await prisma.transaction.findFirst({
     where: { id: transferId },
@@ -172,7 +212,7 @@ export const cancelTransfer = async (
   } catch (error) {
     logger.error(
       { err: error, transferId },
-      "Failed to cancel transfer in Dwolla"
+      "Failed to cancel transfer in Dwolla",
     );
     throw new Error("Failed to cancel transfer with payment provider");
   }

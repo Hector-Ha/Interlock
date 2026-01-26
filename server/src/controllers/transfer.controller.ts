@@ -57,11 +57,13 @@ export const getTransfers = async (req: AuthRequest, res: Response) => {
         status: query.status,
         startDate: query.startDate ? new Date(query.startDate) : undefined,
         endDate: query.endDate ? new Date(query.endDate) : undefined,
+        search: query.search,
+        sortBy: query.sortBy,
       },
       {
         limit: query.limit,
         offset: query.offset,
-      }
+      },
     );
 
     res.json({
@@ -108,7 +110,7 @@ export const cancelTransfer = async (req: AuthRequest, res: Response) => {
         },
       })
       .catch((err) =>
-        logger.error({ err, userId, transferId }, "Failed to create audit log")
+        logger.error({ err, userId, transferId }, "Failed to create audit log"),
       );
   } catch (error) {
     if (error instanceof z.ZodError) {

@@ -5,7 +5,17 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import * as Sentry from "@sentry/nextjs";
-import { ArrowRight, User, Info, AlertCircle, Loader2, X } from "lucide-react";
+import {
+  User,
+  Info,
+  AlertCircle,
+  Loader2,
+  X,
+  Clock,
+  Shield,
+  Building2,
+  Send,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button, Input, Card, Alert } from "@/components/ui";
 import { Select } from "@/components/ui/Select";
@@ -13,17 +23,15 @@ import { RecipientSearch } from "@/components/features/p2p/RecipientSearch";
 import { useBankStore } from "@/stores/bank.store";
 import { p2pService } from "@/services/p2p.service";
 import { useToast } from "@/stores/ui.store";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, cn } from "@/lib/utils";
 import type { Recipient } from "@/types/p2p";
 
-// P2P Transfer limits
 const P2P_LIMITS = {
   PER_TRANSACTION: 2000,
   DAILY: 5000,
   WEEKLY: 10000,
 } as const;
 
-// Validation schema
 const p2pSchema = z.object({
   amount: z
     .string()
@@ -36,7 +44,7 @@ const p2pSchema = z.object({
         const num = parseFloat(val);
         return num <= P2P_LIMITS.PER_TRANSACTION;
       },
-      `Maximum transfer is ${formatCurrency(P2P_LIMITS.PER_TRANSACTION)}`,
+      `Maximum transfer is ${formatCurrency(P2P_LIMITS.PER_TRANSACTION)}`
     ),
   note: z.string().max(200, "Note cannot exceed 200 characters").optional(),
 });
@@ -46,35 +54,33 @@ type P2PFormData = z.infer<typeof p2pSchema>;
 interface P2PTransferFormProps {
   onSuccess?: () => void;
   className?: string;
+  isEmbedded?: boolean;
 }
 
-// Form component for sending money to another Interlock user.
 export function P2PTransferForm({
   onSuccess,
   className,
   isEmbedded = false,
-}: P2PTransferFormProps & { isEmbedded?: boolean }) {
+}: P2PTransferFormProps) {
   const router = useRouter();
   const toast = useToast();
   const { banks, fetchBanks, isLoading: isBankLoading } = useBankStore();
 
   const [selectedRecipient, setSelectedRecipient] = useState<Recipient | null>(
-    null,
+    null
   );
   const [selectedBankId, setSelectedBankId] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // Fetch banks on mount
   useEffect(() => {
     fetchBanks();
   }, [fetchBanks]);
 
-  // Memoized: only recompute when banks change
   const linkedBanks = useMemo(
     () => banks.filter((b) => b.isDwollaLinked && b.status === "ACTIVE"),
-    [banks],
+    [banks]
   );
 
   const bankOptions = useMemo(
@@ -83,7 +89,7 @@ export function P2PTransferForm({
         value: bank.id,
         label: bank.institutionName,
       })),
-    [linkedBanks],
+    [linkedBanks]
   );
 
   const {
@@ -104,7 +110,7 @@ export function P2PTransferForm({
   const note = watch("note");
   const parsedAmount = parseFloat(amount) || 0;
 
-  const onSubmit = (data: P2PFormData) => {
+  const onSubmit = () => {
     if (!selectedRecipient) {
       setError("Please select a recipient");
       return;
@@ -134,12 +140,9 @@ export function P2PTransferForm({
       });
 
       toast.success(
-        `Successfully sent ${formatCurrency(parsedAmount)} to ${
-          selectedRecipient.firstName
-        }!`,
+        `Successfully sent ${formatCurrency(parsedAmount)} to ${selectedRecipient.firstName}`
       );
 
-      // Reset form
       reset();
       setSelectedRecipient(null);
       setSelectedBankId("");
@@ -167,200 +170,238 @@ export function P2PTransferForm({
     setSelectedRecipient(null);
   };
 
-  // Show loading state
   if (isBankLoading && banks.length === 0) {
     return (
-      <div className="flex justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-brand-main" />
+      <div className={cn("flex items-center justify-center py-16", className)}>
+        <Loader2
+          className="h-8 w-8 animate-spin text-[var(--color-brand-main)]"
+          aria-hidden="true"
+        />
       </div>
     );
   }
 
-  // No linked banks warning
   if (linkedBanks.length === 0) {
-    const content = (
-      <div className="flex flex-col items-center justify-center text-center space-y-4">
-        <AlertCircle className="h-12 w-12 text-warning-main" />
-        <h3 className="text-lg font-semibold text-foreground">
-          No Linked Banks
-        </h3>
-        <p className="text-muted-foreground max-w-sm">
-          You need at least one bank account linked with Dwolla to send money.
-          Please link a bank first.
-        </p>
-        <Button
-          onClick={() => router.push("/banks")}
-          className="bg-brand-main hover:bg-brand-hover text-white"
-        >
-          Link a Bank
-        </Button>
+    return (
+      <div className={cn("py-12 px-6", className)}>
+        <div className="flex flex-col items-center justify-center text-center space-y-4 max-w-sm mx-auto">
+          <div className="w-14 h-14 rounded-full bg-[var(--color-warning-surface)] flex items-center justify-center">
+            <Building2
+              className="h-7 w-7 text-[var(--color-warning-main)]"
+              aria-hidden="true"
+            />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-[var(--color-gray-text)]">
+              No Linked Banks
+            </h3>
+            <p className="text-sm text-[var(--color-gray-main)] mt-1">
+              You need at least one bank account linked to send money.
+            </p>
+          </div>
+          <Button
+            onClick={() => router.push("/banks")}
+            className="bg-[var(--color-brand-main)] hover:bg-[var(--color-brand-hover)] text-white"
+          >
+            Link a Bank
+          </Button>
+        </div>
       </div>
-    );
-
-    return isEmbedded ? (
-      <div className={`p-6 ${className || ""}`}>{content}</div>
-    ) : (
-      <Card className="p-6">{content}</Card>
     );
   }
 
-  const Wrapper = isEmbedded ? "div" : Card;
+  const isFormValid = selectedRecipient && selectedBankId && parsedAmount > 0;
 
   return (
     <>
-      <Wrapper className={className}>
-        <div className={isEmbedded ? "" : "p-6"}>
-          <h2 className="text-xl font-semibold text-content-primary mb-1">
-            Send Money
-          </h2>
-          <p className="text-content-secondary text-sm mb-6">
-            Transfer funds to another Interlock user
-          </p>
+      <div className={className}>
+        {error && (
+          <Alert variant="destructive" className="mx-6 mt-6 mb-0">
+            <AlertCircle className="h-4 w-4" aria-hidden="true" />
+            <span className="ml-2">{error}</span>
+          </Alert>
+        )}
 
-          {error && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertCircle className="h-4 w-4" />
-              <span className="ml-2">{error}</span>
-            </Alert>
-          )}
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            {/* Recipient Search */}
-            <div>
-              <label className="block text-sm font-medium text-content-primary mb-2">
-                Recipient
-              </label>
-              {selectedRecipient ? (
-                <div className="flex items-center justify-between p-3 border border-border rounded-lg bg-surface-alt">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-brand-surface flex items-center justify-center">
-                      <User className="h-5 w-5 text-brand-text" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-content-primary">
-                        {selectedRecipient.firstName}{" "}
-                        {selectedRecipient.lastName}
-                      </p>
-                      <p className="text-sm text-content-secondary">
-                        {selectedRecipient.email}
-                      </p>
-                    </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
+          {/* Recipient Selection */}
+          <div>
+            <label className="block text-sm font-medium text-[var(--color-gray-text)] mb-2">
+              Recipient
+            </label>
+            {selectedRecipient ? (
+              <div className="flex items-center justify-between p-3 border border-[var(--color-gray-soft)] rounded-lg bg-[var(--color-gray-surface)]/50">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-[var(--color-brand-surface)] flex items-center justify-center">
+                    <User
+                      className="h-5 w-5 text-[var(--color-brand-main)]"
+                      aria-hidden="true"
+                    />
                   </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleClearRecipient}
-                  >
-                    Change
-                  </Button>
+                  <div className="min-w-0">
+                    <p className="font-medium text-[var(--color-gray-text)] truncate">
+                      {selectedRecipient.firstName} {selectedRecipient.lastName}
+                    </p>
+                    <p className="text-sm text-[var(--color-gray-main)] truncate">
+                      {selectedRecipient.email}
+                    </p>
+                  </div>
                 </div>
-              ) : (
-                <RecipientSearch onSelect={setSelectedRecipient} />
-              )}
-            </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearRecipient}
+                  className="text-[var(--color-gray-main)] hover:text-[var(--color-gray-text)]"
+                >
+                  Change
+                </Button>
+              </div>
+            ) : (
+              <RecipientSearch onSelect={setSelectedRecipient} />
+            )}
+          </div>
 
-            {/* Source Bank */}
-            <Select
-              label="From Account"
-              options={bankOptions}
-              value={selectedBankId}
-              onChange={setSelectedBankId}
-              placeholder="Select your bank account"
-            />
+          {/* Source Bank */}
+          <Select
+            label="From Account"
+            options={bankOptions}
+            value={selectedBankId}
+            onChange={setSelectedBankId}
+            placeholder="Select your bank account…"
+          />
 
-            {/* Amount */}
-            <div>
-              <Input
-                label="Amount"
-                placeholder="0.00"
-                startIcon={<span className="text-content-tertiary">$</span>}
-                {...register("amount")}
-                error={errors.amount?.message}
-                numericOnly
-              />
-              <p className="text-xs text-content-tertiary mt-1.5 flex items-center gap-1">
-                <Info className="h-3 w-3" />
-                Max: {formatCurrency(P2P_LIMITS.PER_TRANSACTION)}/tx |{" "}
-                {formatCurrency(P2P_LIMITS.DAILY)}/day |{" "}
-                {formatCurrency(P2P_LIMITS.WEEKLY)}/week
-              </p>
-            </div>
-
-            {/* Note */}
+          {/* Amount Input */}
+          <div>
             <Input
-              label="Note (optional)"
-              placeholder="What's this for?"
-              {...register("note")}
-              error={errors.note?.message}
+              label="Amount"
+              placeholder="0.00"
+              startIcon={
+                <span className="text-[var(--color-gray-main)] font-medium">
+                  $
+                </span>
+              }
+              {...register("amount")}
+              error={errors.amount?.message}
+              numericOnly
             />
+            <p className="text-xs text-[var(--color-gray-main)] mt-1.5 flex items-center gap-1">
+              <Info className="h-3 w-3" aria-hidden="true" />
+              Limits: {formatCurrency(P2P_LIMITS.PER_TRANSACTION)}/tx ·{" "}
+              {formatCurrency(P2P_LIMITS.DAILY)}/day ·{" "}
+              {formatCurrency(P2P_LIMITS.WEEKLY)}/week
+            </p>
+          </div>
 
-            {/* Submit Button */}
-            <div className="pt-2">
-              <Button
-                type="submit"
-                className="w-full bg-brand-main hover:bg-brand-hover text-white shadow-md hover:shadow-lg transition-all"
-                disabled={
-                  !selectedRecipient || !selectedBankId || parsedAmount <= 0
-                }
-              >
-                Continue
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+          {/* Note Input */}
+          <Input
+            label="Note (optional)"
+            placeholder="What's this for?…"
+            {...register("note")}
+            error={errors.note?.message}
+          />
+
+          {/* Info Footer */}
+          <div className="flex items-center justify-center pt-4 border-t border-[var(--color-gray-soft)]">
+            <div className="flex items-center gap-4 text-xs text-[var(--color-gray-main)]">
+              <span className="flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+                1-3 business days
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Shield className="h-3.5 w-3.5" aria-hidden="true" />
+                Bank-level security
+              </span>
             </div>
-          </form>
-        </div>
-      </Wrapper>
+          </div>
+
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            className="w-full h-11 bg-[var(--color-brand-main)] hover:bg-[var(--color-brand-hover)] text-white font-medium transition-all"
+            disabled={!isFormValid}
+          >
+            Continue
+            <Send className="ml-2 h-4 w-4" aria-hidden="true" />
+          </Button>
+        </form>
+      </div>
 
       {/* Confirmation Modal */}
       {showConfirm && selectedRecipient && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-md">
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="confirm-title"
+        >
+          <Card className="w-full max-w-md" padding="none">
             <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-content-primary">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <h3
+                  id="confirm-title"
+                  className="text-lg font-semibold text-[var(--color-gray-text)]"
+                >
                   Confirm Transfer
                 </h3>
                 <button
                   onClick={handleCancelConfirm}
-                  className="p-1 hover:bg-surface-alt rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="p-1.5 hover:bg-[var(--color-gray-surface)] rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand-main)]"
                   disabled={isSubmitting}
                   aria-label="Close confirmation dialog"
                 >
                   <X
-                    className="h-5 w-5 text-content-secondary"
+                    className="h-5 w-5 text-[var(--color-gray-main)]"
                     aria-hidden="true"
                   />
                 </button>
               </div>
 
-              <div className="space-y-3 mb-6">
-                <div className="flex justify-between">
-                  <span className="text-content-secondary">To</span>
-                  <span className="font-medium text-content-primary">
+              {/* Recipient Card */}
+              <div className="flex items-center gap-3 p-4 bg-[var(--color-gray-surface)] rounded-lg mb-4">
+                <div className="h-12 w-12 rounded-full bg-[var(--color-brand-surface)] flex items-center justify-center">
+                  <User
+                    className="h-6 w-6 text-[var(--color-brand-main)]"
+                    aria-hidden="true"
+                  />
+                </div>
+                <div>
+                  <p className="text-xs text-[var(--color-gray-main)] uppercase tracking-wide">
+                    Sending to
+                  </p>
+                  <p className="font-semibold text-[var(--color-gray-text)]">
                     {selectedRecipient.firstName} {selectedRecipient.lastName}
-                  </span>
+                  </p>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-content-secondary">Amount</span>
-                  <span className="font-semibold text-lg text-content-primary">
-                    {formatCurrency(parsedAmount)}
-                  </span>
-                </div>
-                {note && (
-                  <div className="flex justify-between">
-                    <span className="text-content-secondary">Note</span>
-                    <span className="text-content-primary text-right max-w-[200px] truncate">
-                      {note}
-                    </span>
-                  </div>
-                )}
               </div>
 
-              <p className="text-sm text-content-secondary mb-6">
-                Funds will be transferred within 1-3 business days.
+              {/* Amount */}
+              <div className="text-center py-4 border-y border-[var(--color-gray-soft)]">
+                <p className="text-xs text-[var(--color-gray-main)] uppercase tracking-wide mb-1">
+                  Amount
+                </p>
+                <p className="text-3xl font-bold text-[var(--color-gray-text)] tabular-nums">
+                  {formatCurrency(parsedAmount)}
+                </p>
+              </div>
+
+              {/* Note */}
+              {note && (
+                <div className="py-4 border-b border-[var(--color-gray-soft)]">
+                  <p className="text-xs text-[var(--color-gray-main)] uppercase tracking-wide mb-1">
+                    Note
+                  </p>
+                  <p className="text-sm text-[var(--color-gray-text)]">{note}</p>
+                </div>
+              )}
+
+              {/* Timing Info */}
+              <p className="text-sm text-[var(--color-gray-main)] py-4 flex items-center justify-center gap-1.5">
+                <Clock className="h-4 w-4" aria-hidden="true" />
+                Funds will arrive within 1-3 business days
               </p>
 
+              {/* Actions */}
               <div className="flex gap-3">
                 <Button
                   variant="outline"
@@ -371,7 +412,7 @@ export function P2PTransferForm({
                   Cancel
                 </Button>
                 <Button
-                  className="flex-1 bg-brand-main hover:bg-brand-hover text-white"
+                  className="flex-1 bg-[var(--color-brand-main)] hover:bg-[var(--color-brand-hover)] text-white"
                   onClick={handleConfirm}
                   disabled={isSubmitting}
                 >
