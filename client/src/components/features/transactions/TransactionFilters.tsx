@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, X, SlidersHorizontal } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
@@ -45,68 +45,47 @@ export function TransactionFilters({
   selectedBankTab,
   onBankTabChange,
 }: TransactionFiltersProps) {
-  const hasFilters = searchQuery || statusFilter !== "all" || sortBy !== "date-desc";
+  const hasFilters =
+    searchQuery || statusFilter !== "all" || sortBy !== "date-desc";
 
   return (
     <div className="space-y-4">
       {/* Search and Filters Row */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
         {/* Search */}
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-gray-disabled)]" />
+        <div className="flex-1 sm:max-w-xs">
           <Input
-            placeholder="Search transactions..."
+            type="text"
+            placeholder="Search transactions…"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10 bg-white border-[var(--color-gray-soft)] focus:border-[var(--color-brand-disabled)]"
+            startIcon={<Search className="w-4 h-4" aria-hidden="true" />}
+            className="h-9 text-sm"
+            containerClassName="w-full"
           />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => onSearchChange("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-gray-main)] hover:text-[var(--color-gray-text)] transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
         </div>
 
         {/* Status Filter */}
-        <div className="w-full sm:w-36">
+        <div className="w-full sm:w-32 shrink-0">
           <Select
             options={statusOptions}
             value={statusFilter}
             onChange={onStatusChange}
             placeholder="Status"
+            triggerClassName="h-9 text-sm"
           />
         </div>
 
         {/* Sort */}
-        <div className="w-full sm:w-44">
+        <div className="w-full sm:w-40 shrink-0">
           <Select
             options={sortOptions}
             value={sortBy}
             onChange={onSortChange}
             placeholder="Sort by"
+            triggerClassName="h-9 text-sm"
           />
         </div>
-
-        {/* Clear Filters */}
-        {hasFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              onSearchChange("");
-              onStatusChange("all");
-              onSortChange("date-desc");
-            }}
-            className="text-[var(--color-gray-main)] hover:text-[var(--color-error-main)]"
-          >
-            <X className="h-4 w-4 mr-1" />
-            Clear
-          </Button>
-        )}
       </div>
 
       {/* Bank Tabs */}
@@ -118,10 +97,10 @@ export function TransactionFilters({
               type="button"
               onClick={() => onBankTabChange(tab.value)}
               className={cn(
-                "px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all",
+                "px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors",
                 selectedBankTab === tab.value
                   ? "bg-[var(--color-brand-main)] text-white shadow-md shadow-[var(--color-brand-main)]/25"
-                  : "bg-white border border-[var(--color-gray-soft)] text-[var(--color-gray-main)] hover:border-[var(--color-brand-disabled)] hover:text-[var(--color-brand-main)]"
+                  : "bg-white border border-[var(--color-gray-soft)] text-[var(--color-gray-main)] hover:border-[var(--color-brand-disabled)] hover:text-[var(--color-brand-main)]",
               )}
             >
               {tab.label}

@@ -1,24 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import {
   ArrowUpRight,
   ArrowDownLeft,
   Search,
   CreditCard,
-  ShoppingBag,
-  Utensils,
-  Car,
-  Tv,
-  Briefcase,
-  Heart,
-  Gift,
-  Home,
-  PiggyBank,
+  XCircle,
 } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Spinner } from "@/components/ui/Spinner";
-import { cn, formatDate, formatCategory } from "@/lib/utils";
+import { Pagination } from "@/components/ui/Pagination";
+import {
+  cn,
+  formatDate,
+  formatCategory,
+  getCategoryBadgeVariant,
+} from "@/lib/utils";
 
 interface Transaction {
   id: string;
@@ -38,45 +36,40 @@ interface TransactionTableProps {
   isLoading?: boolean;
   error?: string | null;
   showBankHeader?: boolean;
+  searchQuery?: string;
+  totalOriginalCount?: number;
 }
 
-const categoryIcons: Record<string, React.ReactNode> = {
-  "Food and Drink": <Utensils className="h-4 w-4" />,
-  Travel: <Car className="h-4 w-4" />,
-  Shops: <ShoppingBag className="h-4 w-4" />,
-  Shopping: <ShoppingBag className="h-4 w-4" />,
-  Transfer: <CreditCard className="h-4 w-4" />,
-  Payment: <CreditCard className="h-4 w-4" />,
-  Recreation: <Tv className="h-4 w-4" />,
-  Entertainment: <Tv className="h-4 w-4" />,
-  Service: <Briefcase className="h-4 w-4" />,
-  Healthcare: <Heart className="h-4 w-4" />,
-  Community: <Gift className="h-4 w-4" />,
-  "Bank Fees": <Home className="h-4 w-4" />,
-  Interest: <PiggyBank className="h-4 w-4" />,
-  Tax: <Briefcase className="h-4 w-4" />,
-};
-
-function getCategoryIcon(category: string): React.ReactNode {
-  if (categoryIcons[category]) return categoryIcons[category];
-  for (const [key, icon] of Object.entries(categoryIcons)) {
-    if (category.toLowerCase().includes(key.toLowerCase())) return icon;
-  }
-  return <CreditCard className="h-4 w-4" />;
-}
+const TRANSACTIONS_PER_PAGE = 10;
 
 function getStatusConfig(status: string) {
   switch (status) {
     case "SUCCESS":
-      return { variant: "success" as const, label: "Success" };
+      return {
+        dotClass: "bg-success-main",
+        textClass: "text-success-main",
+        label: "Success",
+      };
     case "PENDING":
-      return { variant: "warning" as const, label: "Pending" };
+      return {
+        dotClass: "bg-warning-main",
+        textClass: "text-warning-main",
+        label: "Pending",
+      };
     case "FAILED":
     case "DECLINED":
     case "RETURNED":
-      return { variant: "destructive" as const, label: status };
+      return {
+        dotClass: "bg-error-main",
+        textClass: "text-error-main",
+        label: status.charAt(0) + status.slice(1).toLowerCase(),
+      };
     default:
-      return { variant: "secondary" as const, label: status };
+      return {
+        dotClass: "bg-gray-main",
+        textClass: "text-gray-main",
+        label: status,
+      };
   }
 }
 
@@ -86,10 +79,21 @@ export function TransactionTable({
   isLoading,
   error,
   showBankHeader = false,
+  searchQuery,
+  totalOriginalCount,
 }: TransactionTableProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(transactions.length / TRANSACTIONS_PER_PAGE);
+  const startIndex = (currentPage - 1) * TRANSACTIONS_PER_PAGE;
+  const paginatedTransactions = transactions.slice(
+    startIndex,
+    startIndex + TRANSACTIONS_PER_PAGE,
+  );
+
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-16">
         <Spinner size="lg" />
       </div>
     );
@@ -97,21 +101,36 @@ export function TransactionTable({
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <p className="text-[var(--color-error-main)]">
-          {bankName ? `Failed to load ${bankName}: ` : ""}{error}
+      <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+        <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-[var(--color-error-surface)] mb-4">
+          <XCircle
+            className="h-7 w-7 text-[var(--color-error-main)]"
+            aria-hidden="true"
+          />
+        </div>
+        <p className="font-medium text-[var(--color-gray-text)] mb-1">
+          Failed to load transactions
+        </p>
+        <p className="text-sm text-[var(--color-error-main)]">
+          {bankName ? `${bankName}: ` : ""}
+          {error}
         </p>
       </div>
     );
   }
 
-  if (transactions.length === 0) {
+  if (transactions.length === 0 && !searchQuery) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="flex flex-col items-center justify-center py-20 text-center px-6">
         <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-[var(--color-gray-surface)] mb-4">
-          <Search className="h-8 w-8 text-[var(--color-gray-disabled)]" />
+          <Search
+            className="h-8 w-8 text-[var(--color-gray-disabled)]"
+            aria-hidden="true"
+          />
         </div>
-        <p className="font-medium text-[var(--color-gray-text)] mb-1">No transactions found</p>
+        <p className="font-medium text-[var(--color-gray-text)] mb-1">
+          No transactions found
+        </p>
         <p className="text-sm text-[var(--color-gray-main)]">
           Try adjusting your filters or search query
         </p>
@@ -123,14 +142,32 @@ export function TransactionTable({
     <div>
       {/* Bank Header */}
       {showBankHeader && bankName && (
-        <div className="flex items-center justify-between px-5 py-3 bg-[var(--color-gray-surface)]/50 border-b border-[var(--color-gray-soft)]">
-          <div className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4 text-[var(--color-brand-main)]" />
-            <span className="font-semibold text-[var(--color-gray-text)]">{bankName}</span>
+        <div className="flex items-center justify-between px-5 lg:px-6 py-3.5 bg-[var(--color-gray-surface)]/60 border-b border-[var(--color-gray-soft)]">
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--color-brand-surface)]">
+              <CreditCard
+                className="h-4 w-4 text-[var(--color-brand-main)]"
+                aria-hidden="true"
+              />
+            </div>
+            <span className="font-semibold text-[var(--color-gray-text)]">
+              {bankName}
+            </span>
           </div>
-          <Badge variant="secondary" className="text-xs">
-            {transactions.length} transactions
+          <Badge variant="secondary" className="text-xs tabular-nums">
+            {totalOriginalCount ?? transactions.length} transactions
           </Badge>
+        </div>
+      )}
+
+      {/* Results Info Bar */}
+      {searchQuery && (
+        <div className="px-5 lg:px-6 py-2 bg-[var(--color-gray-surface)] border-b border-[var(--color-gray-soft)]">
+          <p className="text-xs text-[var(--color-gray-main)]">
+            Showing {transactions.length} of{" "}
+            {totalOriginalCount ?? transactions.length} transactions matching "
+            {searchQuery}"
+          </p>
         </div>
       )}
 
@@ -138,108 +175,122 @@ export function TransactionTable({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-[var(--color-gray-soft)] bg-[var(--color-gray-surface)]/30">
-              <th className="px-5 py-3 text-left text-xs font-semibold text-[var(--color-gray-main)] uppercase tracking-wider">
+            <tr className="border-b border-[var(--color-gray-soft)] bg-[var(--color-gray-surface)]/40">
+              <th className="px-5 lg:px-6 py-3 text-left text-xs font-semibold text-[var(--color-gray-main)] uppercase tracking-wider w-48 lg:w-64">
                 Transaction
               </th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-[var(--color-gray-main)] uppercase tracking-wider hidden sm:table-cell">
-                Category
-              </th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-[var(--color-gray-main)] uppercase tracking-wider hidden md:table-cell">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-gray-main)] uppercase tracking-wider hidden md:table-cell whitespace-nowrap">
                 Date
               </th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-[var(--color-gray-main)] uppercase tracking-wider hidden lg:table-cell">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-gray-main)] uppercase tracking-wider hidden sm:table-cell whitespace-nowrap">
+                Category
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--color-gray-main)] uppercase tracking-wider hidden lg:table-cell whitespace-nowrap">
                 Status
               </th>
-              <th className="px-5 py-3 text-right text-xs font-semibold text-[var(--color-gray-main)] uppercase tracking-wider">
+              <th className="px-5 lg:px-6 py-3 text-right text-xs font-semibold text-[var(--color-gray-main)] uppercase tracking-wider whitespace-nowrap">
                 Amount
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-gray-soft)]">
-            {transactions.slice(0, 25).map((tx) => {
+            {paginatedTransactions.map((tx) => {
               const isDebit = tx.amount > 0;
-              const statusConfig = getStatusConfig(tx.status);
               const category = tx.category || "Other";
+              const statusConfig = getStatusConfig(tx.status);
 
               return (
                 <tr
                   key={tx.id}
                   className="hover:bg-[var(--color-gray-surface)]/50 transition-colors"
                 >
-                  {/* Transaction Name */}
-                  <td className="px-5 py-4">
+                  {/* Transaction Name + Icon */}
+                  <td className="px-5 lg:px-6 py-4 w-48 lg:w-64 max-w-48 lg:max-w-64">
                     <div className="flex items-center gap-3">
                       <div
                         className={cn(
                           "flex items-center justify-center w-10 h-10 rounded-xl shrink-0",
                           isDebit
                             ? "bg-[var(--color-error-surface)]"
-                            : "bg-[var(--color-success-surface)]"
+                            : "bg-[var(--color-success-surface)]",
                         )}
                       >
                         {isDebit ? (
-                          <ArrowUpRight className="h-5 w-5 text-[var(--color-error-main)]" />
+                          <ArrowUpRight
+                            className="h-5 w-5 text-[var(--color-error-main)]"
+                            aria-hidden="true"
+                          />
                         ) : (
-                          <ArrowDownLeft className="h-5 w-5 text-[var(--color-success-main)]" />
+                          <ArrowDownLeft
+                            className="h-5 w-5 text-[var(--color-success-main)]"
+                            aria-hidden="true"
+                          />
                         )}
                       </div>
-                      <div className="min-w-0">
-                        <p className="font-medium text-[var(--color-gray-text)] truncate max-w-[200px]">
+                      <div className="min-w-0 flex-1 overflow-hidden">
+                        <p className="font-medium text-[var(--color-gray-text)] truncate">
                           {tx.name}
                         </p>
-                        {tx.merchantName && (
-                          <p className="text-xs text-[var(--color-gray-main)] truncate max-w-[200px]">
+                        {tx.merchantName && tx.merchantName !== tx.name && (
+                          <p className="text-xs text-[var(--color-gray-main)] truncate mt-0.5">
                             {tx.merchantName}
                           </p>
                         )}
-                        {/* Mobile: Show date and category inline */}
-                        <div className="flex items-center gap-2 mt-1 sm:hidden">
-                          <span className="text-xs text-[var(--color-gray-main)]">
-                            {formatDate(tx.date)}
-                          </span>
-                          <span className="text-[var(--color-gray-disabled)]">•</span>
-                          <span className="text-xs text-[var(--color-gray-main)]">{formatCategory(category)}</span>
-                        </div>
+                        {/* Mobile: Show date inline */}
+                        <p className="text-xs text-[var(--color-gray-main)] mt-1 md:hidden tabular-nums">
+                          {formatDate(tx.date)}
+                        </p>
                       </div>
-                    </div>
-                  </td>
-
-                  {/* Category */}
-                  <td className="px-5 py-4 hidden sm:table-cell">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[var(--color-gray-main)]">
-                        {getCategoryIcon(category)}
-                      </span>
-                      <span className="text-sm text-[var(--color-gray-main)]">{formatCategory(category)}</span>
                     </div>
                   </td>
 
                   {/* Date */}
-                  <td className="px-5 py-4 hidden md:table-cell">
-                    <span className="text-sm text-[var(--color-gray-main)]">
+                  <td className="px-4 py-4 hidden md:table-cell whitespace-nowrap">
+                    <span className="text-sm text-[var(--color-gray-main)] tabular-nums">
                       {formatDate(tx.date)}
                     </span>
                   </td>
 
-                  {/* Status */}
-                  <td className="px-5 py-4 hidden lg:table-cell">
-                    <Badge variant={statusConfig.variant} className="text-[10px]">
-                      {statusConfig.label}
+                  {/* Category */}
+                  <td className="px-4 py-4 hidden sm:table-cell whitespace-nowrap">
+                    <Badge
+                      variant={getCategoryBadgeVariant(category)}
+                      className="text-xs"
+                    >
+                      {formatCategory(category)}
                     </Badge>
                   </td>
 
+                  {/* Status */}
+                  <td className="px-4 py-4 hidden lg:table-cell whitespace-nowrap">
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={cn(
+                          "w-1.5 h-1.5 rounded-full",
+                          statusConfig.dotClass,
+                        )}
+                        aria-hidden="true"
+                      />
+                      <span className={cn("text-sm", statusConfig.textClass)}>
+                        {statusConfig.label}
+                      </span>
+                    </div>
+                  </td>
+
                   {/* Amount */}
-                  <td className="px-5 py-4 text-right">
+                  <td className="px-5 lg:px-6 py-4 text-right whitespace-nowrap">
                     <span
                       className={cn(
-                        "font-semibold tabular-nums",
+                        "text-base font-semibold tabular-nums",
                         isDebit
                           ? "text-[var(--color-error-main)]"
-                          : "text-[var(--color-success-main)]"
+                          : "text-[var(--color-success-main)]",
                       )}
                     >
-                      {isDebit ? "-" : "+"}${Math.abs(tx.amount).toFixed(2)}
+                      {isDebit ? "-" : "+"}$
+                      {Math.abs(tx.amount).toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                      })}
                     </span>
                   </td>
                 </tr>
@@ -247,14 +298,33 @@ export function TransactionTable({
             })}
           </tbody>
         </table>
-
-        {/* Show more indicator */}
-        {transactions.length > 25 && (
-          <div className="px-5 py-3 text-center text-sm text-[var(--color-gray-main)] border-t border-[var(--color-gray-soft)] bg-[var(--color-gray-surface)]/30">
-            Showing 25 of {transactions.length} transactions
-          </div>
-        )}
       </div>
+
+      {/* Pagination Footer */}
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-5 lg:px-6 py-4 border-t border-[var(--color-gray-soft)] bg-[var(--color-gray-surface)]/30">
+          <p className="text-sm text-[var(--color-gray-main)] tabular-nums">
+            Showing {startIndex + 1}–
+            {Math.min(startIndex + TRANSACTIONS_PER_PAGE, transactions.length)}{" "}
+            of {transactions.length}
+          </p>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
+
+      {/* Single page footer */}
+      {totalPages === 1 && transactions.length > 0 && (
+        <div className="px-5 lg:px-6 py-3 border-t border-[var(--color-gray-soft)] bg-[var(--color-gray-surface)]/30">
+          <p className="text-sm text-[var(--color-gray-main)] text-center tabular-nums">
+            {transactions.length} transaction
+            {transactions.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

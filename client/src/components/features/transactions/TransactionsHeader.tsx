@@ -1,16 +1,14 @@
 "use client";
 
-import { Receipt, TrendingDown, TrendingUp, Building2 } from "lucide-react";
+import { TrendingDown, TrendingUp } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 
 interface TransactionsHeaderProps {
-  totalBanks: number;
   totalIncome: number;
   totalExpense: number;
 }
 
 export function TransactionsHeader({
-  totalBanks,
   totalIncome,
   totalExpense,
 }: TransactionsHeaderProps) {
@@ -26,42 +24,22 @@ export function TransactionsHeader({
         </p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Stats Cards - 2 columns equal width */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Card
           padding="none"
-          className="relative overflow-hidden p-4 border-[var(--color-brand-soft)]"
+          className="relative overflow-hidden p-5 border-[var(--color-success-soft)]"
         >
-          <div className="absolute top-0 right-0 w-16 h-16 bg-[var(--color-brand-main)] rounded-full blur-[30px] opacity-10" />
-          <div className="relative flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--color-brand-surface)]">
-              <Receipt className="h-5 w-5 text-[var(--color-brand-main)]" />
+          <div className="absolute top-0 right-0 w-20 h-20 bg-[var(--color-success-main)] rounded-full blur-[40px] opacity-10" />
+          <div className="relative flex items-center gap-4">
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-[var(--color-success-surface)]">
+              <TrendingUp className="h-6 w-6 text-[var(--color-success-main)]" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-xs text-[var(--color-gray-main)] uppercase tracking-wider">
-                All Transactions
+              <p className="text-xs text-[var(--color-gray-main)] uppercase tracking-wider font-medium">
+                Total Income
               </p>
-              <p className="text-sm font-semibold text-[var(--color-gray-text)]">
-                View History
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card
-          padding="none"
-          className="relative overflow-hidden p-4 border-[var(--color-success-soft)]"
-        >
-          <div className="absolute top-0 right-0 w-16 h-16 bg-[var(--color-success-main)] rounded-full blur-[30px] opacity-10" />
-          <div className="relative flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--color-success-surface)]">
-              <TrendingUp className="h-5 w-5 text-[var(--color-success-main)]" />
-            </div>
-            <div>
-              <p className="text-xs text-[var(--color-gray-main)] uppercase tracking-wider">
-                Income
-              </p>
-              <p className="text-lg font-bold text-[var(--color-success-main)] tabular-nums">
+              <p className="text-xl font-bold text-[var(--color-success-main)] tabular-nums mt-0.5">
                 +${totalIncome.toLocaleString("en-US", { minimumFractionDigits: 2 })}
               </p>
             </div>
@@ -70,38 +48,19 @@ export function TransactionsHeader({
 
         <Card
           padding="none"
-          className="relative overflow-hidden p-4 border-[var(--color-error-soft)]"
+          className="relative overflow-hidden p-5 border-[var(--color-error-soft)]"
         >
-          <div className="absolute top-0 right-0 w-16 h-16 bg-[var(--color-error-main)] rounded-full blur-[30px] opacity-10" />
-          <div className="relative flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--color-error-surface)]">
-              <TrendingDown className="h-5 w-5 text-[var(--color-error-main)]" />
+          <div className="absolute top-0 right-0 w-20 h-20 bg-[var(--color-error-main)] rounded-full blur-[40px] opacity-10" />
+          <div className="relative flex items-center gap-4">
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-[var(--color-error-surface)]">
+              <TrendingDown className="h-6 w-6 text-[var(--color-error-main)]" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-xs text-[var(--color-gray-main)] uppercase tracking-wider">
-                Expenses
+              <p className="text-xs text-[var(--color-gray-main)] uppercase tracking-wider font-medium">
+                Total Expenses
               </p>
-              <p className="text-lg font-bold text-[var(--color-error-main)] tabular-nums">
+              <p className="text-xl font-bold text-[var(--color-error-main)] tabular-nums mt-0.5">
                 -${totalExpense.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card
-          padding="none"
-          className="relative overflow-hidden p-4 border-[var(--color-gray-soft)]"
-        >
-          <div className="relative flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--color-gray-surface)]">
-              <Building2 className="h-5 w-5 text-[var(--color-gray-main)]" />
-            </div>
-            <div>
-              <p className="text-xs text-[var(--color-gray-main)] uppercase tracking-wider">
-                Banks
-              </p>
-              <p className="text-lg font-bold text-[var(--color-gray-text)] tabular-nums">
-                {totalBanks}
               </p>
             </div>
           </div>

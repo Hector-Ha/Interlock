@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { cn, formatCategory } from "@/lib/utils";
 
 const bgStyles = [
   "bg-blue-50 text-blue-600",
@@ -28,6 +28,7 @@ export function CategoryTransactionItem({
   className,
 }: CategoryTransactionItemProps) {
   const iconStyle = bgStyles[index % bgStyles.length];
+  const formattedLabel = formatCategory(label);
 
   return (
     <div
@@ -46,7 +47,7 @@ export function CategoryTransactionItem({
           {icon}
         </div>
         <span className="text-sm font-medium text-foreground truncate">
-          {label}
+          {formattedLabel}
         </span>
       </div>
 

@@ -77,61 +77,74 @@ export function CategorySummaryCard({
   const hasAnyData = data.some((bank) => bank.categories.length > 0);
 
   return (
-    <Card padding="none" className="overflow-hidden border-[var(--color-gray-soft)]">
-      <CardHeader className="flex-row items-center justify-between p-5 border-b border-[var(--color-gray-soft)]">
-        <div className="flex items-center gap-2">
-          <PieChart className="h-5 w-5 text-[var(--color-brand-main)]" />
-          <CardTitle className="text-lg">Spending by Category</CardTitle>
-        </div>
-        <div className="w-32">
+    <Card
+      padding="none"
+      className="overflow-hidden border-[var(--color-gray-soft)] h-fit"
+    >
+      <CardHeader className="flex-row items-center justify-between p-5 lg:p-6 border-b border-[var(--color-gray-soft)]">
+        <CardTitle className="text-lg">Spending by Category</CardTitle>
+        <div className="w-30 shrink-0">
           <Select
             options={timePeriodOptions}
             value={timePeriod}
             onChange={onTimePeriodChange}
             placeholder="Period"
+            triggerClassName="h-9 text-sm"
           />
         </div>
       </CardHeader>
 
-      <CardContent className="p-5">
+      <CardContent className="p-5 lg:p-6">
         {isLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-[var(--color-brand-main)]" />
+          <div className="flex items-center justify-center py-12">
+            <Loader2
+              className="h-6 w-6 animate-spin text-[var(--color-brand-main)]"
+              aria-label="Loading…"
+            />
           </div>
         ) : !hasAnyData ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-[var(--color-gray-surface)] mb-3">
-              <PieChart className="h-6 w-6 text-[var(--color-gray-disabled)]" />
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-[var(--color-gray-surface)] mb-4">
+              <PieChart
+                className="h-7 w-7 text-[var(--color-gray-disabled)]"
+                aria-hidden="true"
+              />
             </div>
-            <p className="font-medium text-[var(--color-gray-text)] mb-1">No spending data</p>
+            <p className="font-medium text-[var(--color-gray-text)] mb-1">
+              No spending data
+            </p>
             <p className="text-sm text-[var(--color-gray-main)]">
               Try selecting a different time period
             </p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {data.map((bankData, bankIndex) => {
               if (bankData.categories.length === 0) return null;
 
               return (
                 <div key={bankData.bankId}>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-[var(--color-gray-text)]">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm font-semibold text-[var(--color-gray-text)]">
                       {bankData.bankName}
                     </span>
-                    <span className="text-xs text-[var(--color-gray-main)]">
+                    <span className="text-xs text-[var(--color-gray-main)] tabular-nums">
                       {bankData.categories.length} categories
                     </span>
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     {bankData.categories.slice(0, 6).map((category, index) => (
                       <CategoryTransactionItem
                         key={`${bankData.bankId}-${category.category}`}
                         index={bankIndex * 6 + index}
                         icon={getCategoryIcon(category.category)}
                         label={category.category}
-                        positiveAmount={category.income > 0 ? category.income : undefined}
-                        negativeAmount={category.expense > 0 ? category.expense : undefined}
+                        positiveAmount={
+                          category.income > 0 ? category.income : undefined
+                        }
+                        negativeAmount={
+                          category.expense > 0 ? category.expense : undefined
+                        }
                       />
                     ))}
                   </div>

@@ -44,7 +44,9 @@ export default function TransactionsPage() {
     isLoading: isCategoryLoading,
   } = useTransactionsByCategory(banks);
 
-  const [bankTransactions, setBankTransactions] = useState<BankTransactions[]>([]);
+  const [bankTransactions, setBankTransactions] = useState<BankTransactions[]>(
+    [],
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("date-desc");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -69,17 +71,20 @@ export default function TransactionsPage() {
         transactions: [],
         isLoading: true,
         error: null,
-      }))
+      })),
     );
 
     const results = await Promise.all(
       banks.map(async (bank) => {
         try {
-          const response = await bankService.getTransactions(bank.id, { limit: 100 });
+          const response = await bankService.getTransactions(bank.id, {
+            limit: 100,
+          });
           return {
             bankId: bank.id,
             bankName: bank.institutionName,
-            transactions: response.transactions as unknown as ServerTransaction[],
+            transactions:
+              response.transactions as unknown as ServerTransaction[],
             isLoading: false,
             error: null,
           };
@@ -92,7 +97,7 @@ export default function TransactionsPage() {
             error: err instanceof Error ? err.message : "Failed to load",
           };
         }
-      })
+      }),
     );
 
     setBankTransactions(results);
@@ -117,7 +122,7 @@ export default function TransactionsPage() {
           (tx) =>
             tx.name.toLowerCase().includes(query) ||
             tx.merchantName?.toLowerCase().includes(query) ||
-            tx.category?.toLowerCase().includes(query)
+            tx.category?.toLowerCase().includes(query),
         );
       }
 
@@ -126,7 +131,8 @@ export default function TransactionsPage() {
         let comparison = 0;
         switch (field) {
           case "date":
-            comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+            comparison =
+              new Date(a.date).getTime() - new Date(b.date).getTime();
             break;
           case "amount":
             comparison = a.amount - b.amount;
@@ -140,7 +146,7 @@ export default function TransactionsPage() {
 
       return filtered;
     },
-    [searchQuery, sortBy, statusFilter]
+    [searchQuery, sortBy, statusFilter],
   );
 
   const bankTabs = useMemo(() => {
@@ -184,15 +190,14 @@ export default function TransactionsPage() {
         <div className="space-y-8">
           {/* Header with Stats */}
           <TransactionsHeader
-            totalBanks={banks.length}
             totalIncome={totalIncome}
             totalExpense={totalExpense}
           />
 
           {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
             {/* Left: Category Summary */}
-            <div className="lg:col-span-1">
+            <div className="xl:col-span-4">
               <CategorySummaryCard
                 data={categorySummary}
                 isLoading={isCategoryLoading}
@@ -202,10 +207,13 @@ export default function TransactionsPage() {
             </div>
 
             {/* Right: Transaction Table */}
-            <div className="lg:col-span-2">
-              <Card padding="none" className="overflow-hidden border-[var(--color-gray-soft)]">
+            <div className="xl:col-span-8">
+              <Card
+                padding="none"
+                className="overflow-hidden border-[var(--color-gray-soft)]"
+              >
                 {/* Filters */}
-                <div className="p-5 border-b border-[var(--color-gray-soft)]">
+                <div className="p-5 lg:p-6 border-b border-[var(--color-gray-soft)]">
                   <TransactionFilters
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
@@ -221,10 +229,20 @@ export default function TransactionsPage() {
 
                 {/* Transactions */}
                 {visibleBankTransactions.map((bankData) => {
-                  const filtered = getFilteredTransactions(bankData.transactions);
+                  const filtered = getFilteredTransactions(
+                    bankData.transactions,
+                  );
 
-                  if (bankData.isLoading || bankData.error || filtered.length === 0) {
-                    if (selectedBankTab !== "all" || bankData.isLoading || bankData.error) {
+                  if (
+                    bankData.isLoading ||
+                    bankData.error ||
+                    filtered.length === 0
+                  ) {
+                    if (
+                      selectedBankTab !== "all" ||
+                      bankData.isLoading ||
+                      bankData.error
+                    ) {
                       return (
                         <TransactionTable
                           key={bankData.bankId}
@@ -232,6 +250,8 @@ export default function TransactionsPage() {
                           bankName={bankData.bankName}
                           isLoading={bankData.isLoading}
                           error={bankData.error}
+                          searchQuery={searchQuery}
+                          totalOriginalCount={bankData.transactions.length}
                         />
                       );
                     }
@@ -243,7 +263,11 @@ export default function TransactionsPage() {
                       key={bankData.bankId}
                       transactions={filtered}
                       bankName={bankData.bankName}
-                      showBankHeader={selectedBankTab === "all" && banks.length > 1}
+                      showBankHeader={
+                        selectedBankTab === "all" && banks.length > 1
+                      }
+                      searchQuery={searchQuery}
+                      totalOriginalCount={bankData.transactions.length}
                     />
                   );
                 })}
