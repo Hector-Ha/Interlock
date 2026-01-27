@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, Search, X, Shield } from "lucide-react";
+import { Menu, Search, X } from "lucide-react";
 import { useUIStore } from "@/stores/ui.store";
 import { useAuthStore } from "@/stores/auth.store";
-import { Button, Input } from "@/components/ui";
+import { Button } from "@/components/ui";
 import { NotificationBell } from "./NotificationBell";
-import { cn } from "@/lib/utils";
+import { GlobalSearch } from "./GlobalSearch";
 
 const pageInfo: Record<string, { title: string; description: string }> = {
   "/": { title: "Dashboard", description: "Overview of your finances" },
@@ -56,17 +56,7 @@ export function Header() {
 
       {/* Center - Search (Desktop) */}
       <div className="hidden md:flex flex-1 justify-center max-w-xl mx-8">
-        <div className="relative w-full">
-          <Input
-            placeholder="Search transactions, banks..."
-            startIcon={
-              <Search className="h-4 w-4 text-[var(--color-gray-disabled)]" />
-            }
-            className="h-10 w-full bg-[var(--color-gray-surface)] rounded-xl border-transparent 
-              focus:border-[var(--color-brand-main)] focus:bg-white focus:shadow-sm
-              placeholder:text-[var(--color-gray-disabled)]"
-          />
-        </div>
+        <GlobalSearch className="w-full" />
       </div>
 
       {/* Right side */}
@@ -99,15 +89,8 @@ export function Header() {
 
       {/* Mobile Search Overlay */}
       {isSearchOpen && (
-        <div className="absolute inset-x-0 top-full bg-white border-b border-[var(--color-gray-soft)] p-4 md:hidden shadow-lg">
-          <Input
-            placeholder="Search..."
-            startIcon={
-              <Search className="h-4 w-4 text-[var(--color-gray-disabled)]" />
-            }
-            className="h-10 w-full bg-[var(--color-gray-surface)] rounded-xl border-transparent"
-            autoFocus
-          />
+        <div className="absolute inset-x-0 top-full bg-white border-b border-[var(--color-gray-soft)] p-4 md:hidden shadow-lg z-40">
+          <GlobalSearch placeholder="Search..." isMobile />
         </div>
       )}
     </header>

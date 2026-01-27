@@ -1,7 +1,12 @@
 // Imports
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, ArrowLeftToLine, ArrowRightFromLine } from "lucide-react";
+import {
+  ChevronLeft,
+  ArrowLeftToLine,
+  ArrowRightFromLine,
+  LogOut,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth.store";
@@ -18,14 +23,14 @@ import { SidebarItem } from "./SidebarItem";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
-  const { user } = useAuthStore();
+  const { user, signOut } = useAuthStore();
   const { sidebarCollapsed, setSidebarCollapsed } = useUIStore();
   const { banks } = useBankStore();
 
   return (
     <aside
       className={cn(
-        "group/sidebar sticky left-0 top-0 z-40 flex h-screen flex-col border-r border-border/50 bg-card transition-all duration-300 ease-in-out",
+        "group/sidebar sticky left-0 top-0 z-40 flex h-screen shrink-0 flex-col border-r border-border/50 bg-card transition-all duration-300 ease-in-out",
         sidebarCollapsed ? "w-[88px]" : "w-[280px]",
         className,
       )}
@@ -162,7 +167,17 @@ const Sidebar = ({ className }: SidebarProps & { className?: string }) => {
               </AnimatePresence>
             </div>
 
-            {/* Settings Trigger Removed */}
+            {/* Logout Button */}
+            {!sidebarCollapsed && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => signOut()}
+                className="h-8 w-8 text-muted-foreground hover:text-[var(--color-error-main)] hover:bg-[var(--color-error-surface)]"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         ) : (
           // Loading skeleton or fallback

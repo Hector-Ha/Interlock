@@ -91,7 +91,7 @@ export function RightSideBar({ className }: RightSideBarProps) {
   return (
     <aside
       className={cn(
-        "flex w-96 flex-col border-l border-[var(--color-gray-soft)] bg-white",
+        "flex flex-col border-l border-[var(--color-gray-soft)] bg-white overflow-hidden",
         className,
       )}
     >
@@ -205,7 +205,10 @@ export function RightSideBar({ className }: RightSideBarProps) {
           </Card>
 
           {/* Spending by Category Section */}
-          <Card padding="none" className="border-[var(--color-gray-soft)]">
+          <Card
+            padding="none"
+            className="border-[var(--color-gray-soft)] overflow-hidden"
+          >
             <div className="flex items-center justify-between p-4 border-b border-[var(--color-gray-soft)]">
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-[var(--color-success-main)]" />
@@ -267,11 +270,11 @@ export function RightSideBar({ className }: RightSideBarProps) {
 
                     return (
                       <div key={bankData.bankId}>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-medium text-[var(--color-gray-main)]">
+                        <div className="flex items-center justify-between mb-2 gap-2">
+                          <span className="text-xs font-medium text-[var(--color-gray-main)] truncate">
                             {bankData.bankName}
                           </span>
-                          <span className="text-[10px] text-[var(--color-gray-disabled)]">
+                          <span className="text-[10px] text-[var(--color-gray-disabled)] whitespace-nowrap shrink-0">
                             {bankData.categories.length} categories
                           </span>
                         </div>

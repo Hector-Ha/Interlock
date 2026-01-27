@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { useBankStore } from "@/stores/bank.store";
 import { bankService } from "@/services/bank.service";
 import { Card } from "@/components/ui/Card";
@@ -36,6 +37,7 @@ interface BankTransactions {
 }
 
 export default function TransactionsPage() {
+  const searchParams = useSearchParams();
   const { banks, fetchBanks } = useBankStore();
   const {
     data: categorySummary,
@@ -44,14 +46,22 @@ export default function TransactionsPage() {
     isLoading: isCategoryLoading,
   } = useTransactionsByCategory(banks);
 
+  const initialSearch = searchParams.get("search") || "";
   const [bankTransactions, setBankTransactions] = useState<BankTransactions[]>(
     [],
   );
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [sortBy, setSortBy] = useState("date-desc");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedBankTab, setSelectedBankTab] = useState<string>("all");
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+  useEffect(() => {
+    const urlSearch = searchParams.get("search") || "";
+    if (urlSearch !== searchQuery) {
+      setSearchQuery(urlSearch);
+    }
+  }, [searchParams, searchQuery]);
 
   useEffect(() => {
     fetchBanks();
