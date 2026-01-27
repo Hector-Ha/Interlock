@@ -7,6 +7,7 @@ import { config } from "@/config";
 import { encrypt } from "@/utils/encryption";
 import { authSchema } from "@/validators/auth.schema";
 import { emailService } from "./email.service";
+import { notificationService } from "./notification.service";
 
 import { AUTH_CONSTANTS } from "@/config/constants";
 
@@ -67,10 +68,10 @@ export const signIn = async (email: string, password: string) => {
   // Check if account is locked
   if (user.lockedUntil && user.lockedUntil > new Date()) {
     const minutesRemaining = Math.ceil(
-      (user.lockedUntil.getTime() - Date.now()) / (1000 * 60)
+      (user.lockedUntil.getTime() - Date.now()) / (1000 * 60),
     );
     throw new Error(
-      `Account is locked. Please try again in ${minutesRemaining} minutes.`
+      `Account is locked. Please try again in ${minutesRemaining} minutes.`,
     );
   }
 
@@ -85,7 +86,7 @@ export const signIn = async (email: string, password: string) => {
     if (failedAttempts >= AUTH_CONSTANTS.MAX_FAILED_ATTEMPTS) {
       shouldLock = true;
       lockedUntil = new Date(
-        Date.now() + AUTH_CONSTANTS.LOCKOUT_DURATION_MINUTES * 60 * 1000
+        Date.now() + AUTH_CONSTANTS.LOCKOUT_DURATION_MINUTES * 60 * 1000,
       );
     }
 
@@ -98,8 +99,29 @@ export const signIn = async (email: string, password: string) => {
     });
 
     if (shouldLock) {
+      // Send security alert notification for account lock
+      try {
+        const shouldNotify = await notificationService.shouldNotify(
+          user.id,
+          "SECURITY_ALERT",
+          "inApp",
+        );
+
+        if (shouldNotify) {
+          await notificationService.create({
+            recipientUserId: user.id,
+            type: "SECURITY_ALERT",
+            title: "Account Security Alert",
+            message: `Your account has been temporarily locked due to ${failedAttempts} failed login attempts. It will unlock in ${AUTH_CONSTANTS.LOCKOUT_DURATION_MINUTES} minutes.`,
+            actionUrl: "/settings/security",
+          });
+        }
+      } catch {
+        // Don't let notification failure block the error
+      }
+
       throw new Error(
-        `Too many failed attempts. Account locked for ${AUTH_CONSTANTS.LOCKOUT_DURATION_MINUTES} minutes.`
+        `Too many failed attempts. Account locked for ${AUTH_CONSTANTS.LOCKOUT_DURATION_MINUTES} minutes.`,
       );
     }
 
@@ -126,7 +148,7 @@ export const signIn = async (email: string, password: string) => {
 
 // Retrieves a user by ID with basic profile information.
 export const getUserById = async (
-  userId: string
+  userId: string,
 ): Promise<{
   id: string;
   email: string;
@@ -147,7 +169,7 @@ export const generateRefreshToken = (): string => {
 export const createSession = async (
   userId: string,
   userAgent?: string,
-  ipAddress?: string
+  ipAddress?: string,
 ): Promise<string> => {
   const refreshToken = generateRefreshToken();
   const expiresAt = new Date();
@@ -168,7 +190,7 @@ export const createSession = async (
 
 // Validates a refresh token and returns the associated session .
 export const validateRefreshToken = async (
-  refreshToken: string
+  refreshToken: string,
 ): Promise<
   | (Awaited<ReturnType<typeof prisma.session.findUnique>> & {
       user: Awaited<ReturnType<typeof prisma.user.findUnique>>;
@@ -197,7 +219,7 @@ export const validateRefreshToken = async (
 export const rotateRefreshToken = async (
   oldRefreshToken: string,
   userAgent?: string,
-  ipAddress?: string
+  ipAddress?: string,
 ): Promise<string | null> => {
   const session = await validateRefreshToken(oldRefreshToken);
 
@@ -210,14 +232,14 @@ export const rotateRefreshToken = async (
   const newRefreshToken = await createSession(
     session.userId,
     userAgent,
-    ipAddress
+    ipAddress,
   );
 
   return newRefreshToken;
 };
 
 export const invalidateAllSessions = async (
-  userId: string
+  userId: string,
 ): Promise<number> => {
   const result = await prisma.session.deleteMany({
     where: { userId },
@@ -230,7 +252,7 @@ export const invalidateAllSessions = async (
 export const changePassword = async (
   userId: string,
   currentPassword: string,
-  newPassword: string
+  newPassword: string,
 ): Promise<boolean> => {
   const user = await prisma.user.findUnique({ where: { id: userId } });
 
@@ -240,7 +262,7 @@ export const changePassword = async (
 
   const isValidPassword = await bcrypt.compare(
     currentPassword,
-    user.passwordHash
+    user.passwordHash,
   );
 
   if (!isValidPassword) {
@@ -255,6 +277,28 @@ export const changePassword = async (
     data: { passwordHash: newPasswordHash },
   });
 
+  // Send security alert notification for password change
+  try {
+    const shouldNotify = await notificationService.shouldNotify(
+      userId,
+      "SECURITY_ALERT",
+      "inApp",
+    );
+
+    if (shouldNotify) {
+      await notificationService.create({
+        recipientUserId: userId,
+        type: "SECURITY_ALERT",
+        title: "Password Changed",
+        message:
+          "Your password was successfully changed. If you did not make this change, please contact support immediately.",
+        actionUrl: "/settings/security",
+      });
+    }
+  } catch {
+    // Don't let notification failure block success
+  }
+
   // Force re-login by invalidating all sessions
   await invalidateAllSessions(userId);
 
@@ -264,7 +308,7 @@ export const changePassword = async (
 // Updates user profile information
 export const updateProfile = async (
   userId: string,
-  data: { firstName?: string; lastName?: string }
+  data: { firstName?: string; lastName?: string },
 ): Promise<{
   id: string;
   email: string;
@@ -296,7 +340,7 @@ export const forgotPassword = async (email: string): Promise<void> => {
   const token = jwt.sign(
     { userId: user.id, purpose: "password_reset" },
     config.jwtSecret,
-    { expiresIn: "1h" }
+    { expiresIn: "1h" },
   );
 
   await emailService.sendPasswordResetEmail(user.email, token);
@@ -304,7 +348,7 @@ export const forgotPassword = async (email: string): Promise<void> => {
 
 export const resetPasswordWithToken = async (
   token: string,
-  newPassword: string
+  newPassword: string,
 ): Promise<void> => {
   try {
     const decoded = jwt.verify(token, config.jwtSecret) as {
@@ -340,7 +384,7 @@ export const sendVerification = async (userId: string): Promise<void> => {
   const token = jwt.sign(
     { userId: user.id, purpose: "email_verification" },
     config.jwtSecret,
-    { expiresIn: "24h" }
+    { expiresIn: "24h" },
   );
 
   await emailService.sendVerificationEmail(user.email, token);

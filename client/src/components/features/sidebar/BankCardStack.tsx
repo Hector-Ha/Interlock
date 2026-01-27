@@ -206,7 +206,7 @@ export function BankCardStack({ banks, className }: BankCardStackProps) {
         </AnimatePresence>
       </div>
 
-      {/* Navigation - only show if multiple banks */}
+      {/* Navigation */}
       {banks.length > 1 && (
         <div className="flex items-center justify-center gap-3 mt-4">
           <button

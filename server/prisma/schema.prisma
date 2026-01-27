@@ -35,6 +35,7 @@ model User {
   sessions          Session[]
   auditLogs         AuditLog[]
   notifications     Notification[]
+  notificationPreferences NotificationPreference[]
 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -183,11 +184,31 @@ model Notification {
   
   isRead                Boolean          @default(false)
   readAt                DateTime?
+  dismissedAt           DateTime?        // null = visible, date = dismissed (soft delete)
   
   relatedTransactionId  String?
+  actionUrl             String?          // Deep link for click navigation
   
   createdAt             DateTime         @default(now())
 
   @@index([recipientUserId, isRead])
+  @@index([recipientUserId, dismissedAt])
   @@index([createdAt])
 }
+
+model NotificationPreference {
+  id              String           @id @default(uuid())
+  userId          String
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type            NotificationType
+  inAppEnabled    Boolean          @default(true)
+  emailEnabled    Boolean          @default(true)
+  
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  
+  @@unique([userId, type])
+  @@index([userId])
+}
+

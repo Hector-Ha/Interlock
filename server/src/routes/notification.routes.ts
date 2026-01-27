@@ -6,6 +6,10 @@ import {
   getUnreadCount,
   markAsRead,
   markAllAsRead,
+  dismissNotification,
+  dismissAllNotifications,
+  getPreferences,
+  updatePreference,
 } from "@/controllers/notification.controller";
 
 const router: Router = Router();
@@ -25,5 +29,17 @@ router.patch("/:id/read", markAsRead as RequestHandler);
 
 // Mark all notifications as read
 router.post("/read-all", markAllAsRead as RequestHandler);
+
+// Dismiss single notification (soft delete)
+router.patch("/:id/dismiss", dismissNotification as RequestHandler);
+
+// Dismiss all notifications (soft delete)
+router.post("/dismiss-all", dismissAllNotifications as RequestHandler);
+
+// Get all user preferences
+router.get("/preferences", getPreferences as RequestHandler);
+
+// Update a single preference by type
+router.patch("/preferences/:type", updatePreference as RequestHandler);
 
 export default router;
