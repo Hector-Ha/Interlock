@@ -12,11 +12,23 @@ import {
   Building2,
   Clock,
   Shield,
+  Terminal,
+  Info,
 } from "lucide-react";
 import { useBankStore } from "@/stores/bank.store";
+import { useAuthStore } from "@/stores/auth.store";
 import { transferService } from "@/services/transfer.service";
-import { Button, Input, Card, Alert } from "@/components/ui";
+import { Button, Input, Card } from "@/components/ui";
 import { Select } from "@/components/ui/Select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/Dialog";
+import { Alert, AlertTitle } from "@/components/ui/Alert";
 import { useToast } from "@/stores/ui.store";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -29,7 +41,7 @@ const transferSchema = z.object({
       const num = parseFloat(val);
       return !isNaN(num) && num > 0;
     },
-    { message: "Amount must be greater than $0.00" }
+    { message: "Amount must be greater than $0.00" },
   ),
 });
 
@@ -48,10 +60,12 @@ export function TransferForm({
 }: TransferFormProps) {
   const router = useRouter();
   const toast = useToast();
+  const user = useAuthStore((s) => s.user);
 
   const { banks, fetchBanks, isLoading: isBankLoading } = useBankStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSandboxModal, setShowSandboxModal] = useState(false);
 
   const {
     register,
@@ -77,7 +91,7 @@ export function TransferForm({
 
   const validBanks = useMemo(
     () => banks.filter((b) => b.isDwollaLinked && b.status === "ACTIVE"),
-    [banks]
+    [banks],
   );
 
   const sourceOptions = useMemo(
@@ -86,7 +100,7 @@ export function TransferForm({
         value: bank.id,
         label: bank.institutionName,
       })),
-    [validBanks]
+    [validBanks],
   );
 
   const destinationOptions = useMemo(
@@ -97,8 +111,10 @@ export function TransferForm({
           value: bank.id,
           label: bank.institutionName,
         })),
-    [validBanks, sourceBankId]
+    [validBanks, sourceBankId],
   );
+
+  const isTestUser = user?.email === "test@interlock.com";
 
   const onSubmit = async (data: TransferFormData) => {
     setIsSubmitting(true);
@@ -116,10 +132,16 @@ export function TransferForm({
       setValue("destinationBankId", "");
       setValue("amount", "");
       onSuccess?.();
+
+      // Show sandbox info modal for test user
+      if (isTestUser) {
+        setShowSandboxModal(true);
+      }
     } catch (err: unknown) {
       Sentry.captureException(err);
       const message =
-        err instanceof Error ? err.message : "Failed to initiate transfer";
+        (err as any)?.message ||
+        (err instanceof Error ? err.message : "Failed to initiate transfer");
       setError(message);
     } finally {
       setIsSubmitting(false);
@@ -169,103 +191,156 @@ export function TransferForm({
   const isFormValid = sourceBankId && destinationBankId && parsedAmount > 0;
 
   return (
-    <div className={className}>
-      {error && (
-        <Alert variant="destructive" className="mx-6 mt-6 mb-0">
-          <AlertCircle className="h-4 w-4" aria-hidden="true" />
-          <span className="ml-2">{error}</span>
-        </Alert>
-      )}
+    <>
+      <div className={className}>
+        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
+          {error && (
+            <div className="mb-6 rounded-lg bg-[var(--color-error-surface)] p-4 border border-[var(--color-error-border)] flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-[var(--color-error-main)] mt-0.5 shrink-0" />
+              <p className="text-sm font-medium text-[var(--color-error-text)] leading-5">
+                {error}
+              </p>
+            </div>
+          )}
+          {/* Account Selection */}
+          <div className="space-y-4">
+            <Select
+              label="From Account"
+              options={sourceOptions}
+              value={sourceBankId}
+              onChange={(val) =>
+                setValue("sourceBankId", val, { shouldValidate: true })
+              }
+              placeholder="Select source account…"
+              error={errors.sourceBankId?.message}
+            />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
-        {/* Account Selection */}
-        <div className="space-y-4">
-          <Select
-            label="From Account"
-            options={sourceOptions}
-            value={sourceBankId}
-            onChange={(val) =>
-              setValue("sourceBankId", val, { shouldValidate: true })
-            }
-            placeholder="Select source account…"
-            error={errors.sourceBankId?.message}
-          />
+            {/* Transfer Direction Indicator */}
+            <div className="flex justify-center -my-1">
+              <div className="w-9 h-9 rounded-full bg-[var(--color-gray-surface)] border border-[var(--color-gray-soft)] flex items-center justify-center">
+                <ArrowDownUp
+                  className="h-4 w-4 text-[var(--color-gray-main)]"
+                  aria-hidden="true"
+                />
+              </div>
+            </div>
 
-          {/* Transfer Direction Indicator */}
-          <div className="flex justify-center -my-1">
-            <div className="w-9 h-9 rounded-full bg-[var(--color-gray-surface)] border border-[var(--color-gray-soft)] flex items-center justify-center">
-              <ArrowDownUp
-                className="h-4 w-4 text-[var(--color-gray-main)]"
-                aria-hidden="true"
-              />
+            <Select
+              label="To Account"
+              options={destinationOptions}
+              value={destinationBankId}
+              onChange={(val) =>
+                setValue("destinationBankId", val, { shouldValidate: true })
+              }
+              placeholder="Select destination account…"
+              error={errors.destinationBankId?.message}
+              disabled={!sourceBankId}
+            />
+          </div>
+
+          {/* Amount Input */}
+          <div className="pt-2">
+            <Input
+              label="Amount"
+              placeholder="0.00"
+              startIcon={
+                <span className="text-[var(--color-gray-main)] font-medium">
+                  $
+                </span>
+              }
+              {...register("amount")}
+              error={errors.amount?.message}
+              numericOnly
+            />
+          </div>
+
+          {/* Info Footer */}
+          <div className="flex items-center justify-center pt-4 border-t border-[var(--color-gray-soft)]">
+            <div className="flex items-center gap-4 text-xs text-[var(--color-gray-main)]">
+              <span className="flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+                1-3 business days
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Shield className="h-3.5 w-3.5" aria-hidden="true" />
+                Bank-level security
+              </span>
             </div>
           </div>
 
-          <Select
-            label="To Account"
-            options={destinationOptions}
-            value={destinationBankId}
-            onChange={(val) =>
-              setValue("destinationBankId", val, { shouldValidate: true })
-            }
-            placeholder="Select destination account…"
-            error={errors.destinationBankId?.message}
-            disabled={!sourceBankId}
-          />
-        </div>
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            className="w-full h-11 bg-[var(--color-brand-main)] hover:bg-[var(--color-brand-hover)] text-white font-medium transition-all"
+            disabled={isSubmitting || !isFormValid}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2
+                  className="h-4 w-4 mr-2 animate-spin"
+                  aria-hidden="true"
+                />
+                Processing…
+              </>
+            ) : (
+              <>
+                Transfer Funds
+                <ArrowDownUp className="ml-2 h-4 w-4" aria-hidden="true" />
+              </>
+            )}
+          </Button>
+        </form>
+      </div>
 
-        {/* Amount Input */}
-        <div className="pt-2">
-          <Input
-            label="Amount"
-            placeholder="0.00"
-            startIcon={
-              <span className="text-[var(--color-gray-main)] font-medium">
-                $
-              </span>
-            }
-            {...register("amount")}
-            error={errors.amount?.message}
-            numericOnly
-          />
-        </div>
+      {/* Sandbox Info Modal for Test User */}
+      <Dialog open={showSandboxModal} onOpenChange={setShowSandboxModal}>
+        <DialogContent className="sm:max-w-md bg-[var(--card)] border-[var(--border)]">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[var(--color-warning-surface)] flex items-center justify-center">
+                <Info className="h-5 w-5 text-[var(--color-warning-main)]" />
+              </div>
+              <DialogTitle className="text-[var(--foreground)]">
+                Sandbox Mode Notice
+              </DialogTitle>
+            </div>
+          </DialogHeader>
 
-        {/* Info Footer */}
-        <div className="flex items-center justify-center pt-4 border-t border-[var(--color-gray-soft)]">
-          <div className="flex items-center gap-4 text-xs text-[var(--color-gray-main)]">
-            <span className="flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-              1-3 business days
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Shield className="h-3.5 w-3.5" aria-hidden="true" />
-              Bank-level security
-            </span>
+          <div className="space-y-4 pt-2">
+            <DialogDescription className="text-[var(--muted-foreground)] leading-relaxed">
+              In Plaid&apos;s sandbox environment, transfers are not
+              automatically processed like they would be in production. The
+              transfer will remain in &quot;Pending&quot; status until manually
+              processed.
+            </DialogDescription>
+
+            <div className="bg-[var(--muted)] rounded-xl p-4 space-y-3 border border-[var(--border)]">
+              <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
+                <Terminal className="h-4 w-4 text-[var(--color-brand-main)]" />
+                To simulate transfer processing:
+              </div>
+              <div className="bg-[var(--card)] rounded-lg p-3 border border-[var(--border)]">
+                <code className="text-xs text-[var(--color-success-main)] font-mono break-all">
+                  cd server && bun run src/scripts/process-sandbox-transfers.ts
+                </code>
+              </div>
+              <p className="text-xs text-[var(--muted-foreground)]">
+                Run this command in your terminal to process all pending sandbox
+                transfers and update their status.
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* Submit Button */}
-        <Button
-          type="submit"
-          className="w-full h-11 bg-[var(--color-brand-main)] hover:bg-[var(--color-brand-hover)] text-white font-medium transition-all"
-          disabled={isSubmitting || !isFormValid}
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2
-                className="h-4 w-4 mr-2 animate-spin"
-                aria-hidden="true"
-              />
-              Processing…
-            </>
-          ) : (
-            <>
-              Transfer Funds
-              <ArrowDownUp className="ml-2 h-4 w-4" aria-hidden="true" />
-            </>
-          )}
-        </Button>
-      </form>
-    </div>
+          <DialogFooter className="pt-2">
+            <Button
+              onClick={() => setShowSandboxModal(false)}
+              className="w-full bg-[var(--color-brand-main)] hover:bg-[var(--color-brand-hover)] text-white"
+            >
+              Got it
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

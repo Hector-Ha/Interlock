@@ -15,12 +15,23 @@ import {
   Shield,
   Building2,
   Send,
+  UserCheck,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Button, Input, Card, Alert } from "@/components/ui";
+import { Button, Input, Card } from "@/components/ui";
 import { Select } from "@/components/ui/Select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/Dialog";
+import { Alert, AlertTitle } from "@/components/ui/Alert";
 import { RecipientSearch } from "@/components/features/p2p/RecipientSearch";
 import { useBankStore } from "@/stores/bank.store";
+import { useAuthStore } from "@/stores/auth.store";
 import { p2pService } from "@/services/p2p.service";
 import { useToast } from "@/stores/ui.store";
 import { formatCurrency, cn } from "@/lib/utils";
@@ -44,7 +55,7 @@ const p2pSchema = z.object({
         const num = parseFloat(val);
         return num <= P2P_LIMITS.PER_TRANSACTION;
       },
-      `Maximum transfer is ${formatCurrency(P2P_LIMITS.PER_TRANSACTION)}`
+      `Maximum transfer is ${formatCurrency(P2P_LIMITS.PER_TRANSACTION)}`,
     ),
   note: z.string().max(200, "Note cannot exceed 200 characters").optional(),
 });
@@ -64,15 +75,17 @@ export function P2PTransferForm({
 }: P2PTransferFormProps) {
   const router = useRouter();
   const toast = useToast();
+  const user = useAuthStore((s) => s.user);
   const { banks, fetchBanks, isLoading: isBankLoading } = useBankStore();
 
   const [selectedRecipient, setSelectedRecipient] = useState<Recipient | null>(
-    null
+    null,
   );
   const [selectedBankId, setSelectedBankId] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showSandboxModal, setShowSandboxModal] = useState(false);
 
   useEffect(() => {
     fetchBanks();
@@ -80,7 +93,7 @@ export function P2PTransferForm({
 
   const linkedBanks = useMemo(
     () => banks.filter((b) => b.isDwollaLinked && b.status === "ACTIVE"),
-    [banks]
+    [banks],
   );
 
   const bankOptions = useMemo(
@@ -89,7 +102,7 @@ export function P2PTransferForm({
         value: bank.id,
         label: bank.institutionName,
       })),
-    [linkedBanks]
+    [linkedBanks],
   );
 
   const {
@@ -109,6 +122,8 @@ export function P2PTransferForm({
   const amount = watch("amount");
   const note = watch("note");
   const parsedAmount = parseFloat(amount) || 0;
+
+  const isTestUser = user?.email === "test@interlock.com";
 
   const onSubmit = () => {
     if (!selectedRecipient) {
@@ -140,7 +155,7 @@ export function P2PTransferForm({
       });
 
       toast.success(
-        `Successfully sent ${formatCurrency(parsedAmount)} to ${selectedRecipient.firstName}`
+        `Successfully sent ${formatCurrency(parsedAmount)} to ${selectedRecipient.firstName}`,
       );
 
       reset();
@@ -149,12 +164,16 @@ export function P2PTransferForm({
       setShowConfirm(false);
 
       onSuccess?.();
+
+      // Show sandbox info modal for test user
+      if (isTestUser) {
+        setShowSandboxModal(true);
+      }
     } catch (err: unknown) {
       Sentry.captureException(err);
       const message =
-        err instanceof Error
-          ? err.message
-          : "Transfer failed. Please try again.";
+        (err as any)?.message ||
+        (err instanceof Error ? err.message : "Failed to initiate transfer");
       setError(message);
       setShowConfirm(false);
     } finally {
@@ -215,19 +234,32 @@ export function P2PTransferForm({
   return (
     <>
       <div className={className}>
-        {error && (
-          <Alert variant="destructive" className="mx-6 mt-6 mb-0">
-            <AlertCircle className="h-4 w-4" aria-hidden="true" />
-            <span className="ml-2">{error}</span>
-          </Alert>
-        )}
-
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
+          {error && (
+            <div className="mb-6 rounded-lg bg-[var(--color-error-surface)] p-4 border border-[var(--color-error-border)] flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-[var(--color-error-main)] mt-0.5 shrink-0" />
+              <p className="text-sm font-medium text-[var(--color-error-text)] leading-5">
+                {error}
+              </p>
+            </div>
+          )}
           {/* Recipient Selection */}
           <div>
             <label className="block text-sm font-medium text-[var(--color-gray-text)] mb-2">
               Recipient
             </label>
+            {/* Test user hint */}
+            {isTestUser && !selectedRecipient && (
+              <div className="mb-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--color-brand-surface)] border border-[var(--color-brand-soft)]">
+                <Info className="h-4 w-4 text-[var(--color-brand-main)] shrink-0" />
+                <p className="text-xs text-[var(--color-brand-text)]">
+                  Try sending to{" "}
+                  <code className="font-mono font-medium text-[var(--color-brand-main)]">
+                    recipient@interlock.com
+                  </code>
+                </p>
+              </div>
+            )}
             {selectedRecipient ? (
               <div className="flex items-center justify-between p-3 border border-[var(--color-gray-soft)] rounded-lg bg-[var(--color-gray-surface)]/50">
                 <div className="flex items-center gap-3">
@@ -391,7 +423,9 @@ export function P2PTransferForm({
                   <p className="text-xs text-[var(--color-gray-main)] uppercase tracking-wide mb-1">
                     Note
                   </p>
-                  <p className="text-sm text-[var(--color-gray-text)]">{note}</p>
+                  <p className="text-sm text-[var(--color-gray-text)]">
+                    {note}
+                  </p>
                 </div>
               )}
 
@@ -433,6 +467,69 @@ export function P2PTransferForm({
           </Card>
         </div>
       )}
+
+      {/* Sandbox Info Modal for Test User */}
+      <Dialog open={showSandboxModal} onOpenChange={setShowSandboxModal}>
+        <DialogContent className="sm:max-w-md bg-[var(--card)] border-[var(--border)]">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[var(--color-warning-surface)] flex items-center justify-center">
+                <Info className="h-5 w-5 text-[var(--color-warning-main)]" />
+              </div>
+              <DialogTitle className="text-[var(--foreground)]">
+                Sandbox Mode Notice
+              </DialogTitle>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-4 pt-2">
+            <DialogDescription className="text-[var(--muted-foreground)] leading-relaxed">
+              In sandbox mode, Plaid cannot receive updates from Dwolla. The
+              transfer has been processed, but the recipient&apos;s balance
+              won&apos;t automatically update in their Plaid-connected bank.
+            </DialogDescription>
+
+            <div className="bg-[var(--muted)] rounded-xl p-4 space-y-3 border border-[var(--border)]">
+              <div className="flex items-center gap-2 text-sm font-medium text-[var(--foreground)]">
+                <UserCheck className="h-4 w-4 text-[var(--color-brand-main)]" />
+                To verify the transfer went through:
+              </div>
+              <div className="bg-[var(--card)] rounded-lg p-3 border border-[var(--border)] space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-[var(--muted-foreground)]">
+                    Email:
+                  </span>
+                  <code className="text-xs text-[var(--color-success-main)] font-mono">
+                    recipient@interlock.com
+                  </code>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-[var(--muted-foreground)]">
+                    Password:
+                  </span>
+                  <code className="text-xs text-[var(--color-success-main)] font-mono">
+                    password123
+                  </code>
+                </div>
+              </div>
+              <p className="text-xs text-[var(--muted-foreground)]">
+                Log in as the recipient to see the incoming transfer
+                notification and transaction history. Note that bank balances
+                won&apos;t reflect the transfer due to sandbox limitations.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="pt-2">
+            <Button
+              onClick={() => setShowSandboxModal(false)}
+              className="w-full bg-[var(--color-brand-main)] hover:bg-[var(--color-brand-hover)] text-white"
+            >
+              Got it
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

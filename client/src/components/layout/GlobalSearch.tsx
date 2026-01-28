@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Search, X, Building2, CreditCard, Loader2 } from "lucide-react";
+import { Search, X, Building2, CreditCard, Loader2, ArrowRight } from "lucide-react";
 import { useBankStore } from "@/stores/bank.store";
 import { bankService } from "@/services/bank.service";
 import { Input } from "@/components/ui/Input";

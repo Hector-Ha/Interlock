@@ -4,7 +4,9 @@ export interface Transfer {
   status: "PENDING" | "SUCCESS" | "FAILED" | "RETURNED";
   sourceBankName: string;
   destinationBankName: string;
+
   createdAt: string;
+  type?: string;
 }
 
 export interface TransferDetails extends Transfer {

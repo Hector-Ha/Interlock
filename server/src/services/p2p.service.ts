@@ -4,6 +4,8 @@ import { notificationService } from "./notification.service";
 import { emailService } from "./email.service";
 import { logger } from "@/middleware/logger";
 import type { Transaction } from "../generated/client";
+import { decrypt } from "@/utils/encryption";
+import { getEffectiveAccounts } from "./bank.service";
 
 // Transfer limits in cents for precision
 const P2P_LIMITS = {
@@ -134,7 +136,7 @@ export const p2pService = {
       }),
     ]);
 
-    const dailySum = Number(dailyTotal._sum.amount || 0) * 100;
+    const dailySum = Math.abs(Number(dailyTotal._sum.amount || 0) * 100);
     if (dailySum + amountCents > P2P_LIMITS.DAILY) {
       const remaining = (P2P_LIMITS.DAILY - dailySum) / 100;
       return {
@@ -145,7 +147,7 @@ export const p2pService = {
       };
     }
 
-    const weeklySum = Number(weeklyTotal._sum.amount || 0) * 100;
+    const weeklySum = Math.abs(Number(weeklyTotal._sum.amount || 0) * 100);
     if (weeklySum + amountCents > P2P_LIMITS.WEEKLY) {
       const remaining = (P2P_LIMITS.WEEKLY - weeklySum) / 100;
       return {
@@ -188,6 +190,28 @@ export const p2pService = {
 
     if (!senderBank?.dwollaFundingUrl) {
       throw new Error("Sender bank not linked to Dwolla");
+    }
+
+    // Verify Balance
+    try {
+      const accessToken = decrypt(senderBank.plaidAccessToken);
+      const accounts = await getEffectiveAccounts(senderBank.id, accessToken);
+      const sourceAccount =
+        accounts.find((acc: any) => acc.subtype === "checking") ||
+        accounts.find((acc: any) => acc.type === "depository");
+
+      if (sourceAccount && sourceAccount.balance.available !== null) {
+        if (sourceAccount.balance.available < amount) {
+          throw new Error(
+            `Insufficient funds. Available balance: $${sourceAccount.balance.available}`,
+          );
+        }
+      }
+    } catch (error: any) {
+      if (error.message.startsWith("Insufficient funds")) {
+        throw error;
+      }
+      logger.warn({ err: error }, "Failed to verify balance for P2P transfer");
     }
 
     // Get recipient's primary bank

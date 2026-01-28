@@ -3,13 +3,13 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { useAuthStore } from "@/stores/auth.store";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { signInSchema, type SignInSchema } from "@/lib/validations/auth";
-import { Alert, AlertDescription } from "@/components/ui/Alert";
+
 import { AuthFooterLinks } from "@/components/auth";
 
 export function SignInForm() {
@@ -78,11 +78,12 @@ export function SignInForm() {
           </div>
 
           {authError && (
-            <Alert variant="destructive" className="py-2.5">
-              <AlertDescription className="text-sm font-medium">
+            <div className="rounded-lg bg-[var(--color-error-surface)] p-4 border border-[var(--color-error-border)] flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-[var(--color-error-main)] mt-0.5 shrink-0" />
+              <p className="text-sm font-medium text-[var(--color-error-text)] leading-5">
                 {authError}
-              </AlertDescription>
-            </Alert>
+              </p>
+            </div>
           )}
 
           <Button

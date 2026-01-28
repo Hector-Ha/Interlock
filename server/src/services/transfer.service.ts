@@ -89,6 +89,7 @@ export const getTransfers = async (
   const where: any = {
     bankId: { in: bankIds },
     dwollaTransferId: { not: null },
+    type: { in: ["DEBIT", "P2P_SENT", "P2P_RECEIVED"] },
   };
 
   if (filters.status) {
@@ -167,6 +168,7 @@ export const getTransfers = async (
     sourceBankName: t.bank.institutionName,
     destinationBankName: t.name.replace("Transfer to ", ""),
     createdAt: t.createdAt,
+    type: t.type,
   }));
 
   return {

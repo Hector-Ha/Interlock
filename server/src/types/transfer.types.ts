@@ -22,4 +22,5 @@ export interface TransferListItem {
   sourceBankName: string;
   destinationBankName: string;
   createdAt: Date;
+  type: string;
 }

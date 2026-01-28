@@ -28,8 +28,11 @@ export interface Account {
   };
 }
 
+export type TransactionType = "DEBIT" | "CREDIT" | "INTERNAL" | "P2P_SENT" | "P2P_RECEIVED";
+
 export interface Transaction {
   id: string;
+  bankId: string;
   amount: number;
   name: string;
   merchantName: string | null;
@@ -45,4 +48,5 @@ export interface Transaction {
   category: string[];
   channel: string;
   pending: boolean;
+  type: TransactionType;
 }

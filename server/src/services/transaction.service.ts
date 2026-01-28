@@ -44,12 +44,14 @@ export const syncTransactions = async (bankId: string): Promise<SyncResult> => {
       // Process added transactions in parallel
       ...newTx.map((tx) =>
         limit(async () => {
+          // Plaid: positive amount = money leaving (debit), negative = money entering (credit)
+          const isDebit = tx.amount > 0;
           await prisma.transaction.upsert({
             where: { plaidTransactionId: tx.transaction_id },
             create: {
               bankId,
               plaidTransactionId: tx.transaction_id,
-              amount: Math.abs(tx.amount),
+              amount: isDebit ? -Math.abs(tx.amount) : Math.abs(tx.amount),
               name: tx.name || "Unknown",
               merchantName: tx.merchant_name,
               date: new Date(tx.date),
@@ -57,14 +59,16 @@ export const syncTransactions = async (bankId: string): Promise<SyncResult> => {
               category: tx.personal_finance_category?.primary || null,
               status: tx.pending ? "PENDING" : "SUCCESS",
               pending: tx.pending,
+              type: isDebit ? "DEBIT" : "CREDIT",
             },
             update: {
-              amount: Math.abs(tx.amount),
+              amount: isDebit ? -Math.abs(tx.amount) : Math.abs(tx.amount),
               name: tx.name || "Unknown",
               merchantName: tx.merchant_name,
               status: tx.pending ? "PENDING" : "SUCCESS",
               pending: tx.pending,
               category: tx.personal_finance_category?.primary || null,
+              type: isDebit ? "DEBIT" : "CREDIT",
             },
           });
           added++;
@@ -79,14 +83,16 @@ export const syncTransactions = async (bankId: string): Promise<SyncResult> => {
           });
 
           if (existing) {
+            const isDebit = tx.amount > 0;
             await prisma.transaction.update({
               where: { id: existing.id },
               data: {
-                amount: Math.abs(tx.amount),
+                amount: isDebit ? -Math.abs(tx.amount) : Math.abs(tx.amount),
                 name: tx.name || "Unknown",
                 merchantName: tx.merchant_name,
                 status: tx.pending ? "PENDING" : "SUCCESS",
                 pending: tx.pending,
+                type: isDebit ? "DEBIT" : "CREDIT",
               },
             });
             modified++;
@@ -172,6 +178,7 @@ export const getTransactions = async (
       skip: pagination.offset,
       select: {
         id: true,
+        bankId: true,
         amount: true,
         name: true,
         merchantName: true,
@@ -180,6 +187,7 @@ export const getTransactions = async (
         category: true,
         channel: true,
         pending: true,
+        type: true,
       },
     }),
     prisma.transaction.count({ where }),

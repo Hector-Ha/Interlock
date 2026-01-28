@@ -28,6 +28,7 @@ interface Transaction {
   category: string | null;
   channel: string;
   pending: boolean;
+  type?: string;
 }
 
 interface TransactionTableProps {
@@ -195,7 +196,7 @@ export function TransactionTable({
           </thead>
           <tbody className="divide-y divide-[var(--color-gray-soft)]">
             {paginatedTransactions.map((tx) => {
-              const isDebit = tx.amount > 0;
+              const isDebit = tx.amount < 0;
               const category = tx.category || "Other";
               const statusConfig = getStatusConfig(tx.status);
 

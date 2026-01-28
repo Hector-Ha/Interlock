@@ -230,7 +230,7 @@ export const bankService = {
       prisma.transaction.create({
         data: {
           bankId: sourceBankId,
-          amount,
+          amount: -amount, // Negative for outgoing transfer
           name: `Transfer to ${destBank.institutionName}`,
           date: new Date(),
           channel: "ACH",
@@ -242,7 +242,7 @@ export const bankService = {
       prisma.transaction.create({
         data: {
           bankId: destinationBankId,
-          amount,
+          amount, // Positive for incoming transfer
           name: `Transfer from ${sourceBank.institutionName}`,
           date: new Date(),
           channel: "ACH",
@@ -284,10 +284,10 @@ export async function getEffectiveAccounts(
   let credits = 0;
   for (const tx of pendingTransactions) {
     const amount = Number(tx.amount);
-    if (tx.type === "DEBIT") {
-      debits += amount;
-    } else if (tx.type === "CREDIT") {
-      credits += amount;
+    if (tx.type === "DEBIT" || tx.type === "P2P_SENT") {
+      debits += Math.abs(amount); // Ensure we're adding positive magnitude for debits
+    } else if (tx.type === "CREDIT" || tx.type === "P2P_RECEIVED") {
+      credits += Math.abs(amount);
     }
   }
 

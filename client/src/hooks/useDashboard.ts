@@ -71,15 +71,22 @@ export const useDashboard = (): UseDashboardResult => {
         let calculatedChange = 0;
 
         if (currentBanks.length > 0) {
-          // Fetch recent transactions from the first bank as a primary source
-          const primaryBankId = currentBanks[0].id;
-          if (primaryBankId) {
-            const txResponse = await bankService.getTransactions(
-              primaryBankId,
-              { limit: 5 },
-            );
-            transactions = txResponse.transactions;
-          }
+          // Fetch 10 transactions per bank
+          const txPromises = currentBanks.map((bank) =>
+            bankService.getTransactions(bank.id, { limit: 10 }),
+          );
+          const txResults = await Promise.allSettled(txPromises);
+
+          // Combine all transactions from all banks
+          txResults.forEach((result) => {
+            if (result.status === "fulfilled") {
+              transactions.push(...result.value.transactions);
+            }
+          });
+          // Sort by date descending (display logic will handle limiting to 10 for "All Banks")
+          transactions.sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+          );
 
           // Check if component unmounted during transaction fetch
           if (shouldIgnore?.()) return;

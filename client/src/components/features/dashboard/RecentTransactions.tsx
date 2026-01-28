@@ -162,10 +162,10 @@ export function RecentTransactions({
           {/* Mobile List View */}
           <div className="block md:hidden divide-y divide-gray-100">
             {displayTransactions.map((tx) => {
-              const isDebit = tx.amount > 0;
+              const isDebit = tx.amount < 0;
               const amount = isDebit
-                ? `-$${tx.amount.toFixed(2)}`
-                : `+$${Math.abs(tx.amount).toFixed(2)}`;
+                ? `-$${Math.abs(tx.amount).toFixed(2)}`
+                : `+$${tx.amount.toFixed(2)}`;
               const statusConfig = getStatusBadge(tx.status);
 
               return (
@@ -236,10 +236,10 @@ export function RecentTransactions({
               </TableHeader>
               <TableBody>
                 {displayTransactions.map((tx) => {
-                  const isDebit = tx.amount > 0;
+                  const isDebit = tx.amount < 0;
                   const amount = isDebit
-                    ? `-$${tx.amount.toFixed(2)}`
-                    : `+$${Math.abs(tx.amount).toFixed(2)}`;
+                    ? `-$${Math.abs(tx.amount).toFixed(2)}`
+                    : `+$${tx.amount.toFixed(2)}`;
                   const statusConfig = getStatusBadge(tx.status);
                   const category = Array.isArray(tx.category)
                     ? tx.category[0]

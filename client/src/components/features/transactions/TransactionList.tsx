@@ -77,7 +77,7 @@ export function TransactionList({ transactions }: TransactionListProps) {
   return (
     <div className="divide-y divide-[var(--color-gray-soft)]">
       {transactions.map((tx) => {
-        const isDebit = tx.amount > 0;
+        const isDebit = tx.amount < 0;
         const statusConfig = getStatusConfig(tx.status);
         const category = Array.isArray(tx.category)
           ? tx.category[0]

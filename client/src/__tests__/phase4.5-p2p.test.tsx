@@ -53,7 +53,10 @@ vi.mock("@/services/notification.service", () => ({
           message: "You received $50 from John",
           isRead: false,
           readAt: null,
+          dismissedAt: null,
+          actionUrl: null,
           createdAt: new Date().toISOString(),
+          relatedTransactionId: null,
         },
         {
           id: "n2",
@@ -62,7 +65,10 @@ vi.mock("@/services/notification.service", () => ({
           message: "You sent $25 to Jane",
           isRead: true,
           readAt: new Date().toISOString(),
+          dismissedAt: null,
+          actionUrl: null,
           createdAt: new Date().toISOString(),
+          relatedTransactionId: null,
         },
       ],
       total: 2,
@@ -71,6 +77,10 @@ vi.mock("@/services/notification.service", () => ({
     getUnreadCount: vi.fn().mockResolvedValue({ count: 3 }),
     markAsRead: vi.fn().mockResolvedValue(undefined),
     markAllAsRead: vi.fn().mockResolvedValue(undefined),
+    dismiss: vi.fn().mockResolvedValue(undefined),
+    dismissAll: vi.fn().mockResolvedValue(undefined),
+    getPreferences: vi.fn().mockResolvedValue({ preferences: [] }),
+    updatePreference: vi.fn().mockResolvedValue({}),
   },
 }));
 
@@ -233,6 +243,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
         hasMore: false,
         isLoading: false,
         error: null,
+        preferences: [],
+        preferencesLoading: false,
       });
     });
 
@@ -339,6 +351,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
         hasMore: false,
         isLoading: false,
         error: null,
+        preferences: [],
+        preferencesLoading: false,
       });
     });
 
@@ -388,6 +402,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
             message: "Test message",
             isRead: false,
             readAt: null,
+            dismissedAt: null,
+            actionUrl: null,
             createdAt: new Date().toISOString(),
             relatedTransactionId: null,
           },
@@ -417,6 +433,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
             message: "Test",
             isRead: false,
             readAt: null,
+            dismissedAt: null,
+            actionUrl: null,
             createdAt: new Date().toISOString(),
             relatedTransactionId: null,
           },
@@ -427,6 +445,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
             message: "Test",
             isRead: false,
             readAt: null,
+            dismissedAt: null,
+            actionUrl: null,
             createdAt: new Date().toISOString(),
             relatedTransactionId: null,
           },
@@ -460,6 +480,8 @@ describe("Phase 4.5: P2P Frontend Components", () => {
             message: "Test",
             isRead: true,
             readAt: new Date().toISOString(),
+            dismissedAt: null,
+            actionUrl: null,
             createdAt: new Date().toISOString(),
             relatedTransactionId: null,
           },

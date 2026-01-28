@@ -8,6 +8,7 @@ import {
   Building2,
   Sparkles,
   RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 import { RefreshButton } from "@/components/shared/RefreshButton";
 import { useAuthStore } from "@/stores/auth.store";
@@ -19,7 +20,7 @@ import { QuickActionCard } from "@/components/features/dashboard/QuickActionCard
 import { TransactionsCard } from "@/components/features/dashboard/TransactionsCard";
 import { WelcomeEmptyState } from "@/components/features/dashboard/WelcomeEmptyState";
 import { DashboardSkeleton } from "@/components/features/dashboard/DashboardSkeleton";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/Alert";
+
 import { AddBankModal } from "@/components/features/banks/AddBankModal";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card"; // Add imports
 
@@ -108,10 +109,17 @@ export default function DashboardPage() {
     return (
       <section className="min-h-screen bg-[var(--color-gray-surface)]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-          <Alert variant="destructive">
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
+          <div className="rounded-lg bg-[var(--color-error-surface)] p-4 border border-[var(--color-error-border)] flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-[var(--color-error-main)] mt-0.5 shrink-0" />
+            <div className="flex flex-col gap-1">
+              <h3 className="text-sm font-semibold text-[var(--color-error-text)]">
+                Error
+              </h3>
+              <p className="text-sm font-medium text-[var(--color-error-text)] leading-5">
+                {error}
+              </p>
+            </div>
+          </div>
         </div>
       </section>
     );

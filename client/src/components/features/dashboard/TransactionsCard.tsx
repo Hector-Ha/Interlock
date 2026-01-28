@@ -87,8 +87,8 @@ export function TransactionsCard({
 
   const filteredTransactions =
     selectedBankId === "all"
-      ? transactions
-      : transactions.filter((tx) => tx.id.includes(selectedBankId));
+      ? transactions.slice(0, 10) // Show 10 most recent from all banks
+      : transactions.filter((tx) => tx.bankId === selectedBankId).slice(0, 10);
 
   return (
     <Card padding="none" className="overflow-hidden">
@@ -159,7 +159,7 @@ export function TransactionsCard({
         ) : (
           <div className="divide-y divide-[var(--color-gray-soft)]">
             {filteredTransactions.slice(0, 8).map((tx) => {
-              const isDebit = tx.amount > 0;
+              const isDebit = tx.amount < 0;
               const statusConfig = getStatusConfig(tx.status);
               const category = Array.isArray(tx.category)
                 ? tx.category[0]

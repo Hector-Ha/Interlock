@@ -36,7 +36,7 @@ const accountTypeConfig: Record<
   },
 };
 
-function getAccountConfig(subtype: string | undefined, type: string | undefined) {
+function getAccountConfig(subtype: string | null | undefined, type: string | null | undefined) {
   const key = (subtype || type || "default").toLowerCase();
   return accountTypeConfig[key] || accountTypeConfig.default;
 }

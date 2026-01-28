@@ -85,11 +85,20 @@ export function TransferRow({ transfer, onClick }: TransferRowProps) {
         <div className="min-w-0 flex-1 grid gap-0.5">
           <div className="flex items-center gap-2">
             <span className="font-medium text-[var(--color-gray-text)] truncate group-hover:text-[var(--color-brand-main)] transition-colors">
-              {transfer.destinationBankName}
+              {transfer.type === "DEBIT"
+                ? `Transfer to ${transfer.destinationBankName}`
+                : transfer.type === "P2P_SENT"
+                  ? `Sent to ${transfer.destinationBankName}`
+                  : `Received from ${transfer.destinationBankName}`}
             </span>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-[var(--color-gray-main)] truncate">
-            <span>From {transfer.sourceBankName}</span>
+            {transfer.type === "DEBIT" && (
+              <span>From {transfer.sourceBankName}</span>
+            )}
+            {transfer.type !== "DEBIT" && (
+              <span>Via {transfer.sourceBankName}</span>
+            )}
             <span className="text-[var(--color-gray-disabled)]">•</span>
             <span>{formatDate(transfer.createdAt)}</span>
           </div>
@@ -99,8 +108,16 @@ export function TransferRow({ transfer, onClick }: TransferRowProps) {
       {/* Amount & Status */}
       <div className="flex items-center gap-4 shrink-0">
         <div className="flex flex-col items-end gap-1">
-          <span className="font-semibold text-[var(--color-gray-text)] tabular-nums text-sm sm:text-base">
-            {formatCurrency(transfer.amount)}
+          <span
+            className={cn(
+              "font-semibold tabular-nums text-sm sm:text-base",
+              transfer.type === "P2P_RECEIVED"
+                ? "text-[var(--color-success-main)]"
+                : "text-[var(--color-error-main)]",
+            )}
+          >
+            {transfer.type === "P2P_RECEIVED" ? "+" : "-"}
+            {formatCurrency(Math.abs(transfer.amount))}
           </span>
           <Badge
             variant={statusConfig.badge}

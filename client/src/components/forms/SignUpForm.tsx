@@ -4,14 +4,21 @@ import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { Loader2, ArrowLeft, ArrowRight, Check, Shield } from "lucide-react";
+import {
+  Loader2,
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Shield,
+  AlertCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { signUpSchema, type SignUpSchema } from "@/lib/validations/auth";
 import { useAuthStore } from "@/stores/auth.store";
 import { authService } from "@/services/auth.service";
-import { Alert, AlertDescription } from "@/components/ui/Alert";
+
 import { AuthFooterLinks } from "@/components/auth";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
@@ -117,11 +124,12 @@ export function SignUpForm() {
       router.push("/");
     } catch (err) {
       console.error("Sign up failed", err);
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Something went wrong. Please try again.");
-      }
+      const message =
+        (err as any)?.message ||
+        (err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.");
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -369,9 +377,12 @@ export function SignUpForm() {
           </AnimatePresence>
 
           {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
+            <div className="mb-4 rounded-lg bg-[var(--color-error-surface)] p-4 border border-[var(--color-error-border)] flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-[var(--color-error-main)] mt-0.5 shrink-0" />
+              <p className="text-sm font-medium text-[var(--color-error-text)] leading-5">
+                {error}
+              </p>
+            </div>
           )}
 
           <div className="flex justify-between gap-4 mt-2">
