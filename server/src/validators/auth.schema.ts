@@ -16,15 +16,15 @@ export const authSchema = z.object({
     .min(8, "Password must be at least 8 characters")
     .regex(
       passwordPatterns.uppercase,
-      "Password must contain at least one uppercase letter"
+      "Password must contain at least one uppercase letter",
     )
     .regex(
       passwordPatterns.lowercase,
-      "Password must contain at least one lowercase letter"
+      "Password must contain at least one lowercase letter",
     )
     .regex(
       passwordPatterns.number,
-      "Password must contain at least one number"
+      "Password must contain at least one number",
     ),
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
@@ -55,4 +55,8 @@ export const resetPasswordSchema = z.object({
     .regex(passwordPatterns.uppercase, "Must contain uppercase letter")
     .regex(passwordPatterns.lowercase, "Must contain lowercase letter")
     .regex(passwordPatterns.number, "Must contain number"),
+});
+
+export const verifyEmailSchema = z.object({
+  token: z.string().min(1, "Verification token is required"),
 });

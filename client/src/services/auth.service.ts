@@ -43,7 +43,7 @@ export const authService = {
   },
 
   changePassword: async (
-    data: ChangePasswordData
+    data: ChangePasswordData,
   ): Promise<{ message: string }> => {
     return api.post<{ message: string }>("/auth/change-password", data);
   },
@@ -60,12 +60,16 @@ export const authService = {
   },
 
   resetPassword: async (
-    data: ResetPasswordData
+    data: ResetPasswordData,
   ): Promise<{ message: string }> => {
     return api.post<{ message: string }>("/auth/reset-password", data);
   },
 
   sendVerification: async (): Promise<{ message: string }> => {
     return api.post<{ message: string }>("/auth/send-verification");
+  },
+
+  verifyEmail: async (token: string): Promise<{ message: string }> => {
+    return api.post<{ message: string }>("/auth/verify-email", { token });
   },
 };

@@ -46,8 +46,21 @@ export const signUp = async (data: SignUpInput) => {
       dateOfBirth: encryptedDob,
       identityDocumentId: encryptedSsn,
       country: data.country || "US",
+      lastVerificationSentAt: new Date(),
     },
   });
+
+  // Auto-send verification email on sign-up
+  try {
+    const verificationToken = jwt.sign(
+      { userId: newUser.id, purpose: "email_verification" },
+      config.jwtSecret,
+      { expiresIn: "24h" },
+    );
+    await emailService.sendVerificationEmail(newUser.email, verificationToken);
+  } catch {
+    // Don't block sign-up if email fails
+  }
 
   const token = jwt.sign({ userId: newUser.id }, config.jwtSecret, {
     expiresIn: "15m", // Short-lived access token
@@ -381,6 +394,18 @@ export const sendVerification = async (userId: string): Promise<void> => {
     throw new Error("User not found");
   }
 
+  // Check 60-second cooldown
+  if (user.lastVerificationSentAt) {
+    const secondsSinceLastSent =
+      (Date.now() - user.lastVerificationSentAt.getTime()) / 1000;
+    if (secondsSinceLastSent < 60) {
+      const waitSeconds = Math.ceil(60 - secondsSinceLastSent);
+      throw new Error(
+        `Please wait ${waitSeconds} seconds before requesting another verification email.`,
+      );
+    }
+  }
+
   const token = jwt.sign(
     { userId: user.id, purpose: "email_verification" },
     config.jwtSecret,
@@ -388,6 +413,36 @@ export const sendVerification = async (userId: string): Promise<void> => {
   );
 
   await emailService.sendVerificationEmail(user.email, token);
+
+  // Update last sent timestamp
+  await prisma.user.update({
+    where: { id: userId },
+    data: { lastVerificationSentAt: new Date() },
+  });
+};
+
+// Verifies email using the verification token
+export const verifyEmail = async (token: string): Promise<void> => {
+  try {
+    const decoded = jwt.verify(token, config.jwtSecret) as {
+      userId: string;
+      purpose: string;
+    };
+
+    if (decoded.purpose !== "email_verification") {
+      throw new Error("Invalid token purpose");
+    }
+
+    await prisma.user.update({
+      where: { id: decoded.userId },
+      data: {
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+      },
+    });
+  } catch {
+    throw new Error("Invalid or expired verification token");
+  }
 };
 
 export const authService = {
@@ -404,4 +459,5 @@ export const authService = {
   forgotPassword,
   resetPasswordWithToken,
   sendVerification,
+  verifyEmail,
 };

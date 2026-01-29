@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/client"
 }
 
 datasource db {
@@ -22,6 +23,11 @@ model User {
 
   failedLoginAttempts Int       @default(0)
   lockedUntil         DateTime?
+
+  // Email Verification
+  emailVerified          Boolean   @default(false)
+  emailVerifiedAt        DateTime?
+  lastVerificationSentAt DateTime?
 
   // P2P Discovery (Phase 4.5)
   phoneNumber     String?   @unique

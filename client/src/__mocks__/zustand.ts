@@ -29,4 +29,4 @@ export const createStore = (<T>(stateCreator: zustand.StateCreator<T>) => {
   return typeof stateCreator === "function"
     ? createUncurried(stateCreator)
     : createUncurried(stateCreator);
-}) as typeof zustand.createStore;
+}) as unknown as typeof zustand.createStore;

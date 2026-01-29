@@ -8,6 +8,8 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
+  emailVerified: boolean;
+  emailVerifiedAt?: string;
   dwollaCustomerId?: string;
   dwollaCustomerUrl?: string;
 }

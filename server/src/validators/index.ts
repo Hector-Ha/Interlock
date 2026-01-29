@@ -8,6 +8,7 @@ export {
   signInSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  verifyEmailSchema,
 } from "./auth.schema";
 export {
   bankIdParamsSchema,

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export interface SelectOption {
@@ -105,58 +106,66 @@ export function Select({
           />
         </button>
 
-        {isOpen && (
-          <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-input bg-popover p-1 shadow-md animate-in fade-in-0 zoom-in-95">
-            {options.length === 0 ? (
-              <div className="p-2 text-center text-sm text-muted-foreground">
-                No options available
-              </div>
-            ) : (
-              options.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => handleSelect(option)}
-                  disabled={option.disabled}
-                  role="option"
-                  aria-selected={option.value === value}
-                  className={cn(
-                    "relative flex w-full cursor-pointer select-none items-center rounded-sm py-2 pl-2 pr-8 text-sm outline-none transition-colors text-left",
-                    option.disabled
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent",
-                    option.value === value && "bg-accent/50 font-medium",
-                    itemClassName,
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    {option.icon && (
-                      <div className="flex bg-muted h-8 w-8 items-center justify-center rounded-full text-muted-foreground">
-                        {option.icon}
-                      </div>
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+              className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-input bg-popover p-1 shadow-md"
+            >
+              {options.length === 0 ? (
+                <div className="p-2 text-center text-sm text-muted-foreground">
+                  No options available
+                </div>
+              ) : (
+                options.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => handleSelect(option)}
+                    disabled={option.disabled}
+                    role="option"
+                    aria-selected={option.value === value}
+                    className={cn(
+                      "relative flex w-full cursor-pointer select-none items-center rounded-sm py-2 pl-2 pr-8 text-sm outline-none transition-colors text-left",
+                      option.disabled
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent",
+                      option.value === value && "bg-accent/50 font-medium",
+                      itemClassName,
                     )}
-                    <div className="flex flex-col items-start">
-                      <span className="text-foreground">{option.label}</span>
-                      {option.description && (
-                        <span className="text-xs text-muted-foreground">
-                          {option.description}
-                        </span>
+                  >
+                    <div className="flex items-center gap-3">
+                      {option.icon && (
+                        <div className="flex bg-muted h-8 w-8 items-center justify-center rounded-full text-muted-foreground">
+                          {option.icon}
+                        </div>
                       )}
+                      <div className="flex flex-col items-start">
+                        <span className="text-foreground">{option.label}</span>
+                        {option.description && (
+                          <span className="text-xs text-muted-foreground">
+                            {option.description}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  {option.value === value && (
-                    <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
-                      <Check
-                        className="h-4 w-4 text-emerald-600"
-                        aria-hidden="true"
-                      />
-                    </span>
-                  )}
-                </button>
-              ))
-            )}
-          </div>
-        )}
+                    {option.value === value && (
+                      <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
+                        <Check
+                          className="h-4 w-4 text-emerald-600"
+                          aria-hidden="true"
+                        />
+                      </span>
+                    )}
+                  </button>
+                ))
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {error && <p className="text-sm text-red-500">{error}</p>}

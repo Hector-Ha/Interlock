@@ -93,31 +93,32 @@ export function TransactionsCard({
   return (
     <Card padding="none" className="overflow-hidden">
       {/* Header */}
-      <CardHeader className="flex-row items-center justify-between p-5 sm:p-6 pb-4 border-b border-[var(--color-gray-soft)]">
-        <div>
-          <CardTitle className="text-xl font-semibold">
+      <CardHeader className="flex-row items-start sm:items-center justify-between p-4 sm:p-6 pb-3 sm:pb-4 gap-3 border-b border-[var(--color-gray-soft)]">
+        <div className="min-w-0">
+          <CardTitle className="text-lg sm:text-xl font-semibold">
             Recent Transactions
           </CardTitle>
-          <p className="text-sm text-[var(--color-gray-main)] mt-0.5">
+          <p className="text-xs sm:text-sm text-[var(--color-gray-main)] mt-0.5 hidden sm:block">
             Track your spending and income
           </p>
         </div>
-        <Link href="/transactions">
-          <Button variant="outline" size="sm" className="gap-1.5">
-            View All
-            <ChevronRight className="w-4 h-4" />
+        <Link href="/transactions" className="shrink-0">
+          <Button variant="outline" size="sm" className="gap-1 sm:gap-1.5 h-8 px-2.5 sm:px-3 text-xs sm:text-sm">
+            <span className="hidden sm:inline">View All</span>
+            <span className="sm:hidden">All</span>
+            <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </Button>
         </Link>
       </CardHeader>
 
       {/* Bank Filter Tabs */}
       {banks.length > 1 && (
-        <div className="pt-4">
+        <div className="pt-3 sm:pt-4">
           <Tabs value={selectedBankId} onValueChange={setSelectedBankId}>
-            <TabsList className="h-auto bg-transparent p-0 gap-3 justify-start overflow-x-auto overflow-y-hidden w-full no-scrollbar px-6 pb-4">
+            <TabsList className="h-auto bg-transparent p-0 gap-2 sm:gap-3 justify-start overflow-x-auto overflow-y-hidden w-full no-scrollbar px-4 sm:px-6 pb-3 sm:pb-4">
               <TabsTrigger
                 value="all"
-                className="rounded-md border border-[var(--color-gray-soft)] px-4 py-2 text-sm font-medium text-[var(--color-gray-text)] bg-white 
+                className="rounded-md border border-[var(--color-gray-soft)] px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-[var(--color-gray-text)] bg-white 
                 hover:border-[var(--color-primary)] transition-all hover:text-[var(--color-primary)] hover:bg-primary/10
                 data-[state=active]:bg-[var(--color-brand-main)] data-[state=active]:border-[var(--color-brand-main)] 
                 data-[state=active]:text-white shadow-sm"
@@ -128,7 +129,7 @@ export function TransactionsCard({
                 <TabsTrigger
                   key={bank.id}
                   value={bank.id}
-                  className="rounded-md border border-[var(--color-gray-soft)] px-4 py-2 text-sm font-medium text-[var(--color-gray-text)] bg-white 
+                  className="rounded-md border border-[var(--color-gray-soft)] px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-[var(--color-gray-text)] bg-white 
                   hover:border-[var(--color-primary)] transition-all hover:text-[var(--color-primary)] hover:bg-primary/10
                   data-[state=active]:bg-[var(--color-brand-main)] data-[state=active]:border-[var(--color-brand-main)] 
                   data-[state=active]:text-white shadow-sm whitespace-nowrap"
@@ -168,60 +169,60 @@ export function TransactionsCard({
               return (
                 <div
                   key={tx.id}
-                  className="flex items-center gap-4 px-5 sm:px-6 py-4 hover:bg-[var(--color-gray-surface)]/50 transition-colors cursor-pointer"
+                  className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3 sm:py-4 hover:bg-[var(--color-gray-surface)]/50 transition-colors cursor-pointer"
                 >
                   {/* Transaction Icon */}
                   <div
                     className={cn(
-                      "flex items-center justify-center w-11 h-11 rounded-xl shrink-0",
+                      "flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl shrink-0",
                       isDebit
                         ? "bg-[var(--color-error-surface)]"
                         : "bg-[var(--color-success-surface)]",
                     )}
                   >
                     {isDebit ? (
-                      <ArrowUpRight className="w-5 h-5 text-[var(--color-error-main)]" />
+                      <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-error-main)]" />
                     ) : (
-                      <ArrowDownLeft className="w-5 h-5 text-[var(--color-success-main)]" />
+                      <ArrowDownLeft className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-success-main)]" />
                     )}
                   </div>
 
                   {/* Transaction Details */}
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-[var(--color-gray-text)] truncate">
+                    <p className="font-medium text-sm sm:text-base text-[var(--color-gray-text)] truncate">
                       {tx.name}
                     </p>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 flex-wrap">
                       <Badge
                         variant="outline"
                         className={cn(
-                          "text-[10px] px-1.5 py-0 h-5 gap-1 border-0",
+                          "text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0 h-4 sm:h-5 gap-0.5 sm:gap-1 border-0",
                           statusConfig.bg,
                           statusConfig.text,
                         )}
                       >
                         <span
                           className={cn(
-                            "w-1.5 h-1.5 rounded-full",
+                            "w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full",
                             statusConfig.dot,
                           )}
                         />
                         {statusConfig.label}
                       </Badge>
-                      <span className="text-xs text-[var(--color-gray-disabled)]">
+                      <span className="text-[10px] sm:text-xs text-[var(--color-gray-disabled)] hidden sm:inline">
                         •
                       </span>
-                      <span className="text-xs text-[var(--color-gray-main)]">
+                      <span className="text-[10px] sm:text-xs text-[var(--color-gray-main)]">
                         {formatDayTime(tx.date)}
                       </span>
                     </div>
                   </div>
 
                   {/* Amount & Category */}
-                  <div className="flex flex-col items-end gap-1 shrink-0">
+                  <div className="flex flex-col items-end gap-0.5 sm:gap-1 shrink-0">
                     <span
                       className={cn(
-                        "font-semibold tabular-nums",
+                        "font-semibold tabular-nums text-sm sm:text-base",
                         isDebit
                           ? "text-[var(--color-error-main)]"
                           : "text-[var(--color-success-main)]",
@@ -231,7 +232,7 @@ export function TransactionsCard({
                     </span>
                     <Badge
                       variant={getCategoryBadgeVariant(category)}
-                      className="text-[10px] px-2 py-0"
+                      className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0 hidden sm:flex"
                     >
                       {formatCategory(category)}
                     </Badge>

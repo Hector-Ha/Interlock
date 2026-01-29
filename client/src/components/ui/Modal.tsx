@@ -1,9 +1,18 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { type ReactNode, createContext, useContext } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+
+const ModalContext = createContext<{
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}>({
+  open: false,
+  onOpenChange: () => {},
+});
 
 interface ModalProps {
   open: boolean;
@@ -21,7 +30,9 @@ interface ModalContentProps {
 function Modal({ open, onOpenChange, children }: ModalProps) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      {children}
+      <ModalContext.Provider value={{ open, onOpenChange }}>
+        {children}
+      </ModalContext.Provider>
     </Dialog.Root>
   );
 }
@@ -46,6 +57,8 @@ function ModalContent({
   size = "md",
   showClose = true,
 }: ModalContentProps) {
+  const { open } = useContext(ModalContext);
+
   const sizeClasses = {
     sm: "max-w-sm",
     md: "max-w-md",
@@ -55,33 +68,53 @@ function ModalContent({
   };
 
   return (
-    <Dialog.Portal>
-      <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-      <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-        <Dialog.Content
-          className={cn(
-            "pointer-events-auto w-full p-6 bg-background rounded-2xl shadow-xl overscroll-contain",
-            "data-[state=open]:animate-in data-[state=closed]:animate-out",
-            "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-            "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
-            sizeClasses[size],
-            className,
-          )}
-        >
-          {children}
-          {showClose && (
-            <Dialog.Close asChild>
-              <button
-                className="absolute right-4 top-4 rounded-lg p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                aria-label="Close"
+    <AnimatePresence>
+      {open && (
+        <Dialog.Portal forceMount>
+          <Dialog.Overlay asChild>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+            />
+          </Dialog.Overlay>
+          <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+            <Dialog.Content asChild>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                transition={{
+                  duration: 0.3,
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 25,
+                }}
+                className={cn(
+                  "pointer-events-auto w-full p-6 bg-background rounded-2xl shadow-xl overscroll-contain",
+                  sizeClasses[size],
+                  className,
+                )}
               >
-                <X className="h-5 w-5" />
-              </button>
-            </Dialog.Close>
-          )}
-        </Dialog.Content>
-      </div>
-    </Dialog.Portal>
+                {children}
+                {showClose && (
+                  <Dialog.Close asChild>
+                    <button
+                      className="absolute right-4 top-4 rounded-lg p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                      aria-label="Close"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </Dialog.Close>
+                )}
+              </motion.div>
+            </Dialog.Content>
+          </div>
+        </Dialog.Portal>
+      )}
+    </AnimatePresence>
   );
 }
 

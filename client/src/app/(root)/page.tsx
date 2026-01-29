@@ -97,8 +97,8 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <section className="min-h-screen bg-[var(--color-gray-surface)]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+      <section className="min-h-screen bg-[var(--color-gray-surface)] overflow-x-hidden">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 w-full">
           <DashboardSkeleton />
         </div>
       </section>
@@ -107,8 +107,8 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <section className="min-h-screen bg-[var(--color-gray-surface)]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+      <section className="min-h-screen bg-[var(--color-gray-surface)] overflow-x-hidden">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 w-full">
           <div className="rounded-lg bg-[var(--color-error-surface)] p-4 border border-[var(--color-error-border)] flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-[var(--color-error-main)] mt-0.5 shrink-0" />
             <div className="flex flex-col gap-1">
@@ -126,20 +126,20 @@ export default function DashboardPage() {
   }
 
   return (
-    <section className="min-h-screen bg-[var(--color-gray-surface)]">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <section className="min-h-screen bg-[var(--color-gray-surface)] overflow-x-hidden">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 w-full">
         {/* Header Section */}
-        <header className="flex items-start justify-between gap-4 mb-8">
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-[var(--color-gray-main)]">
+        <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <div className="space-y-0.5 sm:space-y-1">
+            <p className="text-xs sm:text-sm font-medium text-[var(--color-gray-main)]">
               {greeting}
             </p>
-            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-[var(--color-gray-text)]">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-[var(--color-gray-text)]">
               {user?.firstName || "Guest"}
             </h1>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-[var(--color-gray-main)] hidden sm:inline">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="text-[10px] sm:text-xs text-[var(--color-gray-main)]">
               Updated {formatLastUpdated()}
             </span>
             <RefreshButton isRefreshing={isRefreshing} onClick={refresh} />
@@ -164,20 +164,18 @@ export default function DashboardPage() {
 
             {/* Quick Actions Section */}
             <Card padding="none" className="overflow-hidden">
-              <CardHeader className="flex-row items-center justify-between p-5 sm:p-6 pb-4 border-b border-[var(--color-gray-soft)]">
+              <CardHeader className="flex-row items-center justify-between p-4 sm:p-6 pb-3 sm:pb-4 border-b border-[var(--color-gray-soft)]">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <CardTitle className="text-xl font-semibold">
-                      Quick Actions
-                    </CardTitle>
-                  </div>
-                  <p className="text-sm text-[var(--color-gray-main)] mt-0.5">
+                  <CardTitle className="text-lg sm:text-xl font-semibold">
+                    Quick Actions
+                  </CardTitle>
+                  <p className="text-xs sm:text-sm text-[var(--color-gray-main)] mt-0.5 hidden sm:block">
                     Common tasks and shortcuts
                   </p>
                 </div>
               </CardHeader>
-              <CardContent className="p-5 sm:p-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <CardContent className="p-4 sm:p-6">
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
                   {quickActions.map((action) => (
                     <QuickActionCard
                       key={action.label}

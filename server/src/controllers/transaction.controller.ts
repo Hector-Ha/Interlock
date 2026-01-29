@@ -71,7 +71,7 @@ export const getTransactions = async (req: AuthRequest, res: Response) => {
 export const getTransaction = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user.userId;
-    const { transactionId } = req.params;
+    const transactionId = req.params.transactionId as string;
 
     const transaction = await transactionService.getTransactionById(
       transactionId,

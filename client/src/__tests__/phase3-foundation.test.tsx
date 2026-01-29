@@ -161,6 +161,7 @@ describe("Phase 3: Frontend Foundation", () => {
         identityDocumentId: "",
         dateOfBirth: "",
         country: "US",
+        emailVerified: true,
       };
 
       useAuthStore.getState().setUser(mockUser);

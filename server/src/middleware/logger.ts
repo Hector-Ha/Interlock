@@ -40,7 +40,8 @@ export const logger = pino({
 
 // HTTP request logger middleware.
 export const httpLogger = pinoHttp({
-  logger,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  logger: logger as any,
   autoLogging: true,
   genReqId: () => crypto.randomUUID(),
   customLogLevel: (_req, res, err) => {

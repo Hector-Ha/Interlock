@@ -95,7 +95,7 @@ export default function AuthLayout({
           )}
 
           <ScrollArea className="flex-1 h-full w-full">
-            <div className="min-h-full flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
+            <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
               <div
                 className={`w-full ${isSignIn ? "max-w-[448px]" : "max-w-md"}`}
               >

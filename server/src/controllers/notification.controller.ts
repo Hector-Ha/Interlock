@@ -72,7 +72,7 @@ export const getUnreadCount = async (req: AuthRequest, res: Response) => {
 // Mark a notification as read.
 export const markAsRead = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     await notificationService.markAsRead(id, req.user.userId);
     res.json({ message: "Notification marked as read" });
   } catch (error) {
@@ -101,7 +101,7 @@ export const markAllAsRead = async (req: AuthRequest, res: Response) => {
 // Dismiss a single notification (soft delete).
 export const dismissNotification = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     await notificationService.dismiss(id, req.user.userId);
     res.json({ message: "Notification dismissed" });
   } catch (error) {

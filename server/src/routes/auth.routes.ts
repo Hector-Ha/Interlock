@@ -11,6 +11,7 @@ import {
   forgotPassword,
   resetPassword,
   sendVerification,
+  verifyEmail,
 } from "@/controllers/auth.controller";
 import { authenticate } from "@/middleware/auth";
 import { authLimiter } from "@/middleware/rateLimit";
@@ -33,7 +34,8 @@ router.post("/reset-password", resetPassword as RequestHandler);
 router.post(
   "/send-verification",
   authenticate,
-  sendVerification as RequestHandler
+  sendVerification as RequestHandler,
 );
+router.post("/verify-email", verifyEmail as RequestHandler);
 
 export default router;

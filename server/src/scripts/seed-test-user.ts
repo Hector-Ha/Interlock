@@ -12,7 +12,7 @@ import { dwollaClient } from "../services/dwolla.service";
 import { encrypt, decrypt } from "../utils/encryption";
 import bcrypt from "bcryptjs";
 import { Products } from "plaid";
-import { TxType, TxStatus } from "@prisma/client";
+import { TxType, TxStatus } from "../generated/client";
 
 // --- Configuration Data ---
 
@@ -79,6 +79,8 @@ async function seedUser(userData: (typeof USERS_TO_SEED)[0]) {
       lastName: userData.lastName,
       phoneNumber: userData.phone, // P2P Discovery
       phoneVerified: true,
+      emailVerified: true,
+      emailVerifiedAt: new Date(),
       address: encrypt(JSON.stringify(userData.address)),
       dateOfBirth: encrypt(userData.dob),
       identityDocumentId: encrypt(userData.ssn),

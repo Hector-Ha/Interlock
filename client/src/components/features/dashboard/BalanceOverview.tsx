@@ -46,7 +46,7 @@ export function BalanceOverview({
   return (
     <Card
       padding="none"
-      className="relative overflow-hidden bg-gradient-to-br from-[var(--color-gray-text)] via-[#2d2d3a] to-[var(--color-brand-text)]"
+      className="relative overflow-hidden bg-gradient-to-br from-[var(--color-gray-text)] via-[#2d2d3a] to-[var(--color-brand-text)] w-full max-w-full"
     >
       {/* Security Pattern Overlay */}
       <div className="absolute inset-0 opacity-[0.03]">
@@ -71,44 +71,44 @@ export function BalanceOverview({
       </div>
 
       {/* Gradient Orbs */}
-      <div className="absolute -top-24 -right-24 w-64 h-64 bg-[var(--color-brand-main)] rounded-full blur-[100px] opacity-20" />
-      <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-[var(--color-success-main)] rounded-full blur-[120px] opacity-10" />
+      <div className="absolute -top-16 -right-16 sm:-top-24 sm:-right-24 w-40 sm:w-64 h-40 sm:h-64 bg-[var(--color-brand-main)] rounded-full blur-[80px] sm:blur-[100px] opacity-20" />
+      <div className="absolute -bottom-20 -left-20 sm:-bottom-32 sm:-left-32 w-48 sm:w-80 h-48 sm:h-80 bg-[var(--color-success-main)] rounded-full blur-[80px] sm:blur-[120px] opacity-10" />
 
-      <div className="relative p-6 sm:p-8 lg:p-10">
+      <div className="relative p-4 sm:p-8 lg:p-10 min-w-0">
         {/* Header Row */}
-        <div className="flex items-start justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 backdrop-blur-sm">
-              <Shield className="w-5 h-5 text-[var(--color-success-main)]" />
+        <div className="flex items-start justify-between mb-4 sm:mb-8">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-white/10 backdrop-blur-sm">
+              <Shield className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-[var(--color-success-main)]" />
             </div>
             <div>
-              <p className="text-white/60 text-sm font-medium">Total Balance</p>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase tracking-wider text-[var(--color-success-main)] font-semibold">
+              <p className="text-white/60 text-[11px] sm:text-sm font-medium">Total Balance</p>
+              <div className="flex items-center gap-1 sm:gap-2">
+                <span className="text-[8px] sm:text-[10px] uppercase tracking-wider text-[var(--color-success-main)] font-semibold">
                   Secured
                 </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-success-main)] animate-pulse" />
+                <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-[var(--color-success-main)] animate-pulse" />
               </div>
             </div>
           </div>
           <Button
             variant="ghost"
             size="sm"
-            className="text-white/60 hover:text-white hover:bg-white/10"
+            className="text-white/60 hover:text-white hover:bg-white/10 h-7 w-7 sm:h-9 sm:w-9 p-0"
             onClick={() => setIsBalanceVisible(!isBalanceVisible)}
           >
             {isBalanceVisible ? (
-              <Eye className="w-4 h-4" />
+              <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             ) : (
-              <EyeOff className="w-4 h-4" />
+              <EyeOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             )}
           </Button>
         </div>
 
         {/* Balance Display */}
-        <div className="mb-8">
-          <div className="flex items-baseline gap-2">
-            <span className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight tabular-nums">
+        <div className="mb-5 sm:mb-8 overflow-hidden">
+          <div className="flex items-baseline gap-1 sm:gap-2 flex-wrap">
+            <span className="text-[1.5rem] sm:text-5xl lg:text-6xl font-bold text-white tracking-tight tabular-nums break-all sm:break-normal">
               {isBalanceVisible ? (
                 <>
                   <span className="text-white/60">$</span>
@@ -129,53 +129,59 @@ export function BalanceOverview({
             </span>
           </div>
 
-          <div className="flex items-center gap-4 mt-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2 sm:mt-3">
             <div
               className={cn(
-                "flex items-center gap-1.5",
+                "flex items-center gap-1 sm:gap-1.5",
                 isPositive
                   ? "text-[var(--color-success-main)]"
                   : "text-[var(--color-error-main)]",
               )}
             >
               {isPositive ? (
-                <TrendingUp className="w-4 h-4" />
+                <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               ) : (
-                <TrendingDown className="w-4 h-4" />
+                <TrendingDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               )}
-              <span className="text-sm font-medium">
+              <span className="text-xs sm:text-sm font-medium">
                 {isPositive ? "+" : ""}
                 {balanceChange.toFixed(1)}%
               </span>
             </div>
-            <span className="text-white/40 text-sm">vs last month</span>
+            <span className="text-white/40 text-xs sm:text-sm">vs last month</span>
           </div>
         </div>
 
         {/* Account Breakdown */}
         {accounts.length > 0 && (
-          <div className="space-y-3 mb-6">
-            <p className="text-white/40 text-xs uppercase tracking-wider font-medium">
+          <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
+            <p className="text-white/40 text-[9px] sm:text-xs uppercase tracking-wider font-medium">
               Account Distribution
             </p>
-            <div className="grid gap-2">
-              {accounts.slice(0, 3).map((account) => {
+            <div className="grid gap-2 sm:gap-2.5">
+              {accounts.slice(0, 3).map((account, index) => {
                 const balance = account.balance.current || 0;
                 const percentage = (balance / maxBalance) * 100;
                 return (
-                  <div key={account.id} className="group">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-white/80 text-sm truncate max-w-[180px]">
+                  <div 
+                    key={account.id} 
+                    className={cn(
+                      "group",
+                      index === 2 && "hidden sm:block"
+                    )}
+                  >
+                    <div className="flex items-center justify-between mb-0.5 sm:mb-1 gap-2">
+                      <span className="text-white/80 text-[11px] sm:text-sm truncate flex-1 min-w-0">
                         {account.name}
                       </span>
-                      <span className="text-white font-medium text-sm tabular-nums">
+                      <span className="text-white font-medium text-[11px] sm:text-sm tabular-nums shrink-0">
                         $
                         {balance.toLocaleString("en-US", {
                           minimumFractionDigits: 2,
                         })}
                       </span>
                     </div>
-                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-1 sm:h-1.5 bg-white/10 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-[var(--color-brand-main)] to-[var(--color-brand-disabled)] rounded-full transition-all duration-500"
                         style={{ width: `${percentage}%` }}
@@ -184,10 +190,20 @@ export function BalanceOverview({
                   </div>
                 );
               })}
+              {/* Mobile: show +N more if 3+ accounts (since 3rd is hidden) */}
+              {accounts.length >= 3 && (
+                <Link
+                  href="/banks"
+                  className="text-right text-[9px] sm:text-xs text-white/40 font-medium mt-0.5 hover:underline hover:text-white ml-auto w-fit cursor-pointer transition-colors sm:hidden block"
+                >
+                  +{accounts.length - 2} more
+                </Link>
+              )}
+              {/* Desktop: show +N more only if 4+ accounts */}
               {accounts.length > 3 && (
                 <Link
                   href="/banks"
-                  className="text-right text-xs text-white/40 font-medium mt-1 hover:underline hover:text-white block ml-auto w-fit cursor-pointer transition-colors"
+                  className="text-right text-[9px] sm:text-xs text-white/40 font-medium mt-0.5 hover:underline hover:text-white ml-auto w-fit cursor-pointer transition-colors hidden sm:block"
                 >
                   +{accounts.length - 3} more
                 </Link>
@@ -197,18 +213,19 @@ export function BalanceOverview({
         )}
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-white/10">
-          <span className="text-white/40 text-sm">
+        <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-white/10 gap-2">
+          <span className="text-white/40 text-[10px] sm:text-sm truncate min-w-0 flex-1">
             {totalBanks} bank{totalBanks !== 1 ? "s" : ""} connected
           </span>
           <Button
             variant="ghost"
             size="sm"
-            className="text-white hover:bg-white/20 hover:text-white gap-1.5"
+            className="text-white hover:bg-white/20 hover:text-white gap-1 sm:gap-1.5 h-7 sm:h-8 px-2 sm:px-3 text-[11px] sm:text-sm shrink-0"
             onClick={onAddBank}
           >
-            <Plus className="w-4 h-4" />
-            Add Bank
+            <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Add Bank</span>
+            <span className="sm:hidden">Add</span>
           </Button>
         </div>
       </div>

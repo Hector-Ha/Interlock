@@ -60,23 +60,23 @@ export function WelcomeEmptyState({
         <div className="absolute top-0 right-0 w-96 h-96 bg-[var(--color-brand-main)] rounded-full blur-[150px] opacity-20" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-[var(--color-success-main)] rounded-full blur-[100px] opacity-15" />
 
-        <div className="relative px-6 py-12 sm:px-12 sm:py-16 lg:py-20 text-center">
+        <div className="relative px-5 py-10 sm:px-12 sm:py-16 lg:py-20 text-center">
           {/* Logo */}
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-white mb-8 shadow-2xl shadow-black/20">
+          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-white mb-6 sm:mb-8 shadow-2xl shadow-black/20">
             <Image
               src={InterlockLogo}
               alt="Interlock"
               width={48}
               height={48}
-              className="w-12 h-12"
+              className="w-9 h-9 sm:w-12 sm:h-12"
             />
           </div>
 
           {/* Text */}
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
+          <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 sm:mb-4">
             Welcome to Interlock, {userName}
           </h1>
-          <p className="text-white/60 text-lg max-w-xl mx-auto mb-8 leading-relaxed">
+          <p className="text-white/60 text-sm sm:text-lg max-w-xl mx-auto mb-6 sm:mb-8 leading-relaxed">
             Connect your bank account to unlock powerful financial insights,
             seamless transfers, and complete control over your money.
           </p>
@@ -84,31 +84,33 @@ export function WelcomeEmptyState({
           {/* CTA */}
           <Button
             size="lg"
-            className="bg-brand-main hover:bg-brand-hover text-white shadow-xl shadow-brand-main/20 px-8 h-12 text-base font-semibold"
+            className="bg-brand-main hover:bg-brand-hover text-white shadow-xl shadow-brand-main/20 px-6 sm:px-8 h-11 sm:h-12 text-sm sm:text-base font-semibold"
             onClick={onAddBank}
           >
-            <Building2 className="w-5 h-5 mr-2" />
+            <Building2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
             Connect Your First Bank
           </Button>
         </div>
       </Card>
 
       {/* Feature Cards */}
-      <div className="grid sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {features.map((feature) => (
           <Card
             key={feature.title}
-            className="text-center py-6 px-4 border-[var(--color-gray-soft)]"
+            className="flex sm:flex-col items-center sm:text-center py-4 sm:py-6 px-4 border-[var(--color-gray-soft)] gap-3 sm:gap-0"
           >
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[var(--color-brand-surface)] mb-4">
-              <feature.icon className="w-6 h-6 text-[var(--color-brand-main)]" />
+            <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[var(--color-brand-surface)] sm:mb-4 shrink-0">
+              <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--color-brand-main)]" />
             </div>
-            <h3 className="font-semibold text-[var(--color-gray-text)] mb-1">
-              {feature.title}
-            </h3>
-            <p className="text-sm text-[var(--color-gray-main)]">
-              {feature.description}
-            </p>
+            <div className="flex-1 sm:flex-initial">
+              <h3 className="font-semibold text-sm sm:text-base text-[var(--color-gray-text)] mb-0.5 sm:mb-1">
+                {feature.title}
+              </h3>
+              <p className="text-xs sm:text-sm text-[var(--color-gray-main)]">
+                {feature.description}
+              </p>
+            </div>
           </Card>
         ))}
       </div>

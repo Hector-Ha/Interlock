@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useToastStore, Toast as ToastType } from "@/stores/toast.store";
 import { cn } from "@/lib/utils";
 
@@ -41,21 +42,18 @@ interface ToastItemProps {
 }
 
 function ToastItem({ toast, onDismiss }: ToastItemProps) {
-  const [isExiting, setIsExiting] = useState(false);
   const Icon = icons[toast.type];
   const style = styles[toast.type];
 
-  const handleDismiss = () => {
-    setIsExiting(true);
-    setTimeout(onDismiss, 200); // Wait for animation
-  };
-
   return (
-    <div
+    <motion.div
+      layout
+      initial={{ opacity: 0, x: 100, scale: 0.9 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
       className={cn(
-        "pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-lg border p-4 shadow-lg transition-all duration-200",
+        "pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-lg border p-4 shadow-lg",
         style.bg,
-        isExiting ? "translate-x-full opacity-0" : "translate-x-0 opacity-100"
       )}
       role="alert"
     >
@@ -70,21 +68,19 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
 
       {toast.dismissible && (
         <button
-          onClick={handleDismiss}
+          onClick={onDismiss}
           className="flex-shrink-0 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           aria-label="Dismiss"
         >
           <X className="h-4 w-4" />
         </button>
       )}
-    </div>
+    </motion.div>
   );
 }
 
 export function ToastContainer() {
   const { toasts, removeToast } = useToastStore();
-
-  if (toasts.length === 0) return null;
 
   return (
     <div
@@ -92,13 +88,15 @@ export function ToastContainer() {
       aria-live="polite"
       aria-atomic="true"
     >
-      {toasts.map((toast) => (
-        <ToastItem
-          key={toast.id}
-          toast={toast}
-          onDismiss={() => removeToast(toast.id)}
-        />
-      ))}
+      <AnimatePresence mode="popLayout">
+        {toasts.map((toast) => (
+          <ToastItem
+            key={toast.id}
+            toast={toast}
+            onDismiss={() => removeToast(toast.id)}
+          />
+        ))}
+      </AnimatePresence>
     </div>
   );
 }

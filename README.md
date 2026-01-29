@@ -6,7 +6,7 @@
 
 Interlock is a fintech MVP that bridges **Plaid** (banking data) and **Dwolla** (ACH payments). It's a full-stack monorepo built with **Next.js 16** (Frontend) and **Express 5** (Backend), running on the **Bun** runtime.
 
-Currently in **Phase 3**, the backend is feature-complete with full authentication, bank management, transaction syncing, and ACH transfers. The frontend has core dashboard functionality with additional pages in development.
+Currently in **Phase 3**, the backend is feature-complete with full authentication, bank management, transaction syncing, and ACH transfers. The frontend has been significantly updated to include core dashboard functionality, transactions, transfers, and settings.
 
 ### Quick Start
 
@@ -23,18 +23,19 @@ bun run dev
 
 ## Project Stage: Phase 3 (User Experience)
 
-The project has completed **Phase 2** (Core Banking APIs) and entered **Phase 3** (User Experience & Frontend).
+The project has completed **Phase 2** (Core Banking APIs) and is actively building out **Phase 3** (User Experience & Frontend).
 
-| Category               | Backend     | Frontend    | Notes                                     |
-| ---------------------- | ----------- | ----------- | ----------------------------------------- |
-| **Authentication**     | ✅ Complete | ✅ Complete | Full flow including password reset        |
-| **Plaid Integration**  | ✅ Complete | ✅ Complete | Link, Exchange, Update Mode, Balance Sync |
-| **Dwolla Integration** | ✅ Complete | ✅ Complete | Funding sources, Transfers, Webhooks      |
-| **Bank Management**    | ✅ Complete | ⚠️ Partial  | Backend ready; `/my-banks` page pending   |
-| **Transactions**       | ✅ Complete | ⚠️ Partial  | Backend ready; history page pending       |
-| **Transfers**          | ✅ Complete | ⚠️ Partial  | Backend ready; transfer page pending      |
-| **Dashboard**          | ✅ Complete | ✅ Complete | Balance, banks list, recent transactions  |
-| **Security**           | ✅ Complete | N/A         | Rate limiting, encryption, webhooks       |
+| Category               | Backend     | Frontend    | Notes                                      |
+| ---------------------- | ----------- | ----------- | ------------------------------------------ |
+| **Authentication**     | ✅ Complete | ✅ Complete | Sign In/Up flows implemented               |
+| **Plaid Integration**  | ✅ Complete | ✅ Complete | Link, Exchange, Update Mode, Balance Sync  |
+| **Dwolla Integration** | ✅ Complete | ✅ Complete | Funding sources, Transfers, Webhooks       |
+| **Bank Management**    | ✅ Complete | ✅ Complete | View linked banks and details              |
+| **Transactions**       | ✅ Complete | ✅ Complete | Full history with filters & visualization  |
+| **Transfers**          | ✅ Complete | ✅ Complete | Internal & P2P transfers with status       |
+| **Dashboard**          | ✅ Complete | ✅ Complete | Balance, banks list, recent transactions   |
+| **Settings**           | ✅ Complete | ✅ Complete | Profile, Security, & Notification settings |
+| **Security**           | ✅ Complete | N/A         | Rate limiting, encryption, webhooks        |
 
 ## Roadmap
 
@@ -53,17 +54,18 @@ The project has completed **Phase 2** (Core Banking APIs) and entered **Phase 3*
 - [x] Transfer Cancellation
 - [x] Webhook Idempotency
 
-### Phase 3: User Experience (WIP)
+### Phase 3: User Experience (In Progress)
 
 | Feature                   | Backend | Frontend |
 | ------------------------- | ------- | -------- |
 | Dashboard UI              | ✅      | ✅       |
+| Sign In / Sign Up         | ✅      | ✅       |
+| My Banks Page             | ✅      | ✅       |
+| Transactions History Page | ✅      | ✅       |
+| Transfer Funds Page       | ✅      | ✅       |
+| User Settings Page        | ✅      | ✅       |
 | Password Reset Flow       | ✅      | ❌       |
 | Email Verification        | ✅      | ❌       |
-| My Banks Page             | ✅      | ❌       |
-| Transactions History Page | ✅      | ❌       |
-| Transfer Funds Page       | ✅      | ❌       |
-| User Settings Page        | ✅      | ❌       |
 
 ### Phase 4: Advanced Features (Planned)
 
@@ -74,17 +76,17 @@ The project has completed **Phase 2** (Core Banking APIs) and entered **Phase 3*
 
 ## Known Limitations
 
-1. **Transaction Schema**: The `destinationBankId` is derived from Dwolla metadata rather than a strict database relation.
-2. **Localization**: Currency and date formatting uses US locales (`en-US`).
-3. **Sandbox Only**: Configured exclusively for Plaid/Dwolla Sandbox environments.
-4. **Transfer Limits**: No daily/monthly limits enforced yet.
-5. **Missing Pages**: `/my-banks`, `/transactions-history`, `/payment-transfer`, `/forgot-password`, `/reset-password` need frontend implementation.
+1.  **Transaction Schema**: The `destinationBankId` is derived from Dwolla metadata rather than a strict database relation.
+2.  **Localization**: Currency and date formatting uses US locales (`en-US`).
+3.  **Sandbox Only**: Configured exclusively for Plaid/Dwolla Sandbox environments.
+4.  **Transfer Limits**: No daily/monthly limits enforced yet.
+5.  **Missing Pages**: Password reset and Email verification flows are not yet implemented on the frontend.
 
 ## Architecture
 
 Interlock is a full-stack monorepo:
 
-- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS, Chart.js
+- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS, Chart.js, Shadcn UI
 - **Backend**: Express 5, Bun Runtime, Prisma ORM, PostgreSQL
 - **Integrations**: Plaid (Banking), Dwolla (Payments)
 - **Security**: AES-256-GCM Encryption, bcrypt, JWT with rotation

@@ -9,6 +9,7 @@ import { Header } from "./Header";
 import { MobileSidebar } from "./MobileSidebar";
 import { RightSideBar } from "./RightSideBar";
 import { ToastContainer } from "./ToastContainer";
+import { EmailVerificationBanner } from "@/components/features/verification";
 import { Spinner, ScrollArea } from "@/components/ui";
 import { SkipLink } from "@/components/a11y";
 import { Shield } from "lucide-react";
@@ -19,7 +20,7 @@ interface AppShellProps {
 }
 
 export function AppShell({ children }: AppShellProps) {
-  const { isLoading, isInitialized, initialize } = useAuthStore();
+  const { user, isLoading, isInitialized, initialize } = useAuthStore();
   const { sidebarOpen, sidebarCollapsed } = useUIStore();
   const pathname = usePathname();
   const isDashboard = pathname === "/";
@@ -92,13 +93,18 @@ export function AppShell({ children }: AppShellProps) {
       <MobileSidebar open={sidebarOpen} />
 
       {/* Main Content Area */}
-      <div className="flex flex-col overflow-hidden">
+      <div className="flex flex-col overflow-hidden min-w-0">
         {/* Header */}
         <Header />
 
+        {/* Email Verification Banner */}
+        {user && !user.emailVerified && (
+          <EmailVerificationBanner userEmail={user.email} />
+        )}
+
         {/* Main Content */}
         <ScrollArea className="flex-1">
-          <main id="main-content" className="min-h-full">
+          <main id="main-content" className="min-h-full w-full max-w-full overflow-x-hidden">
             {children}
           </main>
         </ScrollArea>
