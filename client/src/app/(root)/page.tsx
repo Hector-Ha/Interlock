@@ -98,7 +98,7 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <section className="min-h-screen bg-[var(--color-gray-surface)] overflow-x-hidden">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 w-full">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-10 w-full">
           <DashboardSkeleton />
         </div>
       </section>
@@ -108,14 +108,14 @@ export default function DashboardPage() {
   if (error) {
     return (
       <section className="min-h-screen bg-[var(--color-gray-surface)] overflow-x-hidden">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 w-full">
-          <div className="rounded-lg bg-[var(--color-error-surface)] p-4 border border-[var(--color-error-border)] flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-[var(--color-error-main)] mt-0.5 shrink-0" />
-            <div className="flex flex-col gap-1">
-              <h3 className="text-sm font-semibold text-[var(--color-error-text)]">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-10 w-full">
+          <div className="rounded-lg bg-[var(--color-error-surface)] p-3 sm:p-4 border border-[var(--color-error-border)] flex items-start gap-2 sm:gap-3">
+            <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-[var(--color-error-main)] mt-0.5 shrink-0" />
+            <div className="flex flex-col gap-0.5 sm:gap-1">
+              <h3 className="text-xs sm:text-sm font-semibold text-[var(--color-error-text)]">
                 Error
               </h3>
-              <p className="text-sm font-medium text-[var(--color-error-text)] leading-5">
+              <p className="text-xs sm:text-sm font-medium text-[var(--color-error-text)] leading-5">
                 {error}
               </p>
             </div>
@@ -127,20 +127,20 @@ export default function DashboardPage() {
 
   return (
     <section className="min-h-screen bg-[var(--color-gray-surface)] overflow-x-hidden">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 w-full">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-10 w-full">
         {/* Header Section */}
-        <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
-          <div className="space-y-0.5 sm:space-y-1">
-            <p className="text-xs sm:text-sm font-medium text-[var(--color-gray-main)]">
+        <header className="flex items-start justify-between gap-2 mb-4 sm:mb-8">
+          <div className="space-y-0.5 min-w-0 flex-1">
+            <p className="text-[11px] sm:text-sm font-medium text-[var(--color-gray-main)]">
               {greeting}
             </p>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-[var(--color-gray-text)]">
+            <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight text-[var(--color-gray-text)] truncate">
               {user?.firstName || "Guest"}
             </h1>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <span className="text-[10px] sm:text-xs text-[var(--color-gray-main)]">
-              Updated {formatLastUpdated()}
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <span className="text-min sm:text-xs text-[var(--color-gray-main)] whitespace-nowrap">
+              {formatLastUpdated()}
             </span>
             <RefreshButton isRefreshing={isRefreshing} onClick={refresh} />
           </div>
@@ -152,7 +152,7 @@ export default function DashboardPage() {
             onAddBank={() => setIsAddBankOpen(true)}
           />
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-4 sm:space-y-8">
             {/* Balance Overview */}
             <BalanceOverview
               totalBalance={totalBalance}
@@ -164,18 +164,18 @@ export default function DashboardPage() {
 
             {/* Quick Actions Section */}
             <Card padding="none" className="overflow-hidden">
-              <CardHeader className="flex-row items-center justify-between p-4 sm:p-6 pb-3 sm:pb-4 border-b border-[var(--color-gray-soft)]">
+              <CardHeader className="flex-row items-center justify-between p-3 sm:p-6 pb-2.5 sm:pb-4 border-b border-[var(--color-gray-soft)]">
                 <div>
-                  <CardTitle className="text-lg sm:text-xl font-semibold">
+                  <CardTitle className="text-base sm:text-xl font-semibold">
                     Quick Actions
                   </CardTitle>
-                  <p className="text-xs sm:text-sm text-[var(--color-gray-main)] mt-0.5 hidden sm:block">
+                  <p className="text-xs text-[var(--color-gray-main)] mt-0.5 hidden sm:block">
                     Common tasks and shortcuts
                   </p>
                 </div>
               </CardHeader>
-              <CardContent className="p-4 sm:p-6">
-                <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
+              <CardContent className="p-3 sm:p-6">
+                <div className="grid grid-cols-2 gap-2 sm:gap-4">
                   {quickActions.map((action) => (
                     <QuickActionCard
                       key={action.label}

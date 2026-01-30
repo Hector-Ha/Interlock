@@ -82,27 +82,27 @@ export function QuickActionCard({
         )}
       />
 
-      <div className="relative flex flex-col sm:flex-row items-center gap-2 sm:gap-4 p-3 sm:p-5">
+      <div className="relative flex flex-col sm:flex-row items-center gap-1.5 sm:gap-4 p-2.5 sm:p-5">
         <div
           className={cn(
-            "flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl transition-transform duration-300 shrink-0",
+            "flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl transition-transform duration-300 shrink-0",
             styles.iconBg,
             !disabled && "group-hover:scale-110",
           )}
         >
-          <span className={cn(styles.iconColor, "[&>svg]:w-4 [&>svg]:h-4 sm:[&>svg]:w-5 sm:[&>svg]:h-5")}>{icon}</span>
+          <span className={cn(styles.iconColor, "[&>svg]:w-3.5 [&>svg]:h-3.5 sm:[&>svg]:w-5 sm:[&>svg]:h-5")}>{icon}</span>
         </div>
         <div className="flex-1 min-w-0 text-center sm:text-left">
           <p
             className={cn(
-              "font-semibold text-xs sm:text-base text-[var(--color-gray-text)] transition-colors",
+              "font-semibold text-[11px] sm:text-base text-[var(--color-gray-text)] transition-colors leading-tight",
               !disabled && styles.hoverText,
             )}
           >
             {label}
           </p>
           {description && (
-            <p className="text-xs sm:text-sm text-[var(--color-gray-main)] truncate hidden sm:block">
+            <p className="text-xs text-[var(--color-gray-main)] truncate hidden sm:block">
               {description}
             </p>
           )}
