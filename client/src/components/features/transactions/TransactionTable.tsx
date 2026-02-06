@@ -166,8 +166,9 @@ export function TransactionTable({
         <div className="px-5 lg:px-6 py-2 bg-[var(--color-gray-surface)] border-b border-[var(--color-gray-soft)]">
           <p className="text-xs text-[var(--color-gray-main)]">
             Showing {transactions.length} of{" "}
-            {totalOriginalCount ?? transactions.length} transactions matching "
-            {searchQuery}"
+            {totalOriginalCount ?? transactions.length} transactions matching
+            &quot;
+            {searchQuery} &quot;
           </p>
         </div>
       )}
