@@ -9,27 +9,28 @@ FROM oven/bun:1 AS base
 WORKDIR /app
 
 # ============================================
-# Stage 1: Install dependencies
+# Stage 1: Install dependencies & generate Prisma
 # ============================================
-FROM base AS deps
-COPY package.json ./
-RUN bun install --production
-
-# ============================================
-# Stage 2: Generate Prisma client
-# ============================================
-FROM base AS prisma
-COPY --from=deps /app/node_modules ./node_modules
+FROM base AS builder
+COPY package.json bun.lock ./
 COPY prisma ./prisma
+RUN bun install --frozen-lockfile
 RUN bunx prisma generate
 
 # ============================================
-# Stage 3: Build application
+# Stage 2: Build application
 # ============================================
-FROM base AS builder
-COPY --from=prisma /app/node_modules ./node_modules
 COPY . .
 RUN bun run build
+
+# ============================================
+# Stage 3: Production dependencies only
+# ============================================
+FROM base AS prod-deps
+COPY package.json bun.lock ./
+COPY prisma ./prisma
+RUN bun install --production --frozen-lockfile
+RUN bunx prisma generate
 
 # ============================================
 # Stage 4: Production runner
@@ -37,25 +38,19 @@ RUN bun run build
 FROM base AS runner
 ENV NODE_ENV=production
 
-# Create non-root user for security (Using standard Linux commands)
 RUN groupadd -r nodejs && useradd -r -g nodejs interlock
 
-# Copy built application
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/prisma ./prisma
+COPY --from=prod-deps /app/node_modules ./node_modules
+COPY --from=prod-deps /app/prisma ./prisma
 COPY --from=builder /app/package.json ./
 
-# Set ownership
 USER interlock
 
-# Expose port
 EXPOSE 8080
 ENV PORT=8080
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8080/api/v1/health || exit 1
 
-# Start server
 CMD ["bun", "run", "start"]
