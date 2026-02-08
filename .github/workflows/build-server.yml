@@ -9,7 +9,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}-server
+  IMAGE_NAME: ${{ github.repository_owner }}/interlock-server
 
 jobs:
   build-and-push-image:

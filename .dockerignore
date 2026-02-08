@@ -1,10 +1,11 @@
 **/node_modules
+**/.env
+**/.env.*
+!**/.env.example
 .git
 .github
-.env
 *.md
 docs
 planning
 pages
-client/node_modules
-server/node_modules
+client

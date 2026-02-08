@@ -1,7 +1,7 @@
 services:
   # PostgreSQL
   postgres:
-    image: postgres:18-alpine
+    image: postgres:16-alpine
     container_name: interlock_db
     restart: always
     environment:
@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - interlock_net
     healthcheck:
@@ -19,23 +19,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  # Redis
-  redis:
-    image: redis:8-alpine
-    container_name: interlock_redis
-    restart: always
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - interlock_net
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
   # Semgrep
   semgrep:
@@ -60,13 +43,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
     env_file:
       - .env
     environment:
       DATABASE_URL: postgres://${DB_USER:-postgres}:${DB_PASSWORD:-password}@postgres:5432/${DB_NAME:-interlock}
-      REDIS_URL: redis://redis:6379
     ports:
       - "${PORT:-8080}:${PORT:-8080}"
     volumes:
@@ -100,8 +80,6 @@ services:
 volumes:
   postgres_data:
     name: interlock_db_data
-  redis_data:
-    name: interlock_redis_data
 
 networks:
   interlock_net:

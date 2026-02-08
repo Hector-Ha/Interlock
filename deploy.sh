@@ -25,6 +25,9 @@ echo "$GHCR_PAT" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
 echo "==> Pulling latest server image..."
 docker compose -f docker-compose.prod.yml pull server
 
+echo "==> Running database migrations..."
+docker compose -f docker-compose.prod.yml run --rm server bunx prisma migrate deploy
+
 echo "==> Restarting containers..."
 docker compose -f docker-compose.prod.yml up -d
 
