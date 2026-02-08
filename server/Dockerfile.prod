@@ -26,7 +26,7 @@ COPY server/package.json ./
 COPY server/bun.lock* ./
 COPY server/prisma ./prisma
 RUN bun install --production
-RUN bunx prisma generate
+COPY --from=deps /app/node_modules/.prisma ./node_modules/.prisma
 
 # ============================================
 # Stage 3: Production runner
@@ -37,7 +37,7 @@ ENV NODE_ENV=production
 RUN groupadd -r nodejs && useradd -r -g nodejs interlock
 
 COPY --from=prod-deps /app/node_modules ./node_modules
-COPY --from=prod-deps /app/prisma ./prisma
+COPY --from=deps /app/prisma ./prisma
 COPY server/package.json ./
 COPY server/src ./src
 COPY server/tsconfig.json ./
