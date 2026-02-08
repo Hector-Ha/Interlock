@@ -1,6 +1,8 @@
 services:
   postgres:
     image: postgres:16-alpine
+    container_name: interlock_db
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER:-interlock}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -14,37 +16,22 @@ services:
       retries: 5
     networks:
       - interlock-network
-    restart: unless-stopped
 
   server:
-    image: ghcr.io/${GHCR_USERNAME}/interlock-server:latest
+    image: ghcr.io/${GHCR_USERNAME}/interlock-server:${IMAGE_TAG:-latest}
+    container_name: interlock_server
+    pull_policy: always
+    env_file:
+      - .env
     environment:
-      - NODE_ENV=production
-      - PORT=8080
-      - DATABASE_URL=postgresql://${DB_USER:-interlock}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-interlock}
-      - JWT_SECRET=${JWT_SECRET}
-      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
-      - PLAID_CLIENT_ID=${PLAID_CLIENT_ID}
-      - PLAID_SECRET=${PLAID_SECRET}
-      - PLAID_ENV=${PLAID_ENV:-production}
-      - DWOLLA_KEY=${DWOLLA_KEY}
-      - DWOLLA_SECRET=${DWOLLA_SECRET}
-      - DWOLLA_ENV=${DWOLLA_ENV:-production}
-      - DWOLLA_WEBHOOK_SECRET=${DWOLLA_WEBHOOK_SECRET}
-      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
-      - SENTRY_DSN=${SENTRY_DSN}
-      - CLIENT_URL=${CLIENT_URL:-http://localhost:3000}
+      NODE_ENV: production
+      PORT: 8080
+      DATABASE_URL: postgresql://${DB_USER:-interlock}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-interlock}
     ports:
       - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "bun", "-e", "const r = await fetch('http://localhost:8080/api/v1/health'); process.exit(r.ok ? 0 : 1)"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
     networks:
       - interlock-network
     restart: unless-stopped
@@ -55,3 +42,4 @@ networks:
 
 volumes:
   postgres_data:
+    name: interlock_db_data

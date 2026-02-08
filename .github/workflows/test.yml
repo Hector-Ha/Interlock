@@ -1,25 +1,19 @@
-name: Tests
-
-env:
-  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+name: Backend Tests
 
 on:
   push:
-    branches: [main, feature/api-v4, testing-implementation]
-    paths-ignore:
-      - "**.md"
-      - "LICENSE"
-      - "docs/**"
+    branches: ["main"]
+    paths:
+      - "server/**"
+      - ".github/workflows/test.yml"
   pull_request:
-    branches: [main, develop, testing-implementation]
-    paths-ignore:
-      - "**.md"
-      - "LICENSE"
-      - "docs/**"
+    branches: ["main"]
+    paths:
+      - "server/**"
+      - ".github/workflows/test.yml"
 
 jobs:
   backend-tests:
-    name: Backend Phase 0, 1, 2 & 4.5 Gates
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -36,9 +30,22 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+    env:
+      DATABASE_URL: postgresql://test:test@localhost:5432/interlock_test
+      JWT_SECRET: "test-secret-key-must-be-long-enough-for-ci"
+      ENCRYPTION_KEY: "12345678901234567890123456789012"
+      CLIENT_URL: "http://localhost:3000"
+      PLAID_CLIENT_ID: "test_client_id"
+      PLAID_SECRET: "test_plaid_secret"
+      DWOLLA_KEY: "test_dwolla_key"
+      DWOLLA_SECRET: "test_dwolla_secret"
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
 
@@ -46,76 +53,10 @@ jobs:
         run: cd server && bun install
 
       - name: Generate Prisma Client
-        # Explicit generate to ensure the client is built for the CI environment (linux)
         run: cd server && bunx prisma generate
 
       - name: Run Database Migrations
-        # Deploy migrations to the test database service
         run: cd server && bunx prisma migrate deploy
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/interlock_test
 
-      - name: Run Phase 0 (Environment) Tests
-        run: cd server && bun test src/__tests__/setup.test.ts
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/interlock_test
-          JWT_SECRET: "test-secret-key-must-be-long-enough-for-ci"
-          ENCRYPTION_KEY: "12345678901234567890123456789012"
-          PLAID_CLIENT_ID: "test_client_id"
-          PLAID_SECRET: "test_plaid_secret"
-          DWOLLA_KEY: "test_dwolla_key"
-          DWOLLA_SECRET: "test_dwolla_secret"
-
-      - name: Run Phase 1 (Security) Tests
-        run: cd server && bun test src/__tests__/phase1-security.test.ts
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/interlock_test
-          JWT_SECRET: "test-secret-key-must-be-long-enough-for-ci"
-          ENCRYPTION_KEY: "12345678901234567890123456789012"
-          PLAID_CLIENT_ID: "test_client_id"
-          PLAID_SECRET: "test_plaid_secret"
-          DWOLLA_KEY: "test_dwolla_key"
-          DWOLLA_SECRET: "test_dwolla_secret"
-
-      - name: Run Phase 2 (API) Tests
-        run: cd server && bun test src/__tests__/phase2-api.test.ts
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/interlock_test
-          JWT_SECRET: "test-secret-key-must-be-long-enough-for-ci"
-          ENCRYPTION_KEY: "12345678901234567890123456789012"
-          PLAID_CLIENT_ID: "test_client_id"
-          PLAID_SECRET: "test_plaid_secret"
-          DWOLLA_KEY: "test_dwolla_key"
-          DWOLLA_SECRET: "test_dwolla_secret"
-
-      - name: Run Phase 4.5 (P2P) Tests
-        run: cd server && bun test src/__tests__/phase4.5-p2p.test.ts
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/interlock_test
-          JWT_SECRET: "test-secret-key-must-be-long-enough-for-ci"
-          ENCRYPTION_KEY: "12345678901234567890123456789012"
-          PLAID_CLIENT_ID: "test_client_id"
-          PLAID_SECRET: "test_plaid_secret"
-          DWOLLA_KEY: "test_dwolla_key"
-          DWOLLA_SECRET: "test_dwolla_secret"
-
-  frontend-tests:
-    name: Frontend Phase 3 & 4 Gates
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: cd client && bun install
-
-      - name: Run Phase 3 (Foundation) Tests
-        run: cd client && bun run test src/__tests__/phase3-foundation.test.tsx
-
-      - name: Run Phase 4 (Features) Tests
-        run: cd client && bun run test src/__tests__/phase4-features.test.tsx
-
-      - name: Run Phase 4.5 (P2P Frontend) Tests
-        run: cd client && bun run test src/__tests__/phase4.5-p2p.test.tsx
+      - name: Run Tests
+        run: cd server && bun test

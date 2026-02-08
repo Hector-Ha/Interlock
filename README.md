@@ -204,8 +204,10 @@ Interlock is a full-stack monorepo:
 # Local dev containers (Postgres + Redis + server)
 docker compose up -d
 
-# Production compose
-docker compose -f docker-compose.prod.yml up -d
+# Production (EC2 + GHCR)
+# 1) Configure .env (see .env.example)
+# 2) Deploy
+bash deploy.sh
 ```
 
 ## Security Features

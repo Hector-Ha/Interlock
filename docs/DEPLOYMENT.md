@@ -1,127 +1,94 @@
-# Interlock Deployment Guide
+# Interlock Deployment Guide (EC2 + GHCR)
 
 ## Prerequisites
 
-- Docker 24.0+
-- Docker Compose 2.0+
-- PostgreSQL 16+ (if not using Docker)
-- Bun 1.0+ (for development)
+- EC2 instance (Ubuntu recommended)
+- Docker 24+ and Docker Compose plugin
+- GitHub Container Registry (GHCR) access token with `read:packages`
 
 ## Environment Variables
 
-### Required (Server)
+Create a `.env` file next to `docker-compose.prod.yml` on the EC2 host.
 
-| Variable          | Description                  | Example                               |
-| ----------------- | ---------------------------- | ------------------------------------- |
-| `DATABASE_URL`    | PostgreSQL connection string | `postgresql://user:pass@host:5432/db` |
-| `JWT_SECRET`      | Min 32 char secret for JWT   | Generate with `openssl rand -hex 32`  |
-| `ENCRYPTION_KEY`  | 32 char key for encryption   | Generate with `openssl rand -hex 16`  |
-| `PLAID_CLIENT_ID` | Plaid API client ID          | From Plaid dashboard                  |
-| `PLAID_SECRET`    | Plaid API secret             | From Plaid dashboard                  |
-| `DWOLLA_KEY`      | Dwolla API key               | From Dwolla dashboard                 |
-| `DWOLLA_SECRET`   | Dwolla API secret            | From Dwolla dashboard                 |
+### Required
 
-### Optional
+| Variable         | Description                                 |
+| ---------------- | ------------------------------------------- |
+| `DB_PASSWORD`    | Postgres password                           |
+| `JWT_SECRET`     | Min 32 char secret for JWT                  |
+| `ENCRYPTION_KEY` | 32 char key for encryption                  |
+| `GHCR_USERNAME`  | GitHub username or org                      |
+| `GHCR_PAT`       | GitHub PAT with `read:packages`             |
+| `CLIENT_URL`     | Vercel frontend URL (CORS + redirects)      |
 
-| Variable           | Description               | Default |
-| ------------------ | ------------------------- | ------- |
-| `SENTRY_DSN`       | Sentry error tracking DSN | -       |
-| `SENDGRID_API_KEY` | SendGrid email API key    | -       |
-| `ENABLE_LOGS`      | Enable verbose logging    | `false` |
+### Optional / Common
 
-## Deployment Steps
+| Variable          | Description                   | Default |
+| ----------------- | ----------------------------- | ------- |
+| `DB_USER`         | Postgres user                 | interlock |
+| `DB_NAME`         | Postgres database             | interlock |
+| `IMAGE_TAG`       | Image tag to pull             | latest |
+| `PLAID_*`         | Plaid configuration           | - |
+| `DWOLLA_*`        | Dwolla configuration          | - |
+| `SENDGRID_*`      | SendGrid configuration        | - |
+| `SENTRY_DSN`      | Sentry error tracking         | - |
+| `ENABLE_LOGS`     | Verbose logging               | false |
 
-### 1. Clone and Configure
+## EC2 Setup
 
 ```bash
-git clone https://github.com/your-org/interlock.git
-cd interlock
+# Install Docker (Ubuntu)
+sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+
+# Install Docker Compose plugin
+sudo apt-get install -y docker-compose-plugin
+```
+
+## Deploy Steps
+
+1. **Clone repository on EC2**
+
+```bash
+git clone https://github.com/<your-org>/<your-repo>.git
+cd <your-repo>
 cp .env.example .env
 # Edit .env with production values
 ```
 
-### 2. Generate Secrets
+2. **Pull and start services**
 
 ```bash
-# Generate JWT_SECRET
-openssl rand -hex 32
-
-# Generate ENCRYPTION_KEY
-openssl rand -hex 16
+bash deploy.sh
 ```
 
-### 3. Build Docker Images
+That script will:
+- Log in to GHCR
+- Pull the latest image
+- Run `prisma migrate deploy`
+- Start containers with Docker Compose
 
-```bash
-docker compose -f docker-compose.prod.yml build
-```
-
-### 4. Run Database Migrations
-
-```bash
-docker compose -f docker-compose.prod.yml run --rm server bunx prisma migrate deploy
-```
-
-### 5. Start Services
-
-```bash
-docker compose -f docker-compose.prod.yml up -d
-```
-
-### 6. Verify Deployment
+## Health Check
 
 ```bash
 curl http://localhost:8080/api/v1/health
-# Should return: {"status":"healthy",...}
 ```
 
-## Health Endpoints
-
-| Endpoint             | Purpose                   |
-| -------------------- | ------------------------- |
-| `GET /api/v1/health` | Full health with DB check |
-| `GET /api/v1/ready`  | Readiness probe           |
-| `GET /api/v1/live`   | Liveness probe            |
-
-## Rollback Procedure
-
-1. Identify previous working image tag
-2. Update docker-compose.prod.yml with previous tag
-3. Restart: `docker compose -f docker-compose.prod.yml up -d`
-4. If database rollback needed:
-   ```bash
-   docker compose run --rm server bunx prisma migrate reset --skip-seed
-   ```
-
-## Monitoring
-
-- **Health**: `GET /api/v1/health`
-- **Metrics**: `GET /api/v1/metrics`
-- **Sentry**: Configure `SENTRY_DSN` for error tracking
-- **Logs**: `docker compose logs -f server`
-
-## Troubleshooting
-
-### Database Connection Failed
+## Logs
 
 ```bash
-# Check Postgres is running
-docker compose ps postgres
-
-# Check connection
-docker compose exec postgres pg_isready
+docker compose -f docker-compose.prod.yml logs -f server
 ```
 
-### Server Won't Start
+## Rollback
+
+Set `IMAGE_TAG` in `.env` to a previous SHA tag and re-run:
 
 ```bash
-# Check logs
-docker compose logs server
-
-# Verify env vars
-docker compose run --rm server env | grep -E "(DATABASE|JWT|PLAID)"
+bash deploy.sh
 ```
 
 ---
 
-_Last updated: January 16, 2026_
+_Last updated: February 8, 2026_
