@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-# Interlock - Production Deploy Script (EC2)
 # Pulls the latest pre-built image from GHCR and restarts the server.
 # Usage: bash deploy.sh
 
