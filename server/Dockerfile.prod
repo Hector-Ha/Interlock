@@ -10,10 +10,10 @@ COPY server/package.json ./
 COPY server/prisma ./prisma
 COPY server/prisma.config.mjs ./prisma.config.mjs
 RUN apt-get update -y && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
-RUN bun install
+RUN npm install
 RUN mkdir -p src/generated
-RUN bunx prisma generate
-RUN bun prune --omit=dev
+RUN npx prisma generate
+RUN npm prune --omit=dev
 
 # Production runner
 FROM base AS runner
