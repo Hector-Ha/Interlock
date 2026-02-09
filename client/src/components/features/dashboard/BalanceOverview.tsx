@@ -82,7 +82,9 @@ export function BalanceOverview({
               <Shield className="w-3 h-3 sm:w-5 sm:h-5 text-[var(--color-success-main)]" />
             </div>
             <div>
-              <p className="text-white/60 text-min sm:text-sm font-medium">Total Balance</p>
+              <p className="text-white/60 text-min sm:text-sm font-medium">
+                Total Balance
+              </p>
               <div className="flex items-center gap-1 sm:gap-2">
                 <span className="text-min sm:text-[10px] uppercase tracking-wider text-[var(--color-success-main)] font-semibold">
                   Secured
@@ -148,7 +150,9 @@ export function BalanceOverview({
                 {balanceChange.toFixed(1)}%
               </span>
             </div>
-            <span className="text-white/40 text-[11px] sm:text-sm">vs last month</span>
+            <span className="text-white/40 text-[11px] sm:text-sm">
+              vs last month
+            </span>
           </div>
         </div>
 
@@ -163,12 +167,9 @@ export function BalanceOverview({
                 const balance = account.balance.current || 0;
                 const percentage = (balance / maxBalance) * 100;
                 return (
-                  <div 
-                    key={account.id} 
-                    className={cn(
-                      "group",
-                      index === 2 && "hidden sm:block"
-                    )}
+                  <div
+                    key={account.id}
+                    className={cn("group", index === 2 && "hidden sm:block")}
                   >
                     <div className="flex items-center justify-between mb-0.5 gap-2">
                       <span className="text-white/80 text-min sm:text-sm truncate flex-1 min-w-0">
@@ -224,7 +225,7 @@ export function BalanceOverview({
             onClick={onAddBank}
           >
             <Plus className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
-            <span className="hidden sm:inline">Add Bank</span>
+            <span className="hidden text-white sm:inline">Add Bank</span>
             <span className="sm:hidden text-white">Add</span>
           </Button>
         </div>
