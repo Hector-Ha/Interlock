@@ -21,12 +21,27 @@ services:
     image: ghcr.io/${GHCR_USERNAME}/interlock-server:${IMAGE_TAG:-latest}
     container_name: interlock_server
     pull_policy: always
-    env_file:
-      - .env
     environment:
       NODE_ENV: production
       PORT: 8080
       DATABASE_URL: postgresql://${DB_USER:-interlock}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-interlock}
+      CLIENT_URL: ${CLIENT_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      PLAID_CLIENT_ID: ${PLAID_CLIENT_ID}
+      PLAID_SECRET: ${PLAID_SECRET}
+      PLAID_ENV: ${PLAID_ENV:-production}
+      PLAID_PRODUCTS: ${PLAID_PRODUCTS:-auth,transactions,identity}
+      PLAID_COUNTRY_CODES: ${PLAID_COUNTRY_CODES:-US}
+      DWOLLA_KEY: ${DWOLLA_KEY}
+      DWOLLA_SECRET: ${DWOLLA_SECRET}
+      DWOLLA_ENV: ${DWOLLA_ENV:-production}
+      DWOLLA_BASE_URL: ${DWOLLA_BASE_URL:-https://api.dwolla.com}
+      DWOLLA_WEBHOOK_SECRET: ${DWOLLA_WEBHOOK_SECRET}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      SENDGRID_SENDER_EMAIL: ${SENDGRID_SENDER_EMAIL}
+      SENTRY_DSN: ${SENTRY_DSN}
+      ENABLE_LOGS: ${ENABLE_LOGS:-false}
     ports:
       - "8080:8080"
     depends_on:

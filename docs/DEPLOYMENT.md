@@ -9,6 +9,8 @@
 ## Environment Variables
 
 Create a `.env` file next to `docker-compose.prod.yml` on the EC2 host.
+If you already have `server/.env`, the deploy script will use it as a fallback,
+but the recommended location is the repo root.
 
 ### Required
 

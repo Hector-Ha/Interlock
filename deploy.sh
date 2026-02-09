@@ -8,10 +8,14 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
+# Prefer repo root .env, fallback to server/.env if present
 ENV_FILE=".env"
+if [ ! -f "$ENV_FILE" ] && [ -f "server/.env" ]; then
+  ENV_FILE="server/.env"
+fi
 
 if [ ! -f "$ENV_FILE" ]; then
-  echo "ERROR: $ENV_FILE not found. Create it from .env.example first."
+  echo "ERROR: .env not found. Create it from .env.example (at repo root)."
   exit 1
 fi
 
@@ -20,6 +24,16 @@ source "$ENV_FILE"
 
 if [ -z "${GHCR_USERNAME:-}" ] || [ -z "${GHCR_PAT:-}" ]; then
   echo "ERROR: GHCR_USERNAME and GHCR_PAT must be set in $ENV_FILE"
+  exit 1
+fi
+
+if [ -z "${DB_PASSWORD:-}" ]; then
+  echo "ERROR: DB_PASSWORD must be set in $ENV_FILE"
+  exit 1
+fi
+
+if [ -z "${JWT_SECRET:-}" ] || [ -z "${ENCRYPTION_KEY:-}" ]; then
+  echo "ERROR: JWT_SECRET and ENCRYPTION_KEY must be set in $ENV_FILE"
   exit 1
 fi
 
