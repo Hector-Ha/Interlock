@@ -27,8 +27,8 @@ if [ -z "${GHCR_USERNAME:-}" ] || [ -z "${GHCR_PAT:-}" ]; then
   exit 1
 fi
 
-if [ -z "${DB_PASSWORD:-}" ]; then
-  echo "ERROR: DB_PASSWORD must be set in $ENV_FILE"
+if [ -z "${DATABASE_URL:-}" ] && [ -z "${DB_PASSWORD:-}" ]; then
+  echo "ERROR: Set DATABASE_URL or DB_PASSWORD in $ENV_FILE"
   exit 1
 fi
 
@@ -44,7 +44,7 @@ echo "==> Pulling latest server image..."
 docker compose -f docker-compose.prod.yml --env-file "$ENV_FILE" pull server
 
 echo "==> Running database migrations..."
-docker compose -f docker-compose.prod.yml --env-file "$ENV_FILE" run --rm server bunx prisma migrate deploy
+docker compose -f docker-compose.prod.yml --env-file "$ENV_FILE" run --rm -e DATABASE_URL="$DATABASE_URL" server bunx prisma migrate deploy
 
 echo "==> Restarting containers..."
 docker compose -f docker-compose.prod.yml --env-file "$ENV_FILE" up -d
