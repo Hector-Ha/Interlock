@@ -3,7 +3,7 @@
 import Image, { ImageProps } from "next/image";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Skeleton } from "./Skeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 interface OptimizedImageProps extends Omit<ImageProps, "onLoadingComplete"> {
   fallback?: string;
