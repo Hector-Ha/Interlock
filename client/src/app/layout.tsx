@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "@/styles/global.css";
 import { ToastContainer } from "@/components/ui";
 import { ErrorBoundary } from "@/components/error";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -30,6 +31,7 @@ export default function RootLayout({
           {children}
           <ToastContainer />
         </ErrorBoundary>
+        <Analytics />
       </body>
     </html>
   );
